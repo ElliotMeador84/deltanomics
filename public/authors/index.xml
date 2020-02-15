@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Authors | Deltanomics</title>
+    <link>/authors/</link>
+      <atom:link href="/authors/index.xml" rel="self" type="application/rss+xml" />
+    <description>Authors</description>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>&amp;2020</copyright><lastBuildDate>Sat, 22 Feb 2020 00:00:00 +0000</lastBuildDate>
+    <image>
+      <url>/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_512x512_fill_lanczos_center_2.png</url>
+      <title>Authors</title>
+      <link>/authors/</link>
+    </image>
+    
+    <item>
+      <title></title>
+      <link>/authors/admin/</link>
+      <pubDate>Sat, 22 Feb 2020 00:00:00 +0000</pubDate>
+      <guid>/authors/admin/</guid>
+      <description>&lt;p&gt;Elliot Meador is a computational social scientist working as a research fellow within the Rural Policy Centre at SRUC in Edinburgh, UK. His work focuses on mapping rural resilience in Scotland, and in understanding how policy impacts community resilience. Elliot&amp;rsquo;s research also looks at how information on sustainable agriculture practices is shared between farmers and how this influences behaviour change. Elliot&amp;rsquo;s research spans North America, Europe and Africa.&lt;/p&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>David O&#39;Brien</title>
+      <link>/authors/david-obrien/</link>
+      <pubDate>Thu, 01 Aug 2019 00:00:00 +0000</pubDate>
+      <guid>/authors/david-obrien/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>

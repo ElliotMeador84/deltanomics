@@ -1,0 +1,277 @@
+---
+title: Apples for apples I
+author: Elliot Meador
+date: '2020-01-01'
+categories:
+  - R
+  - SNA
+tags:
+  - ggraph
+  - tidygraph
+slug: quick-start-network-analysis
+editor_options: 
+  chunk_output_type: console
+---
+
+
+
+<h2>
+Introduction
+</h2>
+<p>This is the initial Deltanomics blog post. So, in this post, I’ll cover a few different approaches to analysis and data visualisation rather quickly that provides a good overview of the types of things covered in this blog.</p>
+<p>Let’s start with loading the packages we’ll use. Also, let’s create a <code>ggplot</code> theme that allows us to easily make changes when we want.</p>
+<pre class="r"><code>## Libraries used in analysis
+library(tidyverse)
+library(magrittr)
+library(scales)
+library(RColorBrewer)
+library(janitor)
+library(ggraph)
+library(tidygraph)
+library(graphlayouts)
+library(flextable)
+
+## a congruent theme throughout for plots
+post_theme &lt;- function(...){
+  theme(text = element_text(color = &#39;black&#39;, 
+                            family = &#39;serif&#39;), 
+        axis.text = element_text(color = &#39;black&#39;),
+        panel.background = element_blank(), 
+        axis.line.x = element_line(color = &#39;black&#39;), 
+        axis.ticks = element_blank(), 
+        plot.margin = margin(.5, .5, .5, .5, &#39;cm&#39;),
+        plot.caption = element_text(hjust = 0, 
+                                    face= &quot;italic&quot;), 
+        plot.title = element_text(face = &#39;bold&#39;),
+        plot.subtitle = element_text(face = &#39;bold&#39;),
+        plot.title.position = &quot;plot&quot;, 
+        plot.caption.position =  &quot;plot&quot;) +
+          theme(...) # this bit allows us to make changes using this same function instead of calling two theme functions. 
+        }</code></pre>
+<h2>
+Data source
+</h2>
+<p>We’re going to look at some FAO data on apples. It comes from the FAO’s online data portal, which can be accessed <a href="http://www.fao.org/faostat/en/?#data/TM">here</a>. The website allows users to specify the varibles they want to analysis and download them into a .csv file. This makes working with the data a breeze using the <code>tidyverse</code>. Let’s first take a quick look at the data.</p>
+<p>We use <code>readcsv</code> from the <code>readr</code> package (included in the <code>tidyverse</code> library) and the function <code>clean_names</code> from the <code>janitor</code> package. <code>clean_names</code> does exactly what it says it does – cleans up a <code>dataframe</code>/<code>tibbles</code>’s variable names so that they are easy to use in analysis.</p>
+<pre class="r"><code>apples &lt;- read_csv(&#39;/Users/emeador/Downloads/FAOSTAT_data_1-1-2020.csv&#39;) %&gt;% clean_names()</code></pre>
+<br>
+<h2>
+Data Analysis
+</h2>
+<h3>
+General analysis
+</h3>
+<p>Let’s do some really quick data analysis to get a feel of what the data works with. From there we’ll move on towards looking at apply supply chain.
+A quick bar plot shows the top 20 exporting countries.</p>
+<pre class="r"><code>apple_export_total &lt;- apples %&gt;%
+  filter(element == &#39;Export Quantity&#39;, 
+         flag_description == &#39;Official data&#39;)%&gt;%
+  group_by(reporter_countries) %&gt;% 
+  summarise(total = sum(value, na.rm = T)) %&gt;% 
+  mutate(reporter_countries=fct_reorder(reporter_countries,total))
+
+apple_export_total %&gt;% 
+  top_n(20) %&gt;% 
+  ggplot(aes(reporter_countries, total))+
+  geom_col(fill = &#39;#ff0800&#39;)+
+  scale_y_continuous(expand = c(0,0), labels = comma)+
+  coord_flip()+
+  post_theme()+
+  labs(title = &#39;Top 20 countries that export apples in 2017&#39;, subtitle = &#39; SOURCE: FAO Detailed trade matrix&#39;, x = NULL, y = &#39;Tonnes&#39;, caption = &#39;NOTE: Only official data shown&#39;)</code></pre>
+<p><img src="/post/Apples-for-apples/Apples_for_apples_i_files/figure-html/Export-1.png" width="576" style="display: block; margin: auto;" /></p>
+<p>China, mainland is the highest exporter of tonnes of apples in 2017 according to the data with 1,328,374 tonnes of apples exported.</p>
+<p>Let’s take a look at the top importers of apples to the UK. We can adapt the code above to create a bar plot that filters by the variable <code>parter_countries</code>, which we’ll set to filter for <em>United Kingdom</em> using the <code>==</code> operator.</p>
+<pre class="r"><code>UK_import &lt;- apples %&gt;%
+  filter(element == &#39;Export Quantity&#39;, 
+         partner_countries == &#39;United Kingdom&#39;, 
+         flag_description == &#39;Official data&#39;) %&gt;% 
+  group_by(reporter_countries) %&gt;% 
+  summarise(total = sum(value, na.rm = T)) %&gt;% 
+  mutate(reporter_countries = fct_reorder(reporter_countries, total)) %&gt;% 
+  top_n(20)
+
+UK_import %&gt;% 
+  ggplot(aes(reporter_countries, total))+
+  geom_col(fill = &#39;#ff0800&#39;)+
+  scale_y_log10(expand = c(0,0), labels = comma)+
+  coord_flip()+
+  post_theme()+
+  labs(title = &#39;Where does the UK get its apples from?&#39;, subtitle = &#39; SOURCE: FAO Detailed trade matrix&#39;, x = NULL, y = &#39;log10(Tonnes)&#39;, caption = &#39;NOTE: Only official data shown&#39;) </code></pre>
+<p><img src="/post/Apples-for-apples/Apples_for_apples_i_files/figure-html/UK-imports-1.png" width="576" style="display: block; margin: auto;" /></p>
+<p>The UK imported 444,906 tonnes of apples in 2017. Over a quarter of all apples imported to the UK came from France and other European countries. So they didn’t have to travel too far. However, the largest and third largest imports came from South Africa and New Zealand, i.e. they traveled halfway across the world!</p>
+<p>Of course, it’s common for goods to travel great distances in today’s global economy. This of course impacts sustainability as traveling accross the world increases the carbon output. And while a total carbon assessment is out of the scope of this post, we can use <code>network analysis</code> to help better our understanding of how the global apply supply chain works and where the UK sits in it all.</p>
+<h3>
+Network analysis
+</h3>
+<p>The data forms a natural occuring edgelist.</p>
+<pre class="r"><code>aph &lt;- apples %&gt;%
+  filter(element == &#39;Export Quantity&#39;, 
+         flag_description == &#39;Official data&#39;) %&gt;% 
+  select(reporter_countries, partner_countries, value) %&gt;% 
+  as_tbl_graph()
+
+
+
+aph %&gt;% 
+  mutate(degree = centrality_degree()) %&gt;% 
+  ggraph(&#39;dh&#39;)+ # specify the DH layout 
+  geom_edge_fan(aes(alpha = ..index..), 
+                color = &#39;#654321&#39;,
+                show.legend = F)+
+  geom_node_point(aes(size = degree), 
+                  color = &#39;#00c400&#39;)+
+  scale_size(range = c(2, 5), 
+      name = &#39;# different countries\n that exporting apples&#39;)+
+  coord_equal()+
+  theme_graph(foreground = T)+
+  labs(title = &#39;The apple supply chain ... hairball&#39;, 
+       caption = &#39;Without much formatting, the network is complicated and unreadable.\nThe look is characteristic of the hairball that sometimes occurs in network visualisations.&#39;)</code></pre>
+<p><img src="/post/Apples-for-apples/Apples_for_apples_i_files/figure-html/Apple-network-1.png" width="768" style="display: block; margin: auto;" />
+The graph above is utterly unintelligable, and shoudn’t really appear in something you plan to publish. There are few things we can do to make the graph easier to understand when visualised. They are:</p>
+<ol style="list-style-type: decimal">
+<li><strong>Remove unnessary edges</strong> – this serves a few purposes: it frees up some of the clutter that comes from having too many lines on the plot; but, another lesser known thing is that it actually affects the underlying <code>layout</code> algorythim We’ll get into this in another post, but, in short, layout algorythims (usually) attempt to group nodes together in a way that reduces overlapping edges. Fewer edges can mean the nodes are spaced in a way so that naturally occuring patterns in connectivity are more easily seen.</li>
+<li><strong>Identify and showcase interesting patterns</strong> – network graphs are often made better when they illustrate specific patterns that a researcher has previously identified through visualising the data or running statistical analysis. This is similar to plotting percents or sums using bars graphs – you choose the plot style (think geom_*’s in <code>ggplot2</code>) that corresponds to what you want to showcase!</li>
+</ol>
+<p>The following code creates an edgelist in the form of a <code>tibble</code> that has each county's top 2 exporting countries (the two countries where it send the most apples). This greatly reduces the number of edges and allows more nuanced findings in terms of apple trading patterns to emerge.</p>
+<pre class="r"><code>UK_neighborhood_1 &lt;- 
+  aph %&gt;% 
+  to_local_neighborhood(node = 85, order = 1, mode = &#39;in&#39;)%&gt;% 
+  .[[1]] %&gt;% 
+  activate(edges) %&gt;% 
+  group_by(from) %&gt;% 
+  top_n(2, value) %&gt;% 
+  activate(nodes) %&gt;% 
+  mutate(degree = centrality_degree()) 
+
+ UK_neighborhood_1 %&gt;% 
+  ggraph()+
+  geom_edge_fan(aes(alpha = value), 
+                color = &#39;#654321&#39;,
+                width = 1.25, 
+                arrow = arrow(length = unit(2.5, &#39;mm&#39;), 
+                              type = &#39;closed&#39;),
+                end_cap = circle(5, &#39;mm&#39;))+
+  geom_node_label(aes(size = degree, 
+                      label = str_wrap(name, 10)),
+                  color = &#39;#ff0800&#39;,
+                  show.legend = F)+
+  scale_size(range = c(2, 3))+
+   scale_edge_alpha(range = c(.5, 1), 
+                    labels = comma)+
+   scale_edge_width_continuous(range = c(.5, 1.5))+
+  coord_equal()+
+  theme_graph(foreground = T)+
+  labs(title = &#39;The UK\&#39;s 1-degree apple supply neighborhood&#39;, 
+       caption = &#39;Only the top-two export destinations are shown per country. All nodes have exactly two out-degrees.\nSome nodes have in-degrees because they happen to be another country\&#39;s top-two imports.&#39;)</code></pre>
+<img src="/post/Apples-for-apples/Apples_for_apples_i_files/figure-html/UK-network-1.png" width="768" style="display: block; margin: auto;" />
+<h3>
+Visualising travel distance
+</h3>
+<h4>
+A quick base-map of the world
+</h4>
+<p>We can draw on existing online resources to help us prepare a base map of the world using <code>ggplot</code> and a (newish) file type called simple features <code>sf</code>. <a href="https://www.r-spatial.org/r/2018/10/25/ggplot2-sf.html">Here</a> is a great resource on mapping and spatial analysis in R using <code>ggplot2</code> by Mel Moreno and Mathieu Basille. I highly recommend checking it out. <code>sf</code> are my prefered object types to work with in R when doing any type of mapping or spatial analysis. The map is projected using the <em>Equal Earth</em> projection to help readers more easily see the network edges (when they are plotted).</p>
+<p>Let’s take a look at a world map that we can use as a base for the network plot. We’ll use the <code>rnaturalearth</code> and <code>rnaturalearthdata</code> packages to provde parameters and data as <code>sf</code> objects, and we’ll plot the map in <code>ggplot2</code>. <code>ggplot2</code> and <code>ggraph</code> can objects can be stacked on top of one another to create a flowing network map.</p>
+<pre class="r"><code>library(rnaturalearth)
+library(rnaturalearthdata)
+
+countries &lt;- ne_countries(returnclass = &quot;sf&quot;)
+
+
+graticules &lt;- ne_download(type = &quot;graticules_15&quot;, 
+                          category = &quot;physical&quot;,
+                          returnclass = &quot;sf&quot;)</code></pre>
+<pre><code>## OGR data source with driver: ESRI Shapefile 
+## Source: &quot;/private/var/folders/ck/v11m55r567d9z7ql_1vvdy600000gn/T/Rtmpqw3573&quot;, layer: &quot;ne_110m_graticules_15&quot;
+## with 35 features
+## It has 5 fields
+## Integer64 fields read as strings:  degrees scalerank</code></pre>
+<pre class="r"><code>bound_box &lt;- ne_download(type = &quot;wgs84_bounding_box&quot;, 
+                  category = &quot;physical&quot;,
+                  returnclass = &quot;sf&quot;)</code></pre>
+<pre><code>## OGR data source with driver: ESRI Shapefile 
+## Source: &quot;/private/var/folders/ck/v11m55r567d9z7ql_1vvdy600000gn/T/Rtmpqw3573&quot;, layer: &quot;ne_110m_wgs84_bounding_box&quot;
+## with 1 features
+## It has 2 fields</code></pre>
+<pre class="r"><code>(base_world &lt;- ggplot() +
+  geom_sf(data = bound_box, 
+          col = &quot;grey20&quot;, 
+          fill = &quot;transparent&quot;) +
+  geom_sf(data = countries, 
+          aes(fill = sovereignt),
+          color = &#39;grey&#39;,
+          lwd = 0.3,
+          show.legend = F) +
+  scale_fill_viridis_d(direction = -1)+
+  post_theme(legend.position = &#39;bottom&#39;, 
+             legend.background = 
+               element_rect(fill = &#39;grey95&#39;, 
+                            color = &#39;black&#39;))+
+  theme(plot.title = element_text(size = 24,
+                                  face = &#39;bold&#39;), 
+        axis.text = element_blank())+
+  labs(title = &#39;World Map&#39;, 
+       caption = &#39;Projected with the Equal Earth map projection &#39;))</code></pre>
+<img src="/post/Apples-for-apples/Apples_for_apples_i_files/figure-html/travel-map-1.png" width="1152" style="display: block; margin: auto;" />
+<h4>
+Combining the basemap and network graph
+</h4>
+<p>In preparation for our supply chain we need to calculate the node positions for each country. A good starting point is to use a polygon’s centroid points. A polygon centroid is the mathmatical centre of mass. Which means that it’s slightly different that the mean of longitude and latitude. The unique and non-uniform shapes of most policital boundaries mean that centre-mass locations are usually preferred. We can use the ‘st_centroid’ function from the ‘sf’ package to calculate the centroids for every country in the world. We’ll save this as ‘country_centroids’.</p>
+<pre class="r"><code># get centroids
+country_centroids &lt;- countries %&gt;% 
+  sf::st_centroid() %&gt;% 
+  as_tibble() %&gt;% 
+  select(name, geometry) %&gt;% 
+  mutate(geometry  = as.character(geometry)) %&gt;% 
+  separate(geometry, c(&#39;x&#39;, &#39;y&#39;), sep = &#39;,&#39;) %&gt;% 
+  mutate_at(vars(x, y), list(~parse_number(.)))
+
+
+# a little cleaning of a few countries to 
+# ensure that they merge properly. 
+node_centroids &lt;- UK_neighborhood_1 %&gt;% 
+  as_tibble() %&gt;% 
+  select(name) %&gt;% 
+  mutate(name = case_when(
+    str_detect(name, &#39;China&#39;) ~ &#39;China&#39;, 
+    str_detect(name, &#39;Iran&#39;) ~ &#39;Iran&#39;, 
+    str_detect(name, &#39;Czechia&#39;) ~ &#39;Czech Rep.&#39;, 
+    str_detect(name, &#39;United States of America&#39;) ~ 
+      &#39;United States&#39;, 
+    T~name
+  )) %&gt;% 
+  left_join(country_centroids) 
+
+layout_centroid &lt;- node_centroids %&gt;% 
+  select(-name)</code></pre>
+<p>Finally, we’ll use <code>ggraph</code> to make the final plot. We use a layered approach and add some <code>geom_sf</code>’s to input the background world map.</p>
+<pre class="r"><code># start with a ggraph
+ggraph(UK_neighborhood_1, 
+         layout = layout_centroid)+
+    geom_sf(data = bound_box, 
+          col = &quot;grey20&quot;, 
+          fill = &quot;transparent&quot;) +
+  geom_sf(data = countries, ## add the geom_sf to map
+          aes(fill = sovereignt), 
+          color = &#39;grey&#39;, 
+          lwd = 0.3,
+          show.legend = F)+
+  geom_edge_arc(arrow = arrow(type = &#39;closed&#39;, # add geom_edge for edges
+                              length = unit(1, &#39;mm&#39;)),
+                width = .75, 
+                color = &#39;black&#39;,
+                end_cap = circle(1.25, &#39;mm&#39;), 
+                alpha = .75, 
+                strength = .15)+
+  post_theme(legend.position = &#39;bottom&#39;, 
+             legend.background = 
+               element_rect(fill = &#39;grey95&#39;, 
+                            color = &#39;black&#39;))+
+  scale_fill_viridis_d(direction = -1)+
+  theme(plot.title = element_text(size = 24,
+                                  face = &#39;bold&#39;), 
+        axis.text = element_blank())+
+  labs(title = &#39;Apples for apples&#39;, 
+       subtitle = &#39;UK first degree network&#39;,
+       caption = &#39;Projected with the Equal Earth map projection &#39;)</code></pre>
+<p><img src="/post/Apples-for-apples/Apples_for_apples_i_files/figure-html/final-supply-map-1.png" width="672" /></p>

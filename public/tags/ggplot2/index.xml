@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>ggplot2 | Deltanomics</title>
+    <link>/tags/ggplot2/</link>
+      <atom:link href="/tags/ggplot2/index.xml" rel="self" type="application/rss+xml" />
+    <description>ggplot2</description>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>&amp;2020</copyright><lastBuildDate>Tue, 07 Jan 2020 00:00:00 +0000</lastBuildDate>
+    <image>
+      <url>/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_512x512_fill_lanczos_center_2.png</url>
+      <title>ggplot2</title>
+      <link>/tags/ggplot2/</link>
+    </image>
+    
+    <item>
+      <title>Visualisiing the 1970&#39;s US Vietnam War Draft</title>
+      <link>/post/vietnam-war-chart-ggplot2/</link>
+      <pubDate>Tue, 07 Jan 2020 00:00:00 +0000</pubDate>
+      <guid>/post/vietnam-war-chart-ggplot2/</guid>
+      <description>
+
+
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(tidyverse)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## ── Attaching packages ─────── tidyverse 1.2.1 ──&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## ✔ ggplot2 3.2.1.9000     ✔ purrr   0.3.2     
+## ✔ tibble  2.1.3          ✔ dplyr   0.8.1     
+## ✔ tidyr   0.8.3          ✔ stringr 1.4.0     
+## ✔ readr   1.3.1          ✔ forcats 0.4.0&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## ── Conflicts ────────── tidyverse_conflicts() ──
+## ✖ dplyr::filter() masks stats::filter()
+## ✖ dplyr::lag()    masks stats::lag()&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;load(&amp;#39;/Users/emeador/Downloads/final.RData&amp;#39;)
+
+
+
+as_tibble(x)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## # A tibble: 50,055 x 964
+##    Version VCF0004 VCF0006 VCF0006a VCF0009 VCF0009a VCF0010 VCF0010a
+##    &amp;lt;I&amp;lt;chr&amp;gt;   &amp;lt;dbl&amp;gt;   &amp;lt;int&amp;gt;    &amp;lt;int&amp;gt;   &amp;lt;dbl&amp;gt;    &amp;lt;dbl&amp;gt;   &amp;lt;dbl&amp;gt;    &amp;lt;dbl&amp;gt;
+##  1 ANES_c…    1948    1001 19481001       1        1       1        1
+##  2 ANES_c…    1948    1002 19481002       1        1       1        1
+##  3 ANES_c…    1948    1003 19481003       1        1       1        1
+##  4 ANES_c…    1948    1004 19481004       1        1       1        1
+##  5 ANES_c…    1948    1005 19481005       1        1       1        1
+##  6 ANES_c…    1948    1006 19481006       1        1       1        1
+##  7 ANES_c…    1948    1007 19481007       1        1       1        1
+##  8 ANES_c…    1948    1008 19481008       1        1       1        1
+##  9 ANES_c…    1948    1009 19481009       1        1       1        1
+## 10 ANES_c…    1948    1010 19481010       1        1       1        1
+## # … with 50,045 more rows, and 956 more variables: VCF0011 &amp;lt;dbl&amp;gt;,
+## #   VCF0011a &amp;lt;dbl&amp;gt;, VCF0012 &amp;lt;int&amp;gt;, VCF0012a &amp;lt;int&amp;gt;, VCF0012b &amp;lt;int&amp;gt;,
+## #   VCF0013 &amp;lt;fct&amp;gt;, VCF0014 &amp;lt;fct&amp;gt;, VCF0015a &amp;lt;ord&amp;gt;, VCF0015b &amp;lt;ord&amp;gt;,
+## #   VCF0016 &amp;lt;fct&amp;gt;, VCF0017 &amp;lt;ord&amp;gt;, VCF0018a &amp;lt;ord&amp;gt;, VCF0018b &amp;lt;ord&amp;gt;,
+## #   VCF0019 &amp;lt;ord&amp;gt;, VCF0050a &amp;lt;ord&amp;gt;, VCF0050b &amp;lt;ord&amp;gt;, VCF0070a &amp;lt;ord&amp;gt;,
+## #   VCF0070b &amp;lt;ord&amp;gt;, VCF0071a &amp;lt;ord&amp;gt;, VCF0071b &amp;lt;ord&amp;gt;, VCF0071c &amp;lt;ord&amp;gt;,
+## #   VCF0071d &amp;lt;ord&amp;gt;, VCF0072a &amp;lt;ord&amp;gt;, VCF0072b &amp;lt;ord&amp;gt;, VCF0101 &amp;lt;dbl&amp;gt;,
+## #   VCF0102 &amp;lt;ord&amp;gt;, VCF0103 &amp;lt;ord&amp;gt;, VCF0104 &amp;lt;ord&amp;gt;, VCF0105 &amp;lt;ord&amp;gt;,
+## #   VCF0106 &amp;lt;ord&amp;gt;, VCF0106a &amp;lt;ord&amp;gt;, VCF0107 &amp;lt;ord&amp;gt;, VCF0108 &amp;lt;ord&amp;gt;,
+## #   VCF0109 &amp;lt;dbl&amp;gt;, VCF0110 &amp;lt;ord&amp;gt;, VCF0111 &amp;lt;ord&amp;gt;, VCF0112 &amp;lt;ord&amp;gt;,
+## #   VCF0113 &amp;lt;fct&amp;gt;, VCF0114 &amp;lt;ord&amp;gt;, VCF0115 &amp;lt;ord&amp;gt;, VCF0116 &amp;lt;ord&amp;gt;,
+## #   VCF0117 &amp;lt;ord&amp;gt;, VCF0118 &amp;lt;ord&amp;gt;, VCF0119 &amp;lt;ord&amp;gt;, VCF0120 &amp;lt;dbl&amp;gt;,
+## #   VCF0121 &amp;lt;dbl&amp;gt;, VCF0122 &amp;lt;dbl&amp;gt;, VCF0123 &amp;lt;dbl&amp;gt;, VCF0124 &amp;lt;dbl&amp;gt;,
+## #   VCF0125 &amp;lt;dbl&amp;gt;, VCF0126 &amp;lt;ord&amp;gt;, VCF0126a &amp;lt;ord&amp;gt;, VCF0126b &amp;lt;dbl&amp;gt;,
+## #   VCF0126c &amp;lt;dbl&amp;gt;, VCF0127 &amp;lt;ord&amp;gt;, VCF0127a &amp;lt;dbl&amp;gt;, VCF0127b &amp;lt;ord&amp;gt;,
+## #   VCF0128 &amp;lt;ord&amp;gt;, VCF0128a &amp;lt;ord&amp;gt;, VCF0128b &amp;lt;ord&amp;gt;, VCF0129 &amp;lt;dbl&amp;gt;,
+## #   VCF0130 &amp;lt;ord&amp;gt;, VCF0130a &amp;lt;ord&amp;gt;, VCF0131 &amp;lt;ord&amp;gt;, VCF0132 &amp;lt;dbl&amp;gt;,
+## #   VCF0133 &amp;lt;dbl&amp;gt;, VCF0134 &amp;lt;ord&amp;gt;, VCF0135 &amp;lt;ord&amp;gt;, VCF0136 &amp;lt;ord&amp;gt;,
+## #   VCF0137 &amp;lt;ord&amp;gt;, VCF0138 &amp;lt;ord&amp;gt;, VCF0138a &amp;lt;ord&amp;gt;, VCF0138b &amp;lt;ord&amp;gt;,
+## #   VCF0138c &amp;lt;ord&amp;gt;, VCF0138d &amp;lt;ord&amp;gt;, VCF0138e &amp;lt;ord&amp;gt;, VCF0139 &amp;lt;ord&amp;gt;,
+## #   VCF0140 &amp;lt;ord&amp;gt;, VCF0140a &amp;lt;ord&amp;gt;, VCF0141 &amp;lt;ord&amp;gt;, VCF0142 &amp;lt;dbl&amp;gt;,
+## #   VCF0143 &amp;lt;ord&amp;gt;, VCF0144 &amp;lt;dbl&amp;gt;, VCF0145 &amp;lt;dbl&amp;gt;, VCF0146 &amp;lt;ord&amp;gt;,
+## #   VCF0147 &amp;lt;ord&amp;gt;, VCF0148 &amp;lt;ord&amp;gt;, VCF0148a &amp;lt;ord&amp;gt;, VCF0149 &amp;lt;ord&amp;gt;,
+## #   VCF0150 &amp;lt;dbl&amp;gt;, VCF0151 &amp;lt;ord&amp;gt;, VCF0152 &amp;lt;dbl&amp;gt;, VCF0153a &amp;lt;ord&amp;gt;,
+## #   VCF0153b &amp;lt;dbl&amp;gt;, VCF0153c &amp;lt;dbl&amp;gt;, VCF0154a &amp;lt;dbl&amp;gt;, VCF0154b &amp;lt;dbl&amp;gt;,
+## #   VCF0155 &amp;lt;ord&amp;gt;, VCF0156 &amp;lt;ord&amp;gt;, VCF0157 &amp;lt;ord&amp;gt;, …&lt;/code&gt;&lt;/pre&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>
