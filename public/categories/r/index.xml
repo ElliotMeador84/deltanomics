@@ -187,7 +187,7 @@ graticules &amp;lt;- ne_download(type = &amp;quot;graticules_15&amp;quot;,
                           category = &amp;quot;physical&amp;quot;,
                           returnclass = &amp;quot;sf&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;## OGR data source with driver: ESRI Shapefile 
-## Source: &amp;quot;/private/var/folders/ck/v11m55r567d9z7ql_1vvdy600000gn/T/Rtmpqw3573&amp;quot;, layer: &amp;quot;ne_110m_graticules_15&amp;quot;
+## Source: &amp;quot;/private/var/folders/ck/v11m55r567d9z7ql_1vvdy600000gn/T/RtmpAOtITl&amp;quot;, layer: &amp;quot;ne_110m_graticules_15&amp;quot;
 ## with 35 features
 ## It has 5 fields
 ## Integer64 fields read as strings:  degrees scalerank&lt;/code&gt;&lt;/pre&gt;
@@ -195,7 +195,7 @@ graticules &amp;lt;- ne_download(type = &amp;quot;graticules_15&amp;quot;,
                   category = &amp;quot;physical&amp;quot;,
                   returnclass = &amp;quot;sf&amp;quot;)&lt;/code&gt;&lt;/pre&gt;
 &lt;pre&gt;&lt;code&gt;## OGR data source with driver: ESRI Shapefile 
-## Source: &amp;quot;/private/var/folders/ck/v11m55r567d9z7ql_1vvdy600000gn/T/Rtmpqw3573&amp;quot;, layer: &amp;quot;ne_110m_wgs84_bounding_box&amp;quot;
+## Source: &amp;quot;/private/var/folders/ck/v11m55r567d9z7ql_1vvdy600000gn/T/RtmpAOtITl&amp;quot;, layer: &amp;quot;ne_110m_wgs84_bounding_box&amp;quot;
 ## with 1 features
 ## It has 2 fields&lt;/code&gt;&lt;/pre&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;(base_world &amp;lt;- ggplot() +
