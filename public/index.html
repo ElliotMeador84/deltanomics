@@ -206,6 +206,42 @@
 
 
 
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-160403362-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+
+  function gtag() {
+      dataLayer.push(arguments);
+  }
+
+  function trackOutboundLink(url) {
+    gtag('event', 'click', {
+         'event_category': 'outbound',
+         'event_label': url,
+         'transport_type': 'beacon',
+         'event_callback': function () {
+           document.location = url;
+         }
+    });
+    console.debug("Outbound link clicked: " + url);
+  }
+
+  function onClickCallback(event) {
+    if ((event.target.tagName !== 'A') || (event.target.host === window.location.host)) {
+      return;
+    }
+    trackOutboundLink(event.target);  
+  }
+
+  gtag('js', new Date());
+  gtag('config', 'UA-160403362-1', {});
+
+  
+  document.addEventListener('click', onClickCallback, false);
+</script>
+
+
   
 
 
@@ -364,7 +400,7 @@
         
 
         <li class="nav-item">
-          <a class="nav-link " href="/#hero" data-target="#hero"><span>Demo</span></a>
+          <a class="nav-link " href="/#hero" data-target="#hero"><span>Home</span></a>
         </li>
 
         
@@ -706,7 +742,7 @@
     
     <h1>Biography</h1>
 
-    <p>Elliot Meador is a computational social scientist working as a research fellow within the Rural Policy Centre at SRUC in Edinburgh, UK. His work focuses on mapping rural resilience in Scotland, and in understanding how policy impacts community resilience. Elliot&rsquo;s research also looks at how information on sustainable agriculture practices is shared between farmers and how this influences behaviour change. Elliot&rsquo;s research spans North America, Europe and Africa.</p>
+    <p>Elliot Meador is a computational social scientist and data scientist working as a research fellow within the Rural Policy Centre at SRUC in Edinburgh, UK. His work focuses on mapping rural resilience in Scotland, and in understanding how policy impacts community resilience. Elliot&rsquo;s research also looks at how information on sustainable agriculture practices is shared between farmers and how this influences behaviour change. Elliot&rsquo;s research spans North America, Europe and Africa.</p>
 
 
     <div class="row">
@@ -1643,6 +1679,99 @@
   <div class="media-body">
 
     <h3 class="article-title mb-0 mt-0">
+      <a href="/publication/community-resilience-2019/index/" >Can community interventions change resilience? Fostering perceptions of individual and community resilience in rural places</a>
+    </h3>
+
+    
+    <div class="article-style">
+      Quantitative study of rural community resilience in southwest Scotland.
+    </div>
+    
+
+    <div class="stream-meta article-metadata">
+
+      
+
+      
+      <div>
+        
+
+
+
+  
+  <span><a href="/authors/marianna-markantoni-phd/">Marianna Markantoni, PhD</a></span>, <span><a href="/authors/artur-adam-steiner-phd/">Artur Adam Steiner, PhD</a></span>, <span><a href="/authors/admin/">Elliot Meador PhD</a></span>
+
+      </div>
+      
+    </div>
+
+    
+    <div class="btn-links">
+      
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    </div>
+    
+
+  </div>
+  <div class="ml-3">
+    
+    
+  </div>
+</div>
+
+      
+    
+      
+        
+
+
+
+
+
+
+
+
+  
+  
+
+
+
+
+
+  
+
+
+<div class="media stream-item">
+  <div class="media-body">
+
+    <h3 class="article-title mb-0 mt-0">
       <a href="/publication/food-security-rwanda/index/" >Placing Rwanda’s agriculture boom: trust, women empowerment and policy impact in maize agricultural cooperatives</a>
     </h3>
 
@@ -1906,7 +2035,7 @@
           
           
           
-          <a href="/tags/source-themes/" style="font-size:1.5202086796428946rem">Source Themes</a>
+          <a href="/tags/source-themes/" style="font-size:1.7302256254687514rem">Source Themes</a>
         
           
           
@@ -2192,7 +2321,7 @@
   
 
   <p class="powered-by">
-    ©{2020} &middot; 
+    ©2020 &middot; 
 
     Powered by the
     <a href="https://sourcethemes.com/academic/" target="_blank" rel="noopener">Academic theme</a> for

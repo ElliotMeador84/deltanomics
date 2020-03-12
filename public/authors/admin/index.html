@@ -206,6 +206,42 @@
 
 
 
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-160403362-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+
+  function gtag() {
+      dataLayer.push(arguments);
+  }
+
+  function trackOutboundLink(url) {
+    gtag('event', 'click', {
+         'event_category': 'outbound',
+         'event_label': url,
+         'transport_type': 'beacon',
+         'event_callback': function () {
+           document.location = url;
+         }
+    });
+    console.debug("Outbound link clicked: " + url);
+  }
+
+  function onClickCallback(event) {
+    if ((event.target.tagName !== 'A') || (event.target.host === window.location.host)) {
+      return;
+    }
+    trackOutboundLink(event.target);  
+  }
+
+  gtag('js', new Date());
+  gtag('config', 'UA-160403362-1', {});
+
+  
+  document.addEventListener('click', onClickCallback, false);
+</script>
+
+
   
 
 
@@ -350,7 +386,7 @@
         
 
         <li class="nav-item">
-          <a class="nav-link " href="/#hero"><span>Demo</span></a>
+          <a class="nav-link " href="/#hero"><span>Home</span></a>
         </li>
 
         
@@ -645,7 +681,7 @@
     
     
 
-    <p>Elliot Meador is a computational social scientist working as a research fellow within the Rural Policy Centre at SRUC in Edinburgh, UK. His work focuses on mapping rural resilience in Scotland, and in understanding how policy impacts community resilience. Elliot&rsquo;s research also looks at how information on sustainable agriculture practices is shared between farmers and how this influences behaviour change. Elliot&rsquo;s research spans North America, Europe and Africa.</p>
+    <p>Elliot Meador is a computational social scientist and data scientist working as a research fellow within the Rural Policy Centre at SRUC in Edinburgh, UK. His work focuses on mapping rural resilience in Scotland, and in understanding how policy impacts community resilience. Elliot&rsquo;s research also looks at how information on sustainable agriculture practices is shared between farmers and how this influences behaviour change. Elliot&rsquo;s research spans North America, Europe and Africa.</p>
 
 
     <div class="row">
@@ -723,6 +759,10 @@
         
         <li>
           <a href="/talk/example/">Crop Production in Northern Britian</a>
+        </li>
+        
+        <li>
+          <a href="/publication/community-resilience-2019/index/">Can community interventions change resilience? Fostering perceptions of individual and community resilience in rural places</a>
         </li>
         
         <li>
@@ -859,7 +899,7 @@
   
 
   <p class="powered-by">
-    ©{2020} &middot; 
+    ©2020 &middot; 
 
     Powered by the
     <a href="https://sourcethemes.com/academic/" target="_blank" rel="noopener">Academic theme</a> for

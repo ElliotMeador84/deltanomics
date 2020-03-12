@@ -206,6 +206,42 @@
 
 
 
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-160403362-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+
+  function gtag() {
+      dataLayer.push(arguments);
+  }
+
+  function trackOutboundLink(url) {
+    gtag('event', 'click', {
+         'event_category': 'outbound',
+         'event_label': url,
+         'transport_type': 'beacon',
+         'event_callback': function () {
+           document.location = url;
+         }
+    });
+    console.debug("Outbound link clicked: " + url);
+  }
+
+  function onClickCallback(event) {
+    if ((event.target.tagName !== 'A') || (event.target.host === window.location.host)) {
+      return;
+    }
+    trackOutboundLink(event.target);  
+  }
+
+  gtag('js', new Date());
+  gtag('config', 'UA-160403362-1', {});
+
+  
+  document.addEventListener('click', onClickCallback, false);
+</script>
+
+
   
 
 
@@ -350,7 +386,7 @@
         
 
         <li class="nav-item">
-          <a class="nav-link " href="/#hero"><span>Demo</span></a>
+          <a class="nav-link " href="/#hero"><span>Home</span></a>
         </li>
 
         
@@ -561,7 +597,13 @@
       <li><a href="/authors/admin/">Elliot Meador PhD</a></li>
     
       
+      <li><a href="/authors/artur-adam-steiner-phd/">Artur Adam Steiner, PhD</a></li>
+    
+      
       <li><a href="/authors/david-obrien/">David O&#39;Brien</a></li>
+    
+      
+      <li><a href="/authors/marianna-markantoni-phd/">Marianna Markantoni, PhD</a></li>
     
   </ul>
 
@@ -689,7 +731,7 @@
   
 
   <p class="powered-by">
-    ©{2020} &middot; 
+    ©2020 &middot; 
 
     Powered by the
     <a href="https://sourcethemes.com/academic/" target="_blank" rel="noopener">Academic theme</a> for

@@ -52,7 +52,7 @@ post_theme <- function(...){
 
 We're going to look at some FAO data on apples. It comes from the FAO's online data portal, which can be accessed [here](http://www.fao.org/faostat/en/?#data/TM). The website allows users to specify the varibles they want to analysis and download them into a .csv file. This makes working with the data a breeze using the `tidyverse`. Let's first take a quick look at the data. 
 
-We use `readcsv` from the `readr` package (included in the `tidyverse` library) and the function `clean_names` from the `janitor` package. `clean_names` does exactly what it says it does -- cleans up a `dataframe`/`tibbles`'s variable names so that they are easy to use in analysis. 
+We use `read_csv` from the `readr` package (included in the `tidyverse` library) and the function `clean_names` from the `janitor` package. `clean_names` does exactly what it says it does -- cleans up a `dataframe`/`tibbles`'s variable names so that they are easy to use in analysis. 
 
 
 ```{r load data, warning=F, message=F}
@@ -62,7 +62,7 @@ apples <- read_csv('/Users/emeador/Downloads/FAOSTAT_data_1-1-2020.csv') %>% cle
 <h2> Data Analysis</h2>
 <h3> General analysis</h3>
 
-Let's do some really quick data analysis to get a feel of what the data works with. From there we'll move on towards looking at apply supply chain. 
+Let's do some really quick data analysis to get a feel of what the data works with. From there we'll move on towards looking at apple supply chain. 
 A quick bar plot shows the top 20 exporting countries. 
 
 ```{r Export, warning=F, message=F, fig.width=6, fig.height=8, fig.align='center'}
@@ -123,11 +123,24 @@ uk_import_total <- apples %>%
 
 The UK imported `r uk_import_total` tonnes of apples in 2017. Over a quarter of all apples imported to the UK came from France and other European countries. So they didn't have to travel too far. However, the largest and third largest imports came from South Africa and New Zealand, i.e. they traveled halfway across the world! 
 
-Of course, it's common for goods to travel great distances in today's global economy. This of course impacts sustainability as traveling accross the world increases the carbon output. And while a total carbon assessment is out of the scope of this post, we can use `network analysis` to help better our understanding of how the global apply supply chain works and where the UK sits in it all. 
+Of course, it's common for goods to travel great distances in today's global economy. This of course impacts sustainability as traveling across the world increases the carbon output. And while a total carbon assessment is out of the scope of this post, we can use `network analysis` to help better our understanding of how the global apple supply chain operates and where the UK sits in it all. 
 
 <h3> Network analysis</h3>
-The data forms a natural occuring edgelist.
+We need to create an `igraph` object in `R` from our `apples` tibble to work with. The easiest way to do this is to create an edgelist from our data. An edgelist is a two-column list of nodes where adjacent nodes form an edge. `igraph` and by extension `tidygraph` will create graphs with dataframes that an edgelist in their first two columns. The remaining columns will be used as edge attributes.
 
+
+```{r edge-list-example, echo=F}
+edge_list_example <- apples %>% 
+  select(reporter_countries, partner_countries) %>% 
+  sample_n(10) 
+
+edge_list_example %>% 
+  flextable(cwidth = c(2,2)) %>% 
+  set_caption('Table 1: Edgelist example')
+```
+An example of the edgelist format is shown above in Table 1. In this example `r  edge_list_example[1,1]` is adjacent to `r  edge_list_example[1,2]`, so an edge will be drawn between the two.
+
+The code below creates a graph and plots it using `ggraph`. 
 ```{r Apple-network, warning=F, message=F, fig.align='center', fig.width=8, fig.height=8}
 
 aph <- apples %>%
@@ -140,13 +153,13 @@ aph <- apples %>%
 
 aph %>% 
   mutate(degree = centrality_degree()) %>% 
-  ggraph('dh')+ # specify the DH layout 
+  ggraph('stress')+ # specify the DH layout 
   geom_edge_fan(aes(alpha = ..index..), 
                 color = '#654321',
                 show.legend = F)+
   geom_node_point(aes(size = degree), 
                   color = '#00c400')+
-  scale_size(range = c(2, 5), 
+  scale_size(range = c(1, 2.5), 
       name = '# different countries\n that exporting apples')+
   coord_equal()+
   theme_graph(foreground = T)+

@@ -206,6 +206,42 @@
 
 
 
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-160403362-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+
+  function gtag() {
+      dataLayer.push(arguments);
+  }
+
+  function trackOutboundLink(url) {
+    gtag('event', 'click', {
+         'event_category': 'outbound',
+         'event_label': url,
+         'transport_type': 'beacon',
+         'event_callback': function () {
+           document.location = url;
+         }
+    });
+    console.debug("Outbound link clicked: " + url);
+  }
+
+  function onClickCallback(event) {
+    if ((event.target.tagName !== 'A') || (event.target.host === window.location.host)) {
+      return;
+    }
+    trackOutboundLink(event.target);  
+  }
+
+  gtag('js', new Date());
+  gtag('config', 'UA-160403362-1', {});
+
+  
+  document.addEventListener('click', onClickCallback, false);
+</script>
+
+
   
 
 
@@ -350,7 +386,7 @@
         
 
         <li class="nav-item">
-          <a class="nav-link " href="/#hero"><span>Demo</span></a>
+          <a class="nav-link " href="/#hero"><span>Home</span></a>
         </li>
 
         
@@ -565,6 +601,9 @@
         
         
       
+        
+        
+      
 
       <div class="form-row mb-4">
         <div class="col-auto">
@@ -732,6 +771,70 @@
         </div>
 
         
+
+        
+          
+        
+
+        <div class="grid-sizer col-lg-12 isotope-item pubtype-2 year-2019">
+          
+            <div class="pub-list-item" style="margin-bottom: 1rem">
+  <i class="far fa-file-alt pub-icon" aria-hidden="true"></i>
+
+  
+  
+
+  <span class="article-metadata li-cite-author">
+    
+
+
+
+  
+  <span><a href="/authors/marianna-markantoni-phd/">Marianna Markantoni, PhD</a></span>, <span><a href="/authors/artur-adam-steiner-phd/">Artur Adam Steiner, PhD</a></span>, <span><a href="/authors/admin/">Elliot Meador PhD</a></span>
+
+  </span>
+  (2019).
+  <a href="/publication/community-resilience-2019/index/">Can community interventions change resilience? Fostering perceptions of individual and community resilience in rural places</a>.
+  <em>Community Development</em>.
+  
+  <p>
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</p>
+
+  
+  
+</div>
+
+          
+        </div>
+
+        
       </div>
 
     </div>
@@ -858,7 +961,7 @@
   
 
   <p class="powered-by">
-    ©{2020} &middot; 
+    ©2020 &middot; 
 
     Powered by the
     <a href="https://sourcethemes.com/academic/" target="_blank" rel="noopener">Academic theme</a> for
