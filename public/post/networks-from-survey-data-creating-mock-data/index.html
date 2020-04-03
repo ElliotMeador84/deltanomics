@@ -1,28 +1,680 @@
----
-title: 'Networks from survey data: Creating mock data'
-author: Elliot Meador
-date: 
-slug: networks-from-survey-data-creating-mock-data
-categories:
-  - R
-  - SNA
-tags:
-  - Data
-  - network
-subtitle: ''
-summary: ''
-authors: []
-lastmod: '2020-03-27T16:25:07Z'
-featured: no
-image:
-  caption: ''
-  focal_point: ''
-  preview_only: no
-projects: []
-editor_options: 
-  chunk_output_type: console
----
+<!DOCTYPE html>
+<html lang="en-us">
 
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="generator" content="Source Themes Academic 4.7.0">
+
+  
+
+  
+  
+  
+  
+  
+    
+    
+    
+  
+  
+
+  <meta name="author" content="Elliot Meador PhD">
+
+  
+  
+  
+    
+  
+  <meta name="description" content="Why create a new dataset? I’d like to do a series of posts looking at social network analysis using primary data (i.e. data collected by yourself.). There are a lot of different examples of when you might want to use a survey to collect data for use in analysing social networks. But that’s for another time.
+The purpose of this post is to create a new dataset that can be used in practising social network analysis in future posts.">
+
+  
+  <link rel="alternate" hreflang="en-us" href="/post/networks-from-survey-data-creating-mock-data/">
+
+  
+
+
+  
+  
+  
+  <meta name="theme-color" content="#2962ff">
+  
+
+  
+  
+
+  
+  
+  
+  
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/academicons/1.8.6/css/academicons.min.css" integrity="sha256-uFVgMKfistnJAfoCUQigIl+JfUaP47GrRKjf6CTPVmw=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css" integrity="sha256-+N4/V/SbAFiW1MPBCXnfnP9QSN3+Keu+NlB+0ev/YKQ=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+    
+    
+    
+      
+    
+    
+      
+      
+        
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/styles/github.min.css" crossorigin="anonymous" title="hl-light">
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/styles/dracula.min.css" crossorigin="anonymous" title="hl-dark" disabled>
+        
+      
+    
+
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.5.1/leaflet.css" integrity="sha256-SHMGCYmST46SoyGgo4YR/9AlK1vf3ff84Aq9yK4hdqM=" crossorigin="anonymous">
+    
+
+    
+
+    
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.1.2/lazysizes.min.js" integrity="sha256-Md1qLToewPeKjfAHU1zyPwOutccPAm5tahnaw7Osw0A=" crossorigin="anonymous" async></script>
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+        
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+
+  
+
+  
+  
+  
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,700%7CRoboto:400,400italic,700%7CRoboto+Mono&display=swap">
+  
+
+  
+  
+  
+  
+  <link rel="stylesheet" href="/css/academic.css">
+
+  
+
+
+
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-160403362-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+
+  function gtag() {
+      dataLayer.push(arguments);
+  }
+
+  function trackOutboundLink(url) {
+    gtag('event', 'click', {
+         'event_category': 'outbound',
+         'event_label': url,
+         'transport_type': 'beacon',
+         'event_callback': function () {
+           document.location = url;
+         }
+    });
+    console.debug("Outbound link clicked: " + url);
+  }
+
+  function onClickCallback(event) {
+    if ((event.target.tagName !== 'A') || (event.target.host === window.location.host)) {
+      return;
+    }
+    trackOutboundLink(event.target);  
+  }
+
+  gtag('js', new Date());
+  gtag('config', 'UA-160403362-1', {});
+
+  
+  document.addEventListener('click', onClickCallback, false);
+</script>
+
+
+  
+
+
+  
+
+  <link rel="manifest" href="/index.webmanifest">
+  <link rel="icon" type="image/png" href="/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_32x32_fill_lanczos_center_2.png">
+  <link rel="apple-touch-icon" type="image/png" href="/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_192x192_fill_lanczos_center_2.png">
+
+  <link rel="canonical" href="/post/networks-from-survey-data-creating-mock-data/">
+
+  
+  
+  
+  
+  
+    
+    
+  
+  
+  <meta property="twitter:card" content="summary">
+  
+  <meta property="twitter:site" content="@Elliot_Meador">
+  <meta property="twitter:creator" content="@Elliot_Meador">
+  
+  <meta property="og:site_name" content="Deltanomics">
+  <meta property="og:url" content="/post/networks-from-survey-data-creating-mock-data/">
+  <meta property="og:title" content="Networks from survey data: Creating mock data | Deltanomics">
+  <meta property="og:description" content="Why create a new dataset? I’d like to do a series of posts looking at social network analysis using primary data (i.e. data collected by yourself.). There are a lot of different examples of when you might want to use a survey to collect data for use in analysing social networks. But that’s for another time.
+The purpose of this post is to create a new dataset that can be used in practising social network analysis in future posts."><meta property="og:image" content="/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_512x512_fill_lanczos_center_2.png">
+  <meta property="twitter:image" content="/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_512x512_fill_lanczos_center_2.png"><meta property="og:locale" content="en-us">
+  
+    
+      <meta property="article:published_time" content="2020-03-27T16:25:07&#43;00:00">
+    
+    <meta property="article:modified_time" content="2020-03-27T16:25:07&#43;00:00">
+  
+
+  
+
+
+    
+
+
+
+
+
+
+  
+
+
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "/post/networks-from-survey-data-creating-mock-data/"
+  },
+  "headline": "Networks from survey data: Creating mock data",
+  
+  "datePublished": "0001-01-01T00:00:00Z",
+  "dateModified": "2020-03-27T16:25:07Z",
+  
+  "author": {
+    "@type": "Person",
+    "name": "Elliot Meador PhD"
+  },
+  
+  "publisher": {
+    "@type": "Organization",
+    "name": "Deltanomics",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "img//"
+    }
+  },
+  "description": "Why create a new dataset? I’d like to do a series of posts looking at social network analysis using primary data (i.e. data collected by yourself.). There are a lot of different examples of when you might want to use a survey to collect data for use in analysing social networks. But that’s for another time.\nThe purpose of this post is to create a new dataset that can be used in practising social network analysis in future posts."
+}
+</script>
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+
+  <title>Networks from survey data: Creating mock data | Deltanomics</title>
+
+</head>
+
+<body id="top" data-spy="scroll" data-offset="70" data-target="#TableOfContents" >
+
+  <aside class="search-results" id="search">
+  <div class="container">
+    <section class="search-header">
+
+      <div class="row no-gutters justify-content-between mb-3">
+        <div class="col-6">
+          <h1>Search</h1>
+        </div>
+        <div class="col-6 col-search-close">
+          <a class="js-search" href="#"><i class="fas fa-times-circle text-muted" aria-hidden="true"></i></a>
+        </div>
+      </div>
+
+      <div id="search-box">
+        
+        <input name="q" id="search-query" placeholder="Search..." autocapitalize="off"
+        autocomplete="off" autocorrect="off" spellcheck="false" type="search">
+        
+      </div>
+
+    </section>
+    <section class="section-search-results">
+
+      <div id="search-hits">
+        
+      </div>
+
+    </section>
+  </div>
+</aside>
+
+
+  
+
+<nav class="navbar navbar-expand-lg navbar-light compensate-for-scrollbar" id="navbar-main">
+  <div class="container">
+
+    
+    
+    <div class="d-none d-lg-inline-flex">
+      <a class="navbar-brand" href="/">Deltanomics</a>
+    </div>
+    
+
+    
+    <button type="button" class="navbar-toggler" data-toggle="collapse"
+            data-target="#navbar-content" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+    <span><i class="fas fa-bars"></i></span>
+    </button>
+    
+
+    
+    <div class="navbar-brand-mobile-wrapper d-inline-flex d-lg-none">
+      <a class="navbar-brand" href="/">Deltanomics</a>
+    </div>
+    
+
+    
+    
+    <div class="navbar-collapse main-menu-item collapse justify-content-start" id="navbar-content">
+
+      
+      <ul class="navbar-nav d-md-inline-flex">
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#hero"><span>Home</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#posts"><span>Posts</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#projects"><span>Projects</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#featured"><span>Publications</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#contact"><span>Contact</span></a>
+        </li>
+
+        
+        
+
+      
+
+        
+      </ul>
+    </div>
+
+    <ul class="nav-icons navbar-nav flex-row ml-auto d-flex pl-md-2">
+      
+      <li class="nav-item">
+        <a class="nav-link js-search" href="#"><i class="fas fa-search" aria-hidden="true"></i></a>
+      </li>
+      
+
+      
+      <li class="nav-item">
+        <a class="nav-link js-dark-toggle" href="#"><i class="fas fa-moon" aria-hidden="true"></i></a>
+      </li>
+      
+
+      
+
+    </ul>
+
+  </div>
+</nav>
+
+
+  <article class="article">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+  
+  
+<div class="article-container pt-3">
+  <h1>Networks from survey data: Creating mock data</h1>
+
+  
+
+  
+    
+
+
+<div class="article-metadata">
+
+  
+  
+
+  
+  <span class="article-date">
+    
+    
+      
+    
+    Mar 27, 2020
+  </span>
+  
+
+  
+
+  
+  <span class="middot-divider"></span>
+  <span class="article-reading-time">
+    9 min read
+  </span>
+  
+
+  
+  
+  
+
+  
+  
+  <span class="middot-divider"></span>
+  <span class="article-categories">
+    <i class="fas fa-folder mr-1"></i><a href="/categories/r/">R</a>, <a href="/categories/sna/">SNA</a></span>
+  
+
+</div>
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+</div>
+
+
+
+  <div class="article-container">
+
+    <div class="article-style">
+      
 <script src="/rmarkdown-libs/htmlwidgets/htmlwidgets.js"></script>
 <script src="/rmarkdown-libs/jquery/jquery.min.js"></script>
 <link href="/rmarkdown-libs/datatables-css/datatables-crosstalk.css" rel="stylesheet" />
@@ -223,3 +875,398 @@ create_sna_data &lt;- create_sna_data %&gt;%
 <script type="application/json" data-for="htmlwidget-1">{"x":{"filter":"none","data":[["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26","27","28","29","30","31","32","33","34","35","36","37","38","39","40","41","42","43","44","45","46","47","48","49","50","51","52","53","54","55","56","57","58","59","60","61","62","63","64","65","66","67","68","69","70","71","72","73","74","75","76","77","78","79","80","81","82","83","84","85","86","87","88","89","90","91","92","93","94","95","96","97","98","99","100"],["Hamilton, Hunter","Casale, Adrian","Ntumba, Alyssa","Nossal, Dezarea","Negash, Jaylon","el-Javid, Fawzi","Walters, Amanda","Johnson, Silvana","Blanc, Kate","Salvidrez, Elsy","Olivas, Byron","Johnson, Silvana","Phillips, Antone","al-Baig, Wardiyya","Cruz, Casey","al-Baig, Wardiyya","Marquez, Jack","Rem, Jacinda","Rambo, Krislynn","Nossal, Dezarea","Mcdevitt, Andrew","Omar, Jacob","Nossal, Dezarea","Hamilton, Hunter","Blanc, Kate","Mcdevitt, Andrew","Mcdevitt, Andrew","Silva, Jose","Rambo, Krislynn","Silva, Jose","el-Yousif, Neeshaan","Mcdevitt, Andrew","Nunez, Catrina","Ford, Nicoletta","el-Fares, Hissa","Lansing, Kelly","al-Sayed, Haatim","Rambo, Krislynn","Williams, Kevin","al-Javed, Izza","Cruz, Casey","el-Idris, Jaleela","Dominguez, Samantha","Eltayeb, Brittany","Left Hand Bull, Allison","Garnier, Miranda","Garnier, Miranda","Timpano, Donna","Walker, Sapphire","el-Fares, Hissa","Dominguez, Samantha","Nguyen, Jenny","Bartlett, Brandon","Hamilton, Hunter","Ward, Dion","Baliga, Meghan","Johnson, Silvana","Travis, Deja","Nguyen, Jenny","Mcdevitt, Andrew","Lee, Keodara","Bonser, Tristan","Barringer, Quentin","Lane, Isaac","el-Syed, Idrees","al-Salloum, Hazm","Sellers, Casimer","Martinez, Gabriel","Sellers, Casimer","Sellers, Casimer","Cruz, Casey","al-Baig, Wardiyya","el-Samad, Saood","Lee, Keodara","al-Sattar, Waheeba","Brehe, Anthony","Torres, Cicely","al-Baig, Wardiyya","Walker, Sapphire","Moore, Dazaun","Teka, Devon","Clark, Brenton","Lee, Linda","Eltayeb, Brittany","Brehe, Anthony","Avila, Mariah","Spiller, Jennifer","al-Darwish, Saqr","Maldonado, Joseph","Norman, Kaliesia","Salvidrez, Elsy","al-Salloum, Hazm","Left Hand Bull, Allison","Sellers, Casimer","Phillips, Antone","Nguyen, Jenny","al-Baig, Wardiyya","Torres, Cicely","Miller, Tilden","Patterson, Kiara"],["el-Haidar, Daif","Francis, Brady","Garnier, Miranda","Ford, Nicoletta","al-Salloum, Hazm","el-Yousif, Neeshaan","Patterson, Kiara","Cruz, Casey","al-Baig, Wardiyya","Salazar, Kastle","Miller, Tilden","al-Javed, Khaleela","Miller, Frederick","Bartlett, Brandon","el-Syed, Idrees","Sellers, Casimer","Lane, Isaac","Silva, Jose","Linton, Yunus","Farris, Luanne","Ford, Nicoletta","Salazar, Kastle","Lee, Keodara","Clark, Brenton","Timpano, Donna","Bonser, Tristan","Walker, Sapphire","Williams, Kevin","Simmons, Justice","Miller, Frederick","Encinias, Gabino","el-Sadek, Abdul Haleem","Cayabyab, Hari","Teet, Dillon","al-Sayed, Haatim","Lee, Linda","Tran, Sariah","Kern, Brock","el-Syed, Idrees","Austin, Ebony","Austin, Ebony","Ward, Dion","Teka, Devon","Encinias, Gabino","Patterson, Kiara","Nguyen, Jenny","Wauneka, Daniel","Ortiz, Leticia","Barringer, Quentin","Morgan, Alexandra","Lane, Isaac","Linton, Yunus","Cayabyab, Hari","Chau, Heidi","Vigil, Allissia","Miller, Tilden","Mach, Adrian Phil","Ford, Justin","el-Haidar, Daif","Madera, Christian","Weickum, James","Patterson, Kiara","Lee, Linda","Francis, Brady","Thompson, Destiny","Thompson, Destiny","al-Darwish, Saqr","Salazar, Kastle","Torres, Cicely","Teka, Devon","Briones, Dominic","Encinias, Gabino","Walton IV, Jordan","Avila, Mariah","Cayabyab, Hari","Ford, Justin","Ford, Justin","Linton, Yunus","Fresquez, Rorey","Salazar, Kastle","Jarwin, Anne","Bagwell, Madeleine","Miller, Tilden","Teet, Dillon","Thompson, Destiny","Cayabyab, Hari","Norman, Kaliesia","Zeng, Christine","Norman, Kaliesia","Walton IV, Jordan","Walton IV, Jordan","Lubthisophon, Danny","Tran, Sariah","Etzenhouser, Kaitlyn","Vigil, Allissia","Salazar, Kastle","Tampubolon, Hannan","Banchongchith, Jian Michael","Mark, Kalia","Martinez, Marco"],["£27,734.59","£60,056.73","£13,668.47","£45,357.06","£20,345.93","£20,162.58","£20,024.30","£39,744.08","£33,529.76","£47,115.77","£4,802.91","£34,168.19","£15,364.22","£102,249","£62,815.48","£80,985.97","£903.42","£6,776.40","£41,771.61","£6,774.42","£54,225.08","£22,349.59","£30,925.69","£9,108.59","£60,694.63","£42,173.75","£73,669.37","£26,261.83","£8,491.00","£20,120.09","£41,918.17","£1,270.85","£14,744.84","£34,306.86","£39,772.99","£25,270.08","£35,727.09","£38,486.23","£89,003.59","£30,445.16","£10,325.14","£16,994.62","£12,466.51","£74,270.34","£10,416.91","£46,439.09","£1,562.21","£11,796.68","£40,011.76","£20,949.85","£46,739.59","£72,315.15","£39,124.26","£54,931.22","£45,033.29","£17,627.81","£51,938.43","£13,197.43","£37,158.70","£770.28","£26,389.56","£8,173.07","£24,440.52","£26,655.22","£58,856.32","£95,452.86","£10,882.49","£64,325.22","£34,363.16","£62,015.63","£3,012.91","£82,277.76","£4,293.19","£15,261.58","£43,656.50","£65,331.64","£48,051.19","£65,535.21","£35,123.74","£22,399.66","£35,446.67","£23,937.10","£63,791.33","£31,901.43","£18,830.07","£57,410.18","£19,155.79","£19,155.30","£19,873.43","£52,101.26","£137,096","£4,748.56","£31,939.44","£5,419.64","£28,646.26","£82,116.34","£28,648.13","£24,134.40","£72,940.15","£52,845.28"],["Hardly any meals","Hardly any meals","Hardly any meals","Hardly any meals","Hardly any meals","Hardly any meals","Hardly any meals","Hardly any meals","Hardly any meals","Most meals","Hardly any meals","Hardly any meals","Every meal","Most meals","Hardly any meals","Most meals","Hardly any meals","Hardly any meals","Most meals","Hardly any meals","Hardly any meals","Hardly any meals","Hardly any meals","Hardly any meals","Hardly any meals","Hardly any meals","Hardly any meals","Hardly any meals","Hardly any meals","Most meals","Hardly any meals","Hardly any meals","Hardly any meals","Hardly any meals","Hardly any meals","Most meals","Hardly any meals","Hardly any meals","Hardly any meals","Hardly any meals","Hardly any meals","Hardly any meals","Most meals","Hardly any meals","Hardly any meals","Hardly any meals","Hardly any meals","Hardly any meals","Most meals","Hardly any meals","Hardly any meals","Most meals","Hardly any meals","Hardly any meals","Most meals","Every meal","Hardly any meals","Hardly any meals","Hardly any meals","Hardly any meals","Hardly any meals","Hardly any meals","Every meal","Hardly any meals","Hardly any meals","Hardly any meals","Hardly any meals","Hardly any meals","Most meals","Every meal","Hardly any meals","Hardly any meals","Most meals","Hardly any meals","Hardly any meals","Hardly any meals","Hardly any meals","Every meal","Hardly any meals","Hardly any meals","Most meals","Hardly any meals","Most meals","Hardly any meals","Hardly any meals","Hardly any meals","Hardly any meals","Hardly any meals","Hardly any meals","Most meals","Every meal","Hardly any meals","Hardly any meals","Every meal","Every meal","Hardly any meals","Hardly any meals","Every meal","Hardly any meals","Hardly any meals"],["13","3","15","6","18","14","19","2","4","7","1","2","8","4","2","17","3","16","20","6","5","7","6","13","4","19","5","16","20","8","14","5","11","6","10","1","10","20","16","2","2","8","3","14","10","15","15","4","1","10","3","15","11","13","8","1","2","12","13","5","6","19","1","3","16","18","17","7","12","3","2","14","9","11","11","12","12","20","5","7","3","13","1","14","18","11","9","17","9","9","9","18","10","17","8","7","4","12","1","19"],[7,2,8,3,9,7,10,1,2,4,1,1,4,2,1,9,2,8,10,3,3,4,3,7,2,10,3,8,10,4,7,3,6,3,5,1,5,10,8,1,1,4,2,7,5,8,8,2,1,5,2,8,6,7,4,1,1,6,7,3,3,10,1,2,8,9,9,4,6,2,1,7,5,6,6,6,6,10,3,4,2,7,1,7,9,6,5,9,5,5,5,9,5,9,4,4,2,6,1,10]],"container":"<table class=\"display\">\n  <thead>\n    <tr>\n      <th> <\/th>\n      <th>resp_name<\/th>\n      <th>recieve_info<\/th>\n      <th>income_pre_tax<\/th>\n      <th>buy_farm_mark<\/th>\n      <th>cows_on_farm<\/th>\n      <th>trust_score<\/th>\n    <\/tr>\n  <\/thead>\n<\/table>","options":{"columnDefs":[{"className":"dt-right","targets":6},{"orderable":false,"targets":0}],"order":[],"autoWidth":false,"orderClasses":false}},"evals":[],"jsHooks":[]}</script>
 </div>
 </div>
+
+    </div>
+
+    
+
+
+
+
+
+<div class="article-tags">
+  
+  <a class="badge badge-light" href="/tags/data/">Data</a>
+  
+  <a class="badge badge-light" href="/tags/network/">network</a>
+  
+</div>
+
+
+
+<div class="share-box" aria-hidden="true">
+  <ul class="share">
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://twitter.com/intent/tweet?url=/post/networks-from-survey-data-creating-mock-data/&amp;text=Networks%20from%20survey%20data:%20Creating%20mock%20data" target="_blank" rel="noopener" class="share-btn-twitter">
+          <i class="fab fa-twitter"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://www.facebook.com/sharer.php?u=/post/networks-from-survey-data-creating-mock-data/&amp;t=Networks%20from%20survey%20data:%20Creating%20mock%20data" target="_blank" rel="noopener" class="share-btn-facebook">
+          <i class="fab fa-facebook"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="mailto:?subject=Networks%20from%20survey%20data:%20Creating%20mock%20data&amp;body=/post/networks-from-survey-data-creating-mock-data/" target="_blank" rel="noopener" class="share-btn-email">
+          <i class="fas fa-envelope"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://www.linkedin.com/shareArticle?url=/post/networks-from-survey-data-creating-mock-data/&amp;title=Networks%20from%20survey%20data:%20Creating%20mock%20data" target="_blank" rel="noopener" class="share-btn-linkedin">
+          <i class="fab fa-linkedin-in"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://web.whatsapp.com/send?text=Networks%20from%20survey%20data:%20Creating%20mock%20data%20/post/networks-from-survey-data-creating-mock-data/" target="_blank" rel="noopener" class="share-btn-whatsapp">
+          <i class="fab fa-whatsapp"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://service.weibo.com/share/share.php?url=/post/networks-from-survey-data-creating-mock-data/&amp;title=Networks%20from%20survey%20data:%20Creating%20mock%20data" target="_blank" rel="noopener" class="share-btn-weibo">
+          <i class="fab fa-weibo"></i>
+        </a>
+      </li>
+    
+  </ul>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  
+  
+    
+  
+  
+  <div class="media author-card content-widget-hr">
+    
+      
+      <img class="portrait mr-3" src="/authors/admin/avatar_hu518fbb0fdd8d7f5f98b79fa33b0d1933_1288340_250x250_fill_q90_lanczos_center.jpeg" alt="Avatar">
+    
+
+    <div class="media-body">
+      <h5 class="card-title"><a href="/">Elliot Meador PhD</a></h5>
+      <h6 class="card-subtitle">Research Fellow</h6>
+      <p class="card-text">My research interests include community resilience, sustainable food systems and computational social science.</p>
+      <ul class="network-icon" aria-hidden="true">
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="/#contact" >
+        <i class="fas fa-envelope"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://twitter.com/Elliot_Meador" target="_blank" rel="noopener">
+        <i class="fab fa-twitter"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://scholar.google.co.uk/citations?view_op=list_works&amp;hl=en&amp;user=n6VoEdcAAAAJ&amp;gmla=AJsN-F4VJjBqZgFHlH2yHzmuGpZd9pzzu6B3ma9LxIML6YrIb4F7HcFg46Y3Uq9FM_mpYFRm9W4B-K6_yPX7qhZrgMy0DgLKeEMxCPEuMQJcy10PnTI6cV4Ba_BtwmlKIzrGWpwSY20V" target="_blank" rel="noopener">
+        <i class="ai ai-google-scholar"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://github.com/ElliotMeador84" target="_blank" rel="noopener">
+        <i class="fab fa-github"></i>
+      </a>
+    </li>
+  
+</ul>
+
+    </div>
+  </div>
+
+
+
+
+
+
+
+
+
+  
+  
+
+
+
+  </div>
+</article>
+
+      
+
+    
+    
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/4.1.4/imagesloaded.pkgd.min.js" integrity="sha256-lqvxZrPLtfffUl2G/e7szqSvPBILGbwmsGE1MKlOi0Q=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/3.0.6/isotope.pkgd.min.js" integrity="sha256-CBrpuqrMhXwcLLUd5tvQ4euBHCdh7wGlDfNz8vbu/iI=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+
+      
+
+      
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/highlight.min.js" integrity="sha256-1zu+3BnLYV9LdiY85uXMzii3bdrkelyp37e0ZyTAQh0=" crossorigin="anonymous"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/languages/r.min.js"></script>
+        
+      
+
+    
+
+    
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.5.1/leaflet.js" integrity="sha256-EErZamuLefUnbMBQbsEqu1USa+btR2oIlCpBJbyD4/g=" crossorigin="anonymous"></script>
+    
+
+    
+    
+    <script>const code_highlighting = true;</script>
+    
+
+    
+    
+    
+    
+    
+    
+    <script>
+      const search_config = {"indexURI":"/index.json","minLength":1,"threshold":0.3};
+      const i18n = {"no_results":"No results found","placeholder":"Search...","results":"results found"};
+      const content_type = {
+        'post': "Posts",
+        'project': "Projects",
+        'publication' : "Publications",
+        'talk' : "Talks"
+        };
+    </script>
+    
+
+    
+    
+
+    
+    
+    <script id="search-hit-fuse-template" type="text/x-template">
+      <div class="search-hit" id="summary-{{key}}">
+      <div class="search-hit-content">
+        <div class="search-hit-name">
+          <a href="{{relpermalink}}">{{title}}</a>
+          <div class="article-metadata search-hit-type">{{type}}</div>
+          <p class="search-hit-description">{{snippet}}</p>
+        </div>
+      </div>
+      </div>
+    </script>
+    
+
+    
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/3.2.1/fuse.min.js" integrity="sha256-VzgmKYmhsGNNN4Ph1kMW+BjoYJM2jV5i4IlFoeZA9XI=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js" integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin="anonymous"></script>
+    
+
+    
+    
+
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+      
+    
+    
+    
+    
+    <script src="/js/academic.min.a0d331bcd05dbe8b31e244f796710f08.js"></script>
+
+    
+
+
+
+
+
+
+  
+  
+  <div class="container">
+    <footer class="site-footer">
+  
+  <p class="powered-by">
+    
+      <a href="/privacy/">Privacy Policy</a>
+    
+    
+       &middot; 
+      <a href="/terms/">Terms</a>
+    
+  </p>
+  
+
+  <p class="powered-by">
+    ©2020 &middot; 
+
+    Powered by the
+    <a href="https://sourcethemes.com/academic/" target="_blank" rel="noopener">Academic theme</a> for
+    <a href="https://gohugo.io" target="_blank" rel="noopener">Hugo</a>.
+
+    
+    <span class="float-right" aria-hidden="true">
+      <a href="#" class="back-to-top">
+        <span class="button_icon">
+          <i class="fas fa-chevron-up fa-2x"></i>
+        </span>
+      </a>
+    </span>
+    
+  </p>
+</footer>
+
+  </div>
+  
+
+  
+<div id="modal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Cite</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <pre><code class="tex hljs"></code></pre>
+      </div>
+      <div class="modal-footer">
+        <a class="btn btn-outline-primary my-1 js-copy-cite" href="#" target="_blank">
+          <i class="fas fa-copy"></i> Copy
+        </a>
+        <a class="btn btn-outline-primary my-1 js-download-cite" href="#" target="_blank">
+          <i class="fas fa-download"></i> Download
+        </a>
+        <div id="modal-error"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

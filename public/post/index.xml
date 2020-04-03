@@ -5,7 +5,7 @@
     <link>/post/</link>
       <atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
     <description>Posts</description>
-    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>©2020</copyright><lastBuildDate>Fri, 13 Mar 2020 00:00:00 +0000</lastBuildDate>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>©2020</copyright><lastBuildDate>Fri, 27 Mar 2020 16:25:07 +0000</lastBuildDate>
     <image>
       <url>/images/icon_hu0b7a4cb9992c9ac0e91bd28ffd38dd00_9727_512x512_fill_lanczos_center_2.png</url>
       <title>Posts</title>
@@ -13,14 +13,211 @@
     </image>
     
     <item>
-      <title>TidyTuesday - College tuition, diversity, and pay</title>
-      <link>/post/tidytuesday-college-tuition-diversity-and-pay/</link>
-      <pubDate>Fri, 13 Mar 2020 00:00:00 +0000</pubDate>
-      <guid>/post/tidytuesday-college-tuition-diversity-and-pay/</guid>
+      <title>Networks from survey data: Creating mock data</title>
+      <link>/post/networks-from-survey-data-creating-mock-data/</link>
+      <pubDate>Fri, 27 Mar 2020 16:25:07 +0000</pubDate>
+      <guid>/post/networks-from-survey-data-creating-mock-data/</guid>
       <description>
+&lt;script src=&#34;/rmarkdown-libs/htmlwidgets/htmlwidgets.js&#34;&gt;&lt;/script&gt;
+&lt;script src=&#34;/rmarkdown-libs/jquery/jquery.min.js&#34;&gt;&lt;/script&gt;
+&lt;link href=&#34;/rmarkdown-libs/datatables-css/datatables-crosstalk.css&#34; rel=&#34;stylesheet&#34; /&gt;
+&lt;script src=&#34;/rmarkdown-libs/datatables-binding/datatables.js&#34;&gt;&lt;/script&gt;
+&lt;link href=&#34;/rmarkdown-libs/dt-core/css/jquery.dataTables.min.css&#34; rel=&#34;stylesheet&#34; /&gt;
+&lt;link href=&#34;/rmarkdown-libs/dt-core/css/jquery.dataTables.extra.css&#34; rel=&#34;stylesheet&#34; /&gt;
+&lt;script src=&#34;/rmarkdown-libs/dt-core/js/jquery.dataTables.min.js&#34;&gt;&lt;/script&gt;
+&lt;link href=&#34;/rmarkdown-libs/crosstalk/css/crosstalk.css&#34; rel=&#34;stylesheet&#34; /&gt;
+&lt;script src=&#34;/rmarkdown-libs/crosstalk/js/crosstalk.min.js&#34;&gt;&lt;/script&gt;
 
 
+&lt;div id=&#34;why-create-a-new-dataset&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Why create a new dataset?&lt;/h1&gt;
+&lt;p&gt;I’d like to do a series of posts looking at social network analysis using primary data (i.e. data collected by yourself.).
+There are a lot of different examples of when you might want to use a survey to collect data for use in analysing social networks.
+But that’s for another time.&lt;/p&gt;
+&lt;p&gt;The purpose of this post is to create a new dataset that can be used in practising social network analysis in future posts.
+Creating a new dataset in R has a lot of useful advantages.
+The biggest advantage is that we will have a single dataset that can be used in all future examples when learning SNA with surveys.&lt;/p&gt;
+&lt;p&gt;Creating a new dataset is also a useful learning opportunity because we will &lt;em&gt;reverse engineer&lt;/em&gt; a dataset around specific modelling, correlations and otherwise interesting easter-eggs that we find interesting.
+We will rely on the power of probability statistics to help us get there.
+And as we make decisions about how to structure our dataset, we’ll learn some important aspects of social network analysis and general data science.
+Lastly, we’ll create a function to house our mock dataset create so we change some parameters of it.
+We’ll save this for the end though.
+So, let’s get started!&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;building-a-new-dataset&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Building a new dataset&lt;/h1&gt;
+&lt;p&gt;As with most posts on Deltanomics, we’ll use a tidy framework. So, that means loading &lt;code&gt;tidyverse&lt;/code&gt;, and we’ll go ahead and load our other SNA workhorse packages.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# For a tidy framework
+library(tidyverse)
+library(glue)
+library(scales)
 
+# Our graphing libraries
+library(igraph)
+library(tidygraph)
+library(ggraph)&lt;/code&gt;&lt;/pre&gt;
+&lt;div id=&#34;an-edgelist&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;An edgelist&lt;/h2&gt;
+&lt;p&gt;The first thing we need to do is create an &lt;a href=&#34;https://en.wikipedia.org/wiki/Edge_list&#34;&gt;edgelist&lt;/a&gt; structure in our data.
+Really anything can be used as an edgelist as it’s just two columns that represent an edge is meant to be drawn between adjacent cells.
+A typical use of surveys in SNA is to look at how information flows between two people and the influence that the information has on sustainable behaviours.
+So let’s create two columns that would reasonably collect that type of information.&lt;/p&gt;
+&lt;div id=&#34;respondent-name&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Respondent name&lt;/h3&gt;
+&lt;p&gt;First, we need a column for the respondent’s name or identification.
+This column length will be the first and primary argument in our function to allow us to create datasets of any size we choose.&lt;/p&gt;
+&lt;p&gt;For this, let’s use one of my favourite packages &lt;code&gt;randomNames&lt;/code&gt; to generate some realistic names.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(randomNames)
+
+create_sna_data &amp;lt;- 
+tibble( # let&amp;#39;s pull 100 random names to start
+    resp_name = randomNames(100,
+                  which.names = &amp;#39;both&amp;#39;))&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;information-holder&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Information holder&lt;/h3&gt;
+&lt;p&gt;Next, we’ll create a column that holds the name of whom the respondent goes to for information.
+We want our social network to be &lt;em&gt;complete&lt;/em&gt;; meaning that every node in the graph will attribute data.
+To ensure this happens, we need to take special care that all of the possible nodes are also respondents.
+In short, the second column of the edgelist needs to be completely contained within the first.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# 1. Make a disconnect graph
+g &amp;lt;- make_empty_graph() %&amp;gt;% 
+  add_vertices(2)
+
+# 2. Run a while loop to ensure that a connected
+# graph is created -- this will help smooth over some of the graphing functions for later. 
+# 
+while (is.connected(g)== FALSE) {
+
+  g &amp;lt;- create_sna_data %&amp;gt;% 
+    mutate(info_one = sample(
+      sample(resp_name, 80), # create 2nd column
+      nrow(.), T)) %&amp;gt;%       # as subset of the
+    as_tbl_graph()           # first.
+}
+
+# send it back to the original name
+create_sna_data &amp;lt;-  g&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Now, let’s take a look at how the social network contained within the data looks like.
+&lt;img src=&#34;/post/2020-03-27-networks-from-survey-data-creating-mock-data_files/figure-html/unnamed-chunk-4-1.png&#34; width=&#34;960&#34; /&gt;
+The network should loosely resemble a sparsely connected sociogram, and it should serve our purposes well.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;node-edge-attributes&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Node &amp;amp; edge attributes&lt;/h2&gt;
+&lt;p&gt;Now that we have our edge list as the first two columns of the data set, we can start to add some node and edge attributes. However, we can’t just randomly create new variables and values because we want a dataset that resembles what we might find in the real world. This means certain variables should be related or correlated with one another. And, because we’re interested in network analysis, a node’s position in the network should also influence their values in key columns. To achieve this, we’ll need to &lt;em&gt;reverse&lt;/em&gt; engineer the values based on some graph analysis.&lt;/p&gt;
+&lt;div id=&#34;node-attributes&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Node attributes&lt;/h3&gt;
+&lt;p&gt;We’ll do some rapid-fire node correlations with some key socio-economic variables.&lt;/p&gt;
+&lt;div id=&#34;income-category&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Income category&lt;/h4&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;create_sna_data &amp;lt;- create_sna_data %&amp;gt;% 
+  mutate(income_pre_tax = map_chr(degree(create_sna_data), function(x){
+  
+    # random normal using degree as the mean
+    # and a standard deviation of 2.5
+    random_norm &amp;lt;- rnorm(n = 1, 
+        mean = x, 
+        sd = sample(2.5, 1, F))
+  
+  dollar(abs(random_norm)*15000, 
+         prefix = &amp;#39;£&amp;#39;)
+}))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Our dataset has a lot of randomness to it, so it’s impossible to tell what the correlation is. But, it should at least be positive and somewhat linear. There aren’t likely to be many nodes that have the maximum number of degrees, so the variance should drop off as the degree increases (but this isn’t a guarantee!).&lt;/p&gt;
+&lt;p&gt;A boxplot of showing degree and income is shown below.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2020-03-27-networks-from-survey-data-creating-mock-data_files/figure-html/unnamed-chunk-6-1.png&#34; width=&#34;672&#34; /&gt;
+So, the theoretical people in our dataset with more connections to others should make more money, something that, could conceivably be true.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;neighbourhood-influence&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Neighbourhood influence&lt;/h4&gt;
+&lt;p&gt;A common question in network analysis is: do nodes behaviour differently when they are connected to certain nodes. It’s like the old adage ~ &lt;em&gt;if you lie down with dogs you’ll get up with fleas&lt;/em&gt;. For this, we’ll pick out some random nodes and have their neighbourhoods adopt a similar value for a question like: do you buy the majority of your fruit and veg from a farmers market?&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;influencers_df &amp;lt;- map_df(1:10, function(x){
+
+  # pull a random node name
+node. &amp;lt;- sample(V(create_sna_data)$name, 1)
+
+  # get the node id, because to_local_neighborhood requires a numeric identifier (this is due to igraph).
+
+ node_id. &amp;lt;- match(node., V(create_sna_data)$name)
+  
+ # pull the neighbourhoods of each node from above. 
+neighbours. &amp;lt;- create_sna_data %&amp;gt;% 
+  to_local_neighborhood(node = node_id., 
+                        order = 1) %&amp;gt;% 
+    .[[1]] %&amp;gt;% 
+    as_tibble() %&amp;gt;% 
+    pull(name)
+
+ # create a tibble of both values for use in the next step
+
+tibble(neighours. = neighbours.,
+       centre = rep(node., length(neighbours.)))
+
+}) 
+# create new variable for each value returned above.
+
+create_sna_data &amp;lt;- 
+  create_sna_data %&amp;gt;% 
+  mutate(buy_farm_mark = case_when(
+    name %in% influencers_df$centre ~ &amp;#39;Every meal&amp;#39;,
+    name %in% influencers_df$neighours. ~ &amp;#39;Most meals&amp;#39;,
+    T ~ &amp;#39;Hardly any meals&amp;#39;
+  ), 
+  buy_farm_mark = factor(buy_farm_mark, 
+                            levels = c(&amp;#39;Every meal&amp;#39;, 
+                                       &amp;#39;Most meals&amp;#39;, 
+                                       &amp;#39;Hardly any meals&amp;#39;)))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;That was a bit verbose and somewhat complicated, but it will be worth it. Let’s take a look below to see how it looks in our new data.
+&lt;img src=&#34;/post/2020-03-27-networks-from-survey-data-creating-mock-data_files/figure-html/unnamed-chunk-8-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;community-influence&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Community influence&lt;/h4&gt;
+&lt;p&gt;We’ll use a community detection algorithm for the last node attribute for our dataset. This one is a bit easier as we’ll just create a new variable using the &lt;code&gt;group_infomap&lt;/code&gt; function from &lt;code&gt;tidygraph&lt;/code&gt;/&lt;code&gt;igraph&lt;/code&gt;.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;create_sna_data &amp;lt;- create_sna_data %&amp;gt;% 
+  to_undirected() %&amp;gt;% 
+  mutate(cows_on_farm = 
+           as.factor(group_infomap()))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The plot below illustrates the communities detected by &lt;code&gt;group_infomap&lt;/code&gt;. The only thing we’ve done here is to rename the variable. Easy enough!
+&lt;img src=&#34;/post/2020-03-27-networks-from-survey-data-creating-mock-data_files/figure-html/unnamed-chunk-10-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;We’ll now add edge attributes.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;edge-attributes&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Edge attributes&lt;/h3&gt;
+&lt;p&gt;Edge attributes won’t be as complicated as node attributes for as we’ve aleady identified the relationship between nodes (edges). We’ll just need to think about a variable that would makes sense for trustful communities. One could be that number of cows is related to higher levels of trust (not super likely in the real world, but anything’s possible!). It’s an easy edge attribute to calculate so let’s do that one.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;create_sna_data &amp;lt;- create_sna_data %&amp;gt;% 
+  mutate(trust_score = round(
+              rescale(
+              as.numeric(cows_on_farm), 
+              c(1, 10))))&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;back-to-a-tibble&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Back to a tibble&lt;/h2&gt;
+&lt;p&gt;We’ve been workig with a &lt;code&gt;tidygraph&lt;/code&gt; object for most the post. We’ll want to create a &lt;code&gt;tibble&lt;/code&gt; for our purposes. Remember, the goal is to create a mock survey dataset that we can use in the future to learn SNA. So it should look authentic. Let’s do that now.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;name_id_df &amp;lt;- create_sna_data %&amp;gt;% 
+  as_tibble() %&amp;gt;% 
+  transmute(name, 
+            value = row_number())
+
+create_sna_data &amp;lt;- create_sna_data %&amp;gt;% 
+  activate(edges) %&amp;gt;% 
+  as_tibble() %&amp;gt;% 
+  gather(key, value) %&amp;gt;% 
+  left_join(name_id_df) %&amp;gt;% 
+  split(.$key) %&amp;gt;% 
+  bind_cols() %&amp;gt;% 
+  select(resp_name = name, 
+         recieve_info = name1) %&amp;gt;% 
+  bind_cols(create_sna_data %&amp;gt;% 
+              as_tibble() %&amp;gt;% 
+              select(-name))&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Joining, by = &amp;quot;value&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;All right, that’s it! We can look at our data below, hopefully it looks like something we might collect in the future for SNA research.&lt;/p&gt;
+&lt;div id=&#34;htmlwidget-1&#34; style=&#34;width:100%;height:auto;&#34; class=&#34;datatables html-widget&#34;&gt;&lt;/div&gt;
+&lt;script type=&#34;application/json&#34; data-for=&#34;htmlwidget-1&#34;&gt;{&#34;x&#34;:{&#34;filter&#34;:&#34;none&#34;,&#34;data&#34;:[[&#34;1&#34;,&#34;2&#34;,&#34;3&#34;,&#34;4&#34;,&#34;5&#34;,&#34;6&#34;,&#34;7&#34;,&#34;8&#34;,&#34;9&#34;,&#34;10&#34;,&#34;11&#34;,&#34;12&#34;,&#34;13&#34;,&#34;14&#34;,&#34;15&#34;,&#34;16&#34;,&#34;17&#34;,&#34;18&#34;,&#34;19&#34;,&#34;20&#34;,&#34;21&#34;,&#34;22&#34;,&#34;23&#34;,&#34;24&#34;,&#34;25&#34;,&#34;26&#34;,&#34;27&#34;,&#34;28&#34;,&#34;29&#34;,&#34;30&#34;,&#34;31&#34;,&#34;32&#34;,&#34;33&#34;,&#34;34&#34;,&#34;35&#34;,&#34;36&#34;,&#34;37&#34;,&#34;38&#34;,&#34;39&#34;,&#34;40&#34;,&#34;41&#34;,&#34;42&#34;,&#34;43&#34;,&#34;44&#34;,&#34;45&#34;,&#34;46&#34;,&#34;47&#34;,&#34;48&#34;,&#34;49&#34;,&#34;50&#34;,&#34;51&#34;,&#34;52&#34;,&#34;53&#34;,&#34;54&#34;,&#34;55&#34;,&#34;56&#34;,&#34;57&#34;,&#34;58&#34;,&#34;59&#34;,&#34;60&#34;,&#34;61&#34;,&#34;62&#34;,&#34;63&#34;,&#34;64&#34;,&#34;65&#34;,&#34;66&#34;,&#34;67&#34;,&#34;68&#34;,&#34;69&#34;,&#34;70&#34;,&#34;71&#34;,&#34;72&#34;,&#34;73&#34;,&#34;74&#34;,&#34;75&#34;,&#34;76&#34;,&#34;77&#34;,&#34;78&#34;,&#34;79&#34;,&#34;80&#34;,&#34;81&#34;,&#34;82&#34;,&#34;83&#34;,&#34;84&#34;,&#34;85&#34;,&#34;86&#34;,&#34;87&#34;,&#34;88&#34;,&#34;89&#34;,&#34;90&#34;,&#34;91&#34;,&#34;92&#34;,&#34;93&#34;,&#34;94&#34;,&#34;95&#34;,&#34;96&#34;,&#34;97&#34;,&#34;98&#34;,&#34;99&#34;,&#34;100&#34;],[&#34;Hamilton, Hunter&#34;,&#34;Casale, Adrian&#34;,&#34;Ntumba, Alyssa&#34;,&#34;Nossal, Dezarea&#34;,&#34;Negash, Jaylon&#34;,&#34;el-Javid, Fawzi&#34;,&#34;Walters, Amanda&#34;,&#34;Johnson, Silvana&#34;,&#34;Blanc, Kate&#34;,&#34;Salvidrez, Elsy&#34;,&#34;Olivas, Byron&#34;,&#34;Johnson, Silvana&#34;,&#34;Phillips, Antone&#34;,&#34;al-Baig, Wardiyya&#34;,&#34;Cruz, Casey&#34;,&#34;al-Baig, Wardiyya&#34;,&#34;Marquez, Jack&#34;,&#34;Rem, Jacinda&#34;,&#34;Rambo, Krislynn&#34;,&#34;Nossal, Dezarea&#34;,&#34;Mcdevitt, Andrew&#34;,&#34;Omar, Jacob&#34;,&#34;Nossal, Dezarea&#34;,&#34;Hamilton, Hunter&#34;,&#34;Blanc, Kate&#34;,&#34;Mcdevitt, Andrew&#34;,&#34;Mcdevitt, Andrew&#34;,&#34;Silva, Jose&#34;,&#34;Rambo, Krislynn&#34;,&#34;Silva, Jose&#34;,&#34;el-Yousif, Neeshaan&#34;,&#34;Mcdevitt, Andrew&#34;,&#34;Nunez, Catrina&#34;,&#34;Ford, Nicoletta&#34;,&#34;el-Fares, Hissa&#34;,&#34;Lansing, Kelly&#34;,&#34;al-Sayed, Haatim&#34;,&#34;Rambo, Krislynn&#34;,&#34;Williams, Kevin&#34;,&#34;al-Javed, Izza&#34;,&#34;Cruz, Casey&#34;,&#34;el-Idris, Jaleela&#34;,&#34;Dominguez, Samantha&#34;,&#34;Eltayeb, Brittany&#34;,&#34;Left Hand Bull, Allison&#34;,&#34;Garnier, Miranda&#34;,&#34;Garnier, Miranda&#34;,&#34;Timpano, Donna&#34;,&#34;Walker, Sapphire&#34;,&#34;el-Fares, Hissa&#34;,&#34;Dominguez, Samantha&#34;,&#34;Nguyen, Jenny&#34;,&#34;Bartlett, Brandon&#34;,&#34;Hamilton, Hunter&#34;,&#34;Ward, Dion&#34;,&#34;Baliga, Meghan&#34;,&#34;Johnson, Silvana&#34;,&#34;Travis, Deja&#34;,&#34;Nguyen, Jenny&#34;,&#34;Mcdevitt, Andrew&#34;,&#34;Lee, Keodara&#34;,&#34;Bonser, Tristan&#34;,&#34;Barringer, Quentin&#34;,&#34;Lane, Isaac&#34;,&#34;el-Syed, Idrees&#34;,&#34;al-Salloum, Hazm&#34;,&#34;Sellers, Casimer&#34;,&#34;Martinez, Gabriel&#34;,&#34;Sellers, Casimer&#34;,&#34;Sellers, Casimer&#34;,&#34;Cruz, Casey&#34;,&#34;al-Baig, Wardiyya&#34;,&#34;el-Samad, Saood&#34;,&#34;Lee, Keodara&#34;,&#34;al-Sattar, Waheeba&#34;,&#34;Brehe, Anthony&#34;,&#34;Torres, Cicely&#34;,&#34;al-Baig, Wardiyya&#34;,&#34;Walker, Sapphire&#34;,&#34;Moore, Dazaun&#34;,&#34;Teka, Devon&#34;,&#34;Clark, Brenton&#34;,&#34;Lee, Linda&#34;,&#34;Eltayeb, Brittany&#34;,&#34;Brehe, Anthony&#34;,&#34;Avila, Mariah&#34;,&#34;Spiller, Jennifer&#34;,&#34;al-Darwish, Saqr&#34;,&#34;Maldonado, Joseph&#34;,&#34;Norman, Kaliesia&#34;,&#34;Salvidrez, Elsy&#34;,&#34;al-Salloum, Hazm&#34;,&#34;Left Hand Bull, Allison&#34;,&#34;Sellers, Casimer&#34;,&#34;Phillips, Antone&#34;,&#34;Nguyen, Jenny&#34;,&#34;al-Baig, Wardiyya&#34;,&#34;Torres, Cicely&#34;,&#34;Miller, Tilden&#34;,&#34;Patterson, Kiara&#34;],[&#34;el-Haidar, Daif&#34;,&#34;Francis, Brady&#34;,&#34;Garnier, Miranda&#34;,&#34;Ford, Nicoletta&#34;,&#34;al-Salloum, Hazm&#34;,&#34;el-Yousif, Neeshaan&#34;,&#34;Patterson, Kiara&#34;,&#34;Cruz, Casey&#34;,&#34;al-Baig, Wardiyya&#34;,&#34;Salazar, Kastle&#34;,&#34;Miller, Tilden&#34;,&#34;al-Javed, Khaleela&#34;,&#34;Miller, Frederick&#34;,&#34;Bartlett, Brandon&#34;,&#34;el-Syed, Idrees&#34;,&#34;Sellers, Casimer&#34;,&#34;Lane, Isaac&#34;,&#34;Silva, Jose&#34;,&#34;Linton, Yunus&#34;,&#34;Farris, Luanne&#34;,&#34;Ford, Nicoletta&#34;,&#34;Salazar, Kastle&#34;,&#34;Lee, Keodara&#34;,&#34;Clark, Brenton&#34;,&#34;Timpano, Donna&#34;,&#34;Bonser, Tristan&#34;,&#34;Walker, Sapphire&#34;,&#34;Williams, Kevin&#34;,&#34;Simmons, Justice&#34;,&#34;Miller, Frederick&#34;,&#34;Encinias, Gabino&#34;,&#34;el-Sadek, Abdul Haleem&#34;,&#34;Cayabyab, Hari&#34;,&#34;Teet, Dillon&#34;,&#34;al-Sayed, Haatim&#34;,&#34;Lee, Linda&#34;,&#34;Tran, Sariah&#34;,&#34;Kern, Brock&#34;,&#34;el-Syed, Idrees&#34;,&#34;Austin, Ebony&#34;,&#34;Austin, Ebony&#34;,&#34;Ward, Dion&#34;,&#34;Teka, Devon&#34;,&#34;Encinias, Gabino&#34;,&#34;Patterson, Kiara&#34;,&#34;Nguyen, Jenny&#34;,&#34;Wauneka, Daniel&#34;,&#34;Ortiz, Leticia&#34;,&#34;Barringer, Quentin&#34;,&#34;Morgan, Alexandra&#34;,&#34;Lane, Isaac&#34;,&#34;Linton, Yunus&#34;,&#34;Cayabyab, Hari&#34;,&#34;Chau, Heidi&#34;,&#34;Vigil, Allissia&#34;,&#34;Miller, Tilden&#34;,&#34;Mach, Adrian Phil&#34;,&#34;Ford, Justin&#34;,&#34;el-Haidar, Daif&#34;,&#34;Madera, Christian&#34;,&#34;Weickum, James&#34;,&#34;Patterson, Kiara&#34;,&#34;Lee, Linda&#34;,&#34;Francis, Brady&#34;,&#34;Thompson, Destiny&#34;,&#34;Thompson, Destiny&#34;,&#34;al-Darwish, Saqr&#34;,&#34;Salazar, Kastle&#34;,&#34;Torres, Cicely&#34;,&#34;Teka, Devon&#34;,&#34;Briones, Dominic&#34;,&#34;Encinias, Gabino&#34;,&#34;Walton IV, Jordan&#34;,&#34;Avila, Mariah&#34;,&#34;Cayabyab, Hari&#34;,&#34;Ford, Justin&#34;,&#34;Ford, Justin&#34;,&#34;Linton, Yunus&#34;,&#34;Fresquez, Rorey&#34;,&#34;Salazar, Kastle&#34;,&#34;Jarwin, Anne&#34;,&#34;Bagwell, Madeleine&#34;,&#34;Miller, Tilden&#34;,&#34;Teet, Dillon&#34;,&#34;Thompson, Destiny&#34;,&#34;Cayabyab, Hari&#34;,&#34;Norman, Kaliesia&#34;,&#34;Zeng, Christine&#34;,&#34;Norman, Kaliesia&#34;,&#34;Walton IV, Jordan&#34;,&#34;Walton IV, Jordan&#34;,&#34;Lubthisophon, Danny&#34;,&#34;Tran, Sariah&#34;,&#34;Etzenhouser, Kaitlyn&#34;,&#34;Vigil, Allissia&#34;,&#34;Salazar, Kastle&#34;,&#34;Tampubolon, Hannan&#34;,&#34;Banchongchith, Jian Michael&#34;,&#34;Mark, Kalia&#34;,&#34;Martinez, Marco&#34;],[&#34;£27,734.59&#34;,&#34;£60,056.73&#34;,&#34;£13,668.47&#34;,&#34;£45,357.06&#34;,&#34;£20,345.93&#34;,&#34;£20,162.58&#34;,&#34;£20,024.30&#34;,&#34;£39,744.08&#34;,&#34;£33,529.76&#34;,&#34;£47,115.77&#34;,&#34;£4,802.91&#34;,&#34;£34,168.19&#34;,&#34;£15,364.22&#34;,&#34;£102,249&#34;,&#34;£62,815.48&#34;,&#34;£80,985.97&#34;,&#34;£903.42&#34;,&#34;£6,776.40&#34;,&#34;£41,771.61&#34;,&#34;£6,774.42&#34;,&#34;£54,225.08&#34;,&#34;£22,349.59&#34;,&#34;£30,925.69&#34;,&#34;£9,108.59&#34;,&#34;£60,694.63&#34;,&#34;£42,173.75&#34;,&#34;£73,669.37&#34;,&#34;£26,261.83&#34;,&#34;£8,491.00&#34;,&#34;£20,120.09&#34;,&#34;£41,918.17&#34;,&#34;£1,270.85&#34;,&#34;£14,744.84&#34;,&#34;£34,306.86&#34;,&#34;£39,772.99&#34;,&#34;£25,270.08&#34;,&#34;£35,727.09&#34;,&#34;£38,486.23&#34;,&#34;£89,003.59&#34;,&#34;£30,445.16&#34;,&#34;£10,325.14&#34;,&#34;£16,994.62&#34;,&#34;£12,466.51&#34;,&#34;£74,270.34&#34;,&#34;£10,416.91&#34;,&#34;£46,439.09&#34;,&#34;£1,562.21&#34;,&#34;£11,796.68&#34;,&#34;£40,011.76&#34;,&#34;£20,949.85&#34;,&#34;£46,739.59&#34;,&#34;£72,315.15&#34;,&#34;£39,124.26&#34;,&#34;£54,931.22&#34;,&#34;£45,033.29&#34;,&#34;£17,627.81&#34;,&#34;£51,938.43&#34;,&#34;£13,197.43&#34;,&#34;£37,158.70&#34;,&#34;£770.28&#34;,&#34;£26,389.56&#34;,&#34;£8,173.07&#34;,&#34;£24,440.52&#34;,&#34;£26,655.22&#34;,&#34;£58,856.32&#34;,&#34;£95,452.86&#34;,&#34;£10,882.49&#34;,&#34;£64,325.22&#34;,&#34;£34,363.16&#34;,&#34;£62,015.63&#34;,&#34;£3,012.91&#34;,&#34;£82,277.76&#34;,&#34;£4,293.19&#34;,&#34;£15,261.58&#34;,&#34;£43,656.50&#34;,&#34;£65,331.64&#34;,&#34;£48,051.19&#34;,&#34;£65,535.21&#34;,&#34;£35,123.74&#34;,&#34;£22,399.66&#34;,&#34;£35,446.67&#34;,&#34;£23,937.10&#34;,&#34;£63,791.33&#34;,&#34;£31,901.43&#34;,&#34;£18,830.07&#34;,&#34;£57,410.18&#34;,&#34;£19,155.79&#34;,&#34;£19,155.30&#34;,&#34;£19,873.43&#34;,&#34;£52,101.26&#34;,&#34;£137,096&#34;,&#34;£4,748.56&#34;,&#34;£31,939.44&#34;,&#34;£5,419.64&#34;,&#34;£28,646.26&#34;,&#34;£82,116.34&#34;,&#34;£28,648.13&#34;,&#34;£24,134.40&#34;,&#34;£72,940.15&#34;,&#34;£52,845.28&#34;],[&#34;Hardly any meals&#34;,&#34;Hardly any meals&#34;,&#34;Hardly any meals&#34;,&#34;Hardly any meals&#34;,&#34;Hardly any meals&#34;,&#34;Hardly any meals&#34;,&#34;Hardly any meals&#34;,&#34;Hardly any meals&#34;,&#34;Hardly any meals&#34;,&#34;Most meals&#34;,&#34;Hardly any meals&#34;,&#34;Hardly any meals&#34;,&#34;Every meal&#34;,&#34;Most meals&#34;,&#34;Hardly any meals&#34;,&#34;Most meals&#34;,&#34;Hardly any meals&#34;,&#34;Hardly any meals&#34;,&#34;Most meals&#34;,&#34;Hardly any meals&#34;,&#34;Hardly any meals&#34;,&#34;Hardly any meals&#34;,&#34;Hardly any meals&#34;,&#34;Hardly any meals&#34;,&#34;Hardly any meals&#34;,&#34;Hardly any meals&#34;,&#34;Hardly any meals&#34;,&#34;Hardly any meals&#34;,&#34;Hardly any meals&#34;,&#34;Most meals&#34;,&#34;Hardly any meals&#34;,&#34;Hardly any meals&#34;,&#34;Hardly any meals&#34;,&#34;Hardly any meals&#34;,&#34;Hardly any meals&#34;,&#34;Most meals&#34;,&#34;Hardly any meals&#34;,&#34;Hardly any meals&#34;,&#34;Hardly any meals&#34;,&#34;Hardly any meals&#34;,&#34;Hardly any meals&#34;,&#34;Hardly any meals&#34;,&#34;Most meals&#34;,&#34;Hardly any meals&#34;,&#34;Hardly any meals&#34;,&#34;Hardly any meals&#34;,&#34;Hardly any meals&#34;,&#34;Hardly any meals&#34;,&#34;Most meals&#34;,&#34;Hardly any meals&#34;,&#34;Hardly any meals&#34;,&#34;Most meals&#34;,&#34;Hardly any meals&#34;,&#34;Hardly any meals&#34;,&#34;Most meals&#34;,&#34;Every meal&#34;,&#34;Hardly any meals&#34;,&#34;Hardly any meals&#34;,&#34;Hardly any meals&#34;,&#34;Hardly any meals&#34;,&#34;Hardly any meals&#34;,&#34;Hardly any meals&#34;,&#34;Every meal&#34;,&#34;Hardly any meals&#34;,&#34;Hardly any meals&#34;,&#34;Hardly any meals&#34;,&#34;Hardly any meals&#34;,&#34;Hardly any meals&#34;,&#34;Most meals&#34;,&#34;Every meal&#34;,&#34;Hardly any meals&#34;,&#34;Hardly any meals&#34;,&#34;Most meals&#34;,&#34;Hardly any meals&#34;,&#34;Hardly any meals&#34;,&#34;Hardly any meals&#34;,&#34;Hardly any meals&#34;,&#34;Every meal&#34;,&#34;Hardly any meals&#34;,&#34;Hardly any meals&#34;,&#34;Most meals&#34;,&#34;Hardly any meals&#34;,&#34;Most meals&#34;,&#34;Hardly any meals&#34;,&#34;Hardly any meals&#34;,&#34;Hardly any meals&#34;,&#34;Hardly any meals&#34;,&#34;Hardly any meals&#34;,&#34;Hardly any meals&#34;,&#34;Most meals&#34;,&#34;Every meal&#34;,&#34;Hardly any meals&#34;,&#34;Hardly any meals&#34;,&#34;Every meal&#34;,&#34;Every meal&#34;,&#34;Hardly any meals&#34;,&#34;Hardly any meals&#34;,&#34;Every meal&#34;,&#34;Hardly any meals&#34;,&#34;Hardly any meals&#34;],[&#34;13&#34;,&#34;3&#34;,&#34;15&#34;,&#34;6&#34;,&#34;18&#34;,&#34;14&#34;,&#34;19&#34;,&#34;2&#34;,&#34;4&#34;,&#34;7&#34;,&#34;1&#34;,&#34;2&#34;,&#34;8&#34;,&#34;4&#34;,&#34;2&#34;,&#34;17&#34;,&#34;3&#34;,&#34;16&#34;,&#34;20&#34;,&#34;6&#34;,&#34;5&#34;,&#34;7&#34;,&#34;6&#34;,&#34;13&#34;,&#34;4&#34;,&#34;19&#34;,&#34;5&#34;,&#34;16&#34;,&#34;20&#34;,&#34;8&#34;,&#34;14&#34;,&#34;5&#34;,&#34;11&#34;,&#34;6&#34;,&#34;10&#34;,&#34;1&#34;,&#34;10&#34;,&#34;20&#34;,&#34;16&#34;,&#34;2&#34;,&#34;2&#34;,&#34;8&#34;,&#34;3&#34;,&#34;14&#34;,&#34;10&#34;,&#34;15&#34;,&#34;15&#34;,&#34;4&#34;,&#34;1&#34;,&#34;10&#34;,&#34;3&#34;,&#34;15&#34;,&#34;11&#34;,&#34;13&#34;,&#34;8&#34;,&#34;1&#34;,&#34;2&#34;,&#34;12&#34;,&#34;13&#34;,&#34;5&#34;,&#34;6&#34;,&#34;19&#34;,&#34;1&#34;,&#34;3&#34;,&#34;16&#34;,&#34;18&#34;,&#34;17&#34;,&#34;7&#34;,&#34;12&#34;,&#34;3&#34;,&#34;2&#34;,&#34;14&#34;,&#34;9&#34;,&#34;11&#34;,&#34;11&#34;,&#34;12&#34;,&#34;12&#34;,&#34;20&#34;,&#34;5&#34;,&#34;7&#34;,&#34;3&#34;,&#34;13&#34;,&#34;1&#34;,&#34;14&#34;,&#34;18&#34;,&#34;11&#34;,&#34;9&#34;,&#34;17&#34;,&#34;9&#34;,&#34;9&#34;,&#34;9&#34;,&#34;18&#34;,&#34;10&#34;,&#34;17&#34;,&#34;8&#34;,&#34;7&#34;,&#34;4&#34;,&#34;12&#34;,&#34;1&#34;,&#34;19&#34;],[7,2,8,3,9,7,10,1,2,4,1,1,4,2,1,9,2,8,10,3,3,4,3,7,2,10,3,8,10,4,7,3,6,3,5,1,5,10,8,1,1,4,2,7,5,8,8,2,1,5,2,8,6,7,4,1,1,6,7,3,3,10,1,2,8,9,9,4,6,2,1,7,5,6,6,6,6,10,3,4,2,7,1,7,9,6,5,9,5,5,5,9,5,9,4,4,2,6,1,10]],&#34;container&#34;:&#34;&lt;table class=\&#34;display\&#34;&gt;\n  &lt;thead&gt;\n    &lt;tr&gt;\n      &lt;th&gt; &lt;\/th&gt;\n      &lt;th&gt;resp_name&lt;\/th&gt;\n      &lt;th&gt;recieve_info&lt;\/th&gt;\n      &lt;th&gt;income_pre_tax&lt;\/th&gt;\n      &lt;th&gt;buy_farm_mark&lt;\/th&gt;\n      &lt;th&gt;cows_on_farm&lt;\/th&gt;\n      &lt;th&gt;trust_score&lt;\/th&gt;\n    &lt;\/tr&gt;\n  &lt;\/thead&gt;\n&lt;\/table&gt;&#34;,&#34;options&#34;:{&#34;columnDefs&#34;:[{&#34;className&#34;:&#34;dt-right&#34;,&#34;targets&#34;:6},{&#34;orderable&#34;:false,&#34;targets&#34;:0}],&#34;order&#34;:[],&#34;autoWidth&#34;:false,&#34;orderClasses&#34;:false}},&#34;evals&#34;:[],&#34;jsHooks&#34;:[]}&lt;/script&gt;
+&lt;/div&gt;
+&lt;/div&gt;
 </description>
     </item>
     
