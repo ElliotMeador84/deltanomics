@@ -1,0 +1,343 @@
+---
+title: 'Networks from survey data: Creating mock data'
+author: Elliot Meador
+date: 
+slug: networks-from-survey-data-creating-mock-data
+categories:
+  - R
+  - SNA
+tags:
+  - Data
+  - network
+subtitle: ''
+summary: ''
+authors: []
+lastmod: '2020-03-27T16:25:07Z'
+featured: no
+image:
+  caption: ''
+  focal_point: ''
+  preview_only: no
+projects: []
+editor_options: 
+  chunk_output_type: console
+---
+# Why create a new dataset?
+I'd like to do a series of posts looking at social network analysis using primary data (i.e. data collected by yourself.). 
+There are a lot of different examples of when you might want to use a survey to collect data for use in analysing social networks. 
+But that's for another time. 
+
+The purpose of this post is to create a new dataset that can be used in practising social network analysis in future posts. 
+Creating a new dataset in R has a lot of useful advantages. 
+The biggest advantage is that we will have a single dataset that can be used in all future examples when learning SNA with surveys. 
+
+Creating a new dataset is also a useful learning opportunity because we will *reverse engineer* a dataset around specific modelling, correlations and otherwise interesting easter-eggs that we find interesting. 
+We will rely on the power of probability statistics to help us get there. 
+And as we make decisions about how to structure our dataset, we'll learn some important aspects of social network analysis and general data science. 
+Lastly, we'll create a function to house our mock dataset create so we change some parameters of it.
+We'll save this for the end though.
+So, let's get started!
+
+# Building a new dataset
+As with most posts on Deltanomics, we'll use a tidy framework. So, that means loading `tidyverse`, and we'll go ahead and load our other SNA workhorse packages. 
+```{r, warning=FALSE, message=F}
+# For a tidy framework
+library(tidyverse)
+library(glue)
+library(scales)
+
+# Our graphing libraries
+library(igraph)
+library(tidygraph)
+library(ggraph)
+
+```
+## An edgelist
+The first thing we need to do is create an [edgelist](https://en.wikipedia.org/wiki/Edge_list) structure in our data. 
+Really anything can be used as an edgelist as it's just two columns that represent an edge is meant to be drawn between adjacent cells. 
+A typical use of surveys in SNA is to look at how information flows between two people and the influence that the information has on sustainable behaviours. 
+So let's create two columns that would reasonably collect that type of information. 
+
+### Respondent name
+First, we need a column for the respondent's name or identification. 
+This column length will be the first and primary argument in our function to allow us to create datasets of any size we choose.
+
+For this, let's use one of my favourite packages `randomNames` to generate some realistic names.
+
+```{r}
+library(randomNames)
+
+create_sna_data <- 
+tibble( # let's pull 100 random names to start
+    resp_name = randomNames(100,
+                  which.names = 'both'))
+```
+### Information holder
+Next, we'll create a column that holds the name of whom the respondent goes to for information. 
+We want our social network to be *complete*; meaning that every node in the graph will attribute data. 
+To ensure this happens, we need to take special care that all of the possible nodes are also respondents. 
+In short, the second column of the edgelist needs to be completely contained within the first. 
+
+```{r}
+# 1. Make a disconnect graph
+g <- make_empty_graph() %>% 
+  add_vertices(2)
+
+# 2. Run a while loop to ensure that a connected
+# graph is created -- this will help smooth over some of the graphing functions for later. 
+# 
+while (is.connected(g)== FALSE) {
+
+  g <- create_sna_data %>% 
+    mutate(info_one = sample(
+      sample(resp_name, 80), # create 2nd column
+      nrow(.), T)) %>%       # as subset of the
+    as_tbl_graph()           # first.
+}
+
+# send it back to the original name
+create_sna_data <-  g
+
+```
+Now, let's take a look at how the social network contained within the data looks like. 
+```{r, echo=F, warning=F, message=F, fig.width=10, fig.height=8}
+
+create_sna_data %>% 
+  mutate(degree = 
+           centrality_degree(mode = 'all')) %>% 
+  ggraph()+
+  geom_edge_fan(color = 'grey70', 
+                start_cap = circle(2.75, 'mm'),
+                end_cap = circle(2.75, 'mm'))+
+  # geom_node_point(color = 'skyblue', 
+  #                 aes(size = degree))+
+  geom_node_text(aes(label = str_wrap(name, 10)), 
+                 size = 2.75, 
+                 nudge_x = .075, 
+                 nudge_y = .075)+
+  scale_size(range = c(5, 10), 
+             name = 'Degree\ncentrality')+
+  theme_graph(foreground = T, 
+              border = T, 
+              base_family = 'serif')+
+  labs(title = 'Mock survey-network-data')
+```
+The network should loosely resemble a sparsely connected sociogram, and it should serve our purposes well.
+
+## Node & edge attributes
+Now that we have our edge list as the first two columns of the data set, we can start to add some node and edge attributes. However, we can't just randomly create new variables and values because we want a dataset that resembles what we might find in the real world. This means certain variables should be related or correlated with one another. And, because we're interested in network analysis, a node's position in the network should also influence their values in key columns. To achieve this, we'll need to *reverse* engineer the values based on some graph analysis. 
+
+### Node attributes
+We'll do some rapid-fire node correlations with some key socio-economic variables.  
+
+#### Income category 
+```{r}
+
+create_sna_data <- create_sna_data %>% 
+  mutate(income_pre_tax = map_chr(degree(create_sna_data), function(x){
+  
+    # random normal using degree as the mean
+    # and a standard deviation of 2.5
+    random_norm <- rnorm(n = 1, 
+        mean = x, 
+        sd = sample(2.5, 1, F))
+  
+  dollar(abs(random_norm)*15000, 
+         prefix = '£')
+}))
+
+
+```
+Our dataset has a lot of randomness to it, so it's impossible to tell what the correlation is. But, it should at least be positive and somewhat linear. There aren't likely to be many nodes that have the maximum number of degrees, so the variance should drop off as the degree increases (but this isn't a guarantee!). 
+
+A boxplot of showing degree and income is shown below.
+
+```{r, echo=FALSE}
+
+create_sna_data %>% 
+  mutate(degree = centrality_degree(mode = 'all')) %>% 
+  as_tibble() %>% 
+  mutate(income_n = parse_number(income_pre_tax)) %>% 
+  ggplot(aes(degree, income_n, group = degree))+
+  geom_jitter(color = 'grey')+
+  geom_boxplot(alpha = .5, 
+               color = 'skyblue', 
+               fill = 'skyblue2')+
+  scale_y_continuous(labels = dollar)+
+  labs(title = 'Degree and income', 
+       x = 'Node degree', 
+       y = 'Pre-tax income')+
+  theme(plot.margin = margin(1,1,1,1, 'cm'), 
+        plot.title.position = 'plot', 
+        text = element_text(family = 'serif', 
+                            size = 14))
+```
+So, the theoretical people in our dataset with more connections to others should make more money, something that, could conceivably be true. 
+
+#### Neighbourhood influence
+A common question in network analysis is: do nodes behaviour differently when they are connected to certain nodes. It's like the old adage ~ *if you lie down with dogs you'll get up with fleas*. For this, we'll pick out some random nodes and have their neighbourhoods adopt a similar value for a question like: do you buy the majority of your fruit and veg from a farmers market?
+
+```{r}
+
+influencers_df <- map_df(1:10, function(x){
+
+  # pull a random node name
+node. <- sample(V(create_sna_data)$name, 1)
+
+  # get the node id, because to_local_neighborhood requires a numeric identifier (this is due to igraph).
+
+ node_id. <- match(node., V(create_sna_data)$name)
+  
+ # pull the neighbourhoods of each node from above. 
+neighbours. <- create_sna_data %>% 
+  to_local_neighborhood(node = node_id., 
+                        order = 1) %>% 
+    .[[1]] %>% 
+    as_tibble() %>% 
+    pull(name)
+
+ # create a tibble of both values for use in the next step
+
+tibble(neighours. = neighbours.,
+       centre = rep(node., length(neighbours.)))
+
+}) 
+# create new variable for each value returned above.
+
+create_sna_data <- 
+  create_sna_data %>% 
+  mutate(buy_farm_mark = case_when(
+    name %in% influencers_df$centre ~ 'Every meal',
+    name %in% influencers_df$neighours. ~ 'Most meals',
+    T ~ 'Hardly any meals'
+  ), 
+  buy_farm_mark = factor(buy_farm_mark, 
+                            levels = c('Every meal', 
+                                       'Most meals', 
+                                       'Hardly any meals')))
+
+```
+That was a bit verbose and somewhat complicated, but it will be worth it. Let's take a look below to see how it looks in our new data.
+```{r, echo=F, message=F, fig.width=10, fig.height=8}
+  
+levels_farm_mark <- 
+ c('Every meal', 
+  'Most meals', 
+  'Hardly any meals')
+
+farm_cols <- blues9[c(9, 6, 3)]
+
+names(farm_cols) <- levels_farm_mark
+
+create_sna_data %>% 
+  ggraph()+
+  geom_edge_fan(color = 'grey70', 
+                start_cap = circle(1.25, 'mm'), 
+                end_cap = circle(1.25, 'mm'))+
+  geom_node_point(color = 'black', 
+                  size = 5.5)+
+  geom_node_point(aes(color = buy_farm_mark), 
+                  size = 5)+
+  scale_color_manual(values = farm_cols)+
+  theme_graph(foreground = T, 
+              border = T, 
+              base_family = 'serif')+
+  labs(title = 'Influencers in buying at a farmers market', 
+       color = str_wrap('How often do you eat food bought at a farmers market?', 20), 
+       caption  = str_wrap('There is some evidence that buying behaviour is influenced by one\'s connection to those who eat every meal at a farmers market. More research is needed.', 100))
+```
+
+#### Community influence
+We'll use a community detection algorithm for the last node attribute for our dataset. This one is a bit easier as we'll just create a new variable using the `group_infomap` function from `tidygraph`/`igraph`.
+
+```{r}
+create_sna_data <- create_sna_data %>% 
+  to_undirected() %>% 
+  mutate(cows_on_farm = 
+           as.factor(group_infomap()))
+```
+
+The plot below illustrates the communities detected by `group_infomap`. The only thing we've done here is to rename the variable. Easy enough!
+```{r, echo=F, fig.width=10, fig.height=8, message=F}
+create_sna_data %>% 
+  ggraph()+
+  geom_edge_fan()+
+  geom_node_point(aes(color = cows_on_farm), 
+                  size = 6)+
+  scale_color_viridis_d(name = str_wrap('How many cows do you have on your farm?', 20))+
+  theme_graph(foreground = T, 
+              border = T, 
+              base_family = 'serif')+
+  guides(color=guide_legend(ncol=2))+
+  labs(title = 'Number of cows per respondent', 
+       caption = 'People with similar numbers of cows tend to cluster together.\nMore research is needed.')
+  
+```
+
+We'll now add edge attributes. 
+
+### Edge attributes
+
+
+
+
+
+
+
+
+
+
+
+
+
+Edge attributes won't be as complicated as node attributes for as we've aleady identified the relationship between nodes (edges). We'll just need to think about a variable that would makes sense for trustful communities. One could be that number of cows is related to higher levels of trust (not super likely in the real world, but anything's possible!). It's an easy edge attribute to calculate so let's do that one.
+
+```{r}
+
+create_sna_data <- create_sna_data %>% 
+  mutate(trust_score = round(
+              rescale(
+              as.numeric(cows_on_farm), 
+              c(1, 10))))
+
+```
+
+## Back to a tibble
+We've been workig with a `tidygraph` object for most the post. We'll want to create a `tibble` for our purposes. Remember, the goal is to create a mock survey dataset that we can use in the future to learn SNA. So it should look authentic. Let's do that now.
+```{r}
+
+name_id_df <- create_sna_data %>% 
+  as_tibble() %>% 
+  transmute(name, 
+            value = row_number())
+
+create_sna_data <- create_sna_data %>% 
+  activate(edges) %>% 
+  as_tibble() %>% 
+  gather(key, value) %>% 
+  left_join(name_id_df) %>% 
+  split(.$key) %>% 
+  bind_cols() %>% 
+  select(resp_name = name, 
+         recieve_info = name1) %>% 
+  bind_cols(create_sna_data %>% 
+              as_tibble() %>% 
+              select(-name))
+  
+```
+
+All right, that's it! We can look at our data below, hopefully it looks like something we might collect in the future for SNA research. 
+
+```{r, echo=F, message=F}
+library(DT)
+create_sna_data %>% 
+  DT::datatable()
+
+
+
+
+
+
+```
+
+
