@@ -31,10 +31,9 @@ The purpose of this post is to create a new dataset that can be used in practisi
 Creating a new dataset in R has a lot of useful advantages. 
 The biggest advantage is that we will have a single dataset that can be used in all future examples when learning SNA with surveys. 
 
-Creating a new dataset is also a useful learning opportunity because we will *reverse engineer* a dataset around specific modelling, correlations and otherwise interesting easter-eggs that we find interesting. 
+Creating a new dataset is also a great learning opportunity because we will *reverse engineer* a dataset around specific modelling, correlations and otherwise interesting easter-eggs that we can use as learning opportunities in future posts. 
 We will rely on the power of probability statistics to help us get there. 
 And as we make decisions about how to structure our dataset, we'll learn some important aspects of social network analysis and general data science. 
-Lastly, we'll create a function to house our mock dataset create so we change some parameters of it.
 We'll save this for the end though.
 So, let's get started!
 
@@ -175,7 +174,7 @@ create_sna_data %>%
 So, the theoretical people in our dataset with more connections to others should make more money, something that, could conceivably be true. 
 
 #### Neighbourhood influence
-A common question in network analysis is: do nodes behaviour differently when they are connected to certain nodes. It's like the old adage ~ *if you lie down with dogs you'll get up with fleas*. For this, we'll pick out some random nodes and have their neighbourhoods adopt a similar value for a question like: do you buy the majority of your fruit and veg from a farmers market?
+A common question in network analysis is: do nodes behave differently when they are connected to certain nodes. It's like the old adage ~ *if you lie down with dogs you'll get up with fleas*. For this, we'll pick out some random nodes and have their neighbourhoods adopt a similar value for a question like: do you buy the majority of your fruit and veg from a farmers market?
 
 ```{r}
 
@@ -326,17 +325,12 @@ create_sna_data <- create_sna_data %>%
   
 ```
 
-All right, that's it! We can look at our data below, hopefully it looks like something we might collect in the future for SNA research. 
+All right, that's it! We can look at our data below; hopefully, it looks like something we might collect in the future for SNA research. 
 
 ```{r, echo=F, message=F}
 library(DT)
 create_sna_data %>% 
   DT::datatable()
-
-
-
-
-
 
 ```
 

@@ -19,27 +19,47 @@
   
   <url>
     <loc>/categories/</loc>
-    <lastmod>2020-03-13T19:43:11+00:00</lastmod>
+    <lastmod>2020-03-27T16:25:07+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/data/</loc>
+    <lastmod>2020-03-27T16:25:07+00:00</lastmod>
   </url>
   
   <url>
     <loc>/</loc>
-    <lastmod>2020-03-13T19:43:11+00:00</lastmod>
+    <lastmod>2020-03-27T16:25:07+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/network/</loc>
+    <lastmod>2020-03-27T16:25:07+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/post/networks-from-survey-data-creating-mock-data/</loc>
+    <lastmod>2020-03-27T16:25:07+00:00</lastmod>
   </url>
   
   <url>
     <loc>/post/</loc>
-    <lastmod>2020-03-13T19:43:11+00:00</lastmod>
+    <lastmod>2020-03-27T16:25:07+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/categories/tidytuesday/</loc>
-    <lastmod>2020-03-13T19:43:11+00:00</lastmod>
+    <loc>/categories/r/</loc>
+    <lastmod>2020-03-27T16:25:07+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/post/tidytuesday-college-tuition-diversity-and-pay/</loc>
-    <lastmod>2020-03-13T19:43:11+00:00</lastmod>
+    <loc>/categories/sna/</loc>
+    <lastmod>2020-03-27T16:25:07+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/</loc>
+    <lastmod>2020-03-27T16:25:07+00:00</lastmod>
   </url>
   
   <url>
@@ -69,21 +89,6 @@
   
   <url>
     <loc>/tags/ggraph/</loc>
-    <lastmod>2020-01-01T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/categories/r/</loc>
-    <lastmod>2020-01-01T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/categories/sna/</loc>
-    <lastmod>2020-01-01T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/</loc>
     <lastmod>2020-01-01T00:00:00+00:00</lastmod>
   </url>
   
