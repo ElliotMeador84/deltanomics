@@ -303,7 +303,7 @@ create_sna_data <- create_sna_data %>%
 
 ## Back to a tibble
 We've been workig with a `tidygraph` object for most the post. We'll want to create a `tibble` for our purposes. Remember, the goal is to create a mock survey dataset that we can use in the future to learn SNA. So it should look authentic. Let's do that now.
-```{r}
+```{r, warning=F, message=F}
 
 name_id_df <- create_sna_data %>% 
   as_tibble() %>% 
@@ -328,9 +328,13 @@ create_sna_data <- create_sna_data %>%
 All right, that's it! We can look at our data below; hopefully, it looks like something we might collect in the future for SNA research. 
 
 ```{r, echo=F, message=F}
-library(DT)
+library(knitr)
+library(kableExtra)
 create_sna_data %>% 
-  DT::datatable()
+  head() %>% 
+  kable(caption = 'Our mock dataset for SNA')%>%
+  kable_styling(bootstrap_options = c("striped", "hover", "responsive")) %>%
+  row_spec(1:6, bold = T, color = "black", background = "white")
 
 ```
 
