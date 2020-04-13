@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Useful links | Deltanomics</title>
+    <link>/links/</link>
+      <atom:link href="/links/index.xml" rel="self" type="application/rss+xml" />
+    <description>Useful links</description>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>©2020</copyright>
+    <image>
+      <url>/images/icon_hu92a9dc9639b79cadf266306904fb01f6_516996_512x512_fill_lanczos_center_2.png</url>
+      <title>Useful links</title>
+      <link>/links/</link>
+    </image>
+    
+    <item>
+      <title></title>
+      <link>/links/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>/links/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>

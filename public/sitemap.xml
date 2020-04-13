@@ -183,7 +183,15 @@
   </url>
   
   <url>
+    <loc>/links/</loc>
+  </url>
+  
+  <url>
     <loc>/courses/</loc>
+  </url>
+  
+  <url>
+    <loc>/links/</loc>
   </url>
   
 </urlset>
