@@ -1,0 +1,243 @@
+---
+title: Covid-19 and Rural Areas in the U.S.
+author: Elliot Meador
+date: '2020-04-26'
+slug: covid-19-rural-deltanomics
+categories:
+  - R
+tags:
+  - Data
+  - ggplot
+  - dplyr
+subtitle: ''
+summary: ''
+authors: []
+lastmod: '2020-04-26T19:45:17+01:00'
+featured: no
+image:
+  caption: ''
+  focal_point: ''
+  preview_only: no
+projects: []
+editor_options: 
+  chunk_output_type: console
+---
+# Introduction
+Now that we are square in the middle of the Covid-19 pandemic, I thought it might be beneficial to look at some statistics associated with the number of cases. 
+We'll differentiate our analysis by focusing on cases of Covid-19 in rural areas of the U.S. 
+There are couple of reasons for this: mainly, rural analytics is my speciality, so while I don't know much about the virus, I do know some about rural societies and economies; we can easily find pertinant data on rural counties; and, we can utilise some cool built-in R functions to help us along the way. 
+Before we go on it's important to note that:
+
+1. I am not a medical doctor or specialist in viral diseases. 
+2. This post is meant to be a learning resource for people interested in looking at the pandemic from a rural perspective. 
+3. Any potential interesting findings must be further investigated before any judements can be made.
+
+# Data
+The data for this post comes from two places: Covid-19 cases from the [New York Times github](https://github.com/nytimes/covid-19-data); and the  [USDA Rural-Urban Classification Codes](https://www.ers.usda.gov/data-products/rural-urban-continuum-codes/).
+
+Datascientists at The New York Times have been collating data on number of cases of Covid-19 by county in the U.S..
+It is available at their github page, which means that one can easily access and update the data through *pull requests*. 
+The data can also be downloaded and saved to a local drive. 
+
+To get a rural understanding of Covid-19 cases, we'll use the USDA data on rural-urban classification of U.S. counties, which can be downloaded using the hyperlink above.
+Many countries have geographical classifcations for rural and urban spaces. 
+Usually, a low-level geography is chosen that spans an entire country. 
+A continuum of rural-urban is used to describe each geographical area that goes from very urban to very rural (though not using those specific labels).
+
+So we'll use those two datasets, join them together and investigate how many cases of Covid-19 are found in rural areas within the U.S..
+
+# Analysis
+## Libraries and themes
+`Tidyverse` packages will be used to do most of the heavy lifting. 
+I created a logo for Deltanomics - it's the icon that shows up in your browser tab - that I'm going to stitch on to the plots. 
+Of course, you don't have to do for your analysis, and you can leave it off by omitting the code at the end. The `cowplot` package is used to help stitch the logo to the `ggplot2` plots.
+```{r, message=F, warning=F}
+library(tidyverse)
+library(lubridate)
+library(janitor)
+library(scales)
+library(cowplot)
+
+# USDA Rural-Urban classification codes
+
+
+post_theme <- function(...) {
+  theme(
+    text = 
+      element_text(
+        color = 'black',
+         family = 'serif'),
+    axis.text = 
+      element_text(
+        color = 'black'),
+    axis.text.x = 
+      element_text(angle = 45, 
+                   hjust = 1),
+    panel.background = 
+      element_blank(),
+    axis.line.x = 
+      element_line(
+        color = 'black'),
+    axis.ticks = element_blank(),
+    plot.margin = margin(.75, .75, .75, .75, 'cm'),
+    plot.caption = 
+      element_text(hjust = 0,
+                                face = "italic"),
+    plot.title = 
+      element_text(
+        face = 'bold'),
+    plot.subtitle = 
+      element_text(face = 'bold'),
+    plot.title.position = "plot",
+    plot.caption.position =  "plot", 
+    strip.background = 
+      element_blank(), 
+    strip.text = 
+      element_text(
+        face = 'bold')
+  ) +
+    theme(...) # this bit allows us to make changes using this same function instead of calling two theme functions.
+}
+
+```
+
+```{r, message=F, warning=F}
+
+# I created a new R-project to house the Covid-19 data in my Documents directory. 
+covid_county <- read_csv('~/Documents/R/covid-19-data/us-counties.csv')
+
+# Pull in the USDA data from a directory I created in my cloud storage.
+rural_urban <-
+  read_csv('~/OneDrive - SRUC/Data/usda/ruralurbancodes2013.csv') %>%
+  select(fips,
+         rucc_2013,
+         desc = description)
+```
+
+
+Now that we've got the data loaded from Covid-19 and USDA Rural-Urban Classifications, we are going to use some of R's base functionality. 
+R has two functions that help with general data analysis and joins: `state.name`, which has all 50 U.S. state names; and, `state.region`, which has the 50 U.S. state's categorised into geographical regions.  
+We'll use this two functions in a `tibble` to help join the Covid-19 data with the Rural-Urban Classifications.
+```{r, message=F, warning=F}
+state_region <-
+  tibble(state = state.name,
+         region = state.region)
+
+covid_region <-
+  covid_county %>%
+  left_join(rural_urban,
+            by = 'fips') %>%
+  left_join(state_region,
+            by = 'state') %>%
+  mutate(week =  
+           floor_date(date,
+                      'week'))
+```
+
+Now we have our working dataframe called `covid_region`. It has the following variable names: `r names(covid_region)`.
+We'll use the `description` variable to filter out rural counties only. 
+There are two classifications of rural areas - those that are adjacent to more metro places and those that are not. 
+Those that are not adjacent to metro areas are adjecent other rural areas, which makes them somewhat more remote, as people living there need to travel further to get to service centres.
+
+We use the `group_by`/`summarise` functionality from `dplyr` to find the sum of Covid-19 cases and deaths by each week, region and for both rural classifications.  
+```{r, message=F, warning=F}
+
+weekly_regions <- covid_region %>%
+  filter(str_detect(desc,
+                    'rural')) %>% 
+  group_by(week, region, desc) %>%
+  summarise(cases =
+              sum(cases, na.rm = T),
+            deaths =
+              sum(deaths, na.rm = T)) %>%
+  ungroup() %>%
+  gather(key,
+         value,-c(week,
+                  region,
+                  desc))
+
+```
+
+
+We're going to make a fancy-looking plot for this post, something that you might like to share on social media or include in a work report. 
+To help clean up the plot a bit, we'll use a few approaches that are layed out in the code below. 
+```{r, message=F, warning=F}
+# each label for the x-axis which we'll use to make some nice looking data labels.
+week_n <- weekly_regions %>% 
+  count(week) %>% 
+  pull(week)
+
+# we'll use scale_color_manual with our own color choice 
+col_v <- c('#3E4A89FF', '#FDE725FF')
+names(col_v) <- unique(weekly_regions$desc)
+
+# a simple label_wrap function for the legend
+label_wrap <- function(x, n = 25){
+  paste0(str_wrap(x, n), '\n')
+}
+
+# date labels that use drops today's date into the caption of the plot.
+today_date <- 
+  as_date(Sys.time()) %>% 
+  format('%d %B, %Y')
+
+```
+
+OK, now we'll create the main ggplot that uses `facet_wrap` to look each region in the U.S. overtime. 
+```{r, message=F, warning=F}
+
+weekly_regional_gg <- 
+  weekly_regions %>%
+  filter(key == 'cases') %>% 
+  ggplot(aes(week, 
+         value, 
+         group = desc)) +
+  geom_line(size = 1.25, 
+            aes(color = desc))+
+  geom_point(size = 4, 
+             color = 'grey90')+
+  geom_point(size = 3.5, 
+             aes(color = desc))+
+  scale_x_date(breaks = week_n, date_labels = '%d-%b')+
+  scale_y_continuous(labels = comma) +
+  scale_color_manual(
+    values = col_v, 
+    labels = label_wrap)+
+  facet_wrap( ~ region) +
+  post_theme() 
+
+```
+
+And now we'll add the labels and annotations. 
+```{r, warning=F, message=F}
+weekly_regional_gg <- 
+  weekly_regional_gg +  
+  labs(
+    title = 'Weekly Total U.S. COVID-19 Cases by Region in Rural Counties',
+    subtitle = str_wrap('SOURCE: The New York Times, based on reports from state and local health agencies & the USDA Rural-Urban Continuum Codes (2013).', 115),
+    x = '\nWeek of',
+    y = 'Total',
+    color = str_wrap('USDA Rural-Urban Continuum Codes (2013)', 25), 
+    fill = str_wrap('USDA Rural-Urban Continuum Codes (2013)', 25),
+    caption = str_c('By Elliot Meador, PhD; @Elliot_Meador\nNOTE: Last week is likely not yet complete.\nProduced ', today_date))
+
+```
+
+Lastly, for this plot, let's stitch the Deltanomics logo on the bottom right of the plot. 
+```{r, message=F, warning=F}
+## Now we start the logo stitching!
+
+(final_plot <- ggdraw() +
+  draw_plot(weekly_regional_gg)+
+  draw_image("~/Documents/R/deltanomics/themes/hugo-academic/assets/images/icon.png", 
+             scale = .125, 
+             x = .4, 
+             y = -.4)) 
+```
+
+
+
+
+
+
+

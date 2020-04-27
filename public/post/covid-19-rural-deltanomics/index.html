@@ -1,0 +1,1297 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="generator" content="Source Themes Academic 4.7.0">
+
+  
+
+  
+  
+  
+  
+  
+    
+    
+    
+  
+  
+
+  <meta name="author" content="Elliot Meador PhD">
+
+  
+  
+  
+    
+  
+  <meta name="description" content="Introduction Now that we are square in the middle of the Covid-19 pandemic, I thought it might be beneficial to look at some statistics associated with the number of cases. We’ll differentiate our analysis by focusing on cases of Covid-19 in rural areas of the U.S. There are couple of reasons for this: mainly, rural analytics is my speciality, so while I don’t know much about the virus, I do know some about rural societies and economies; we can easily find pertinant data on rural counties; and, we can utilise some cool built-in R functions to help us along the way.">
+
+  
+  <link rel="alternate" hreflang="en-us" href="/post/covid-19-rural-deltanomics/">
+
+  
+
+
+  
+  
+  
+  <meta name="theme-color" content="#2962ff">
+  
+
+  
+  
+
+  
+  
+  
+  
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/academicons/1.8.6/css/academicons.min.css" integrity="sha256-uFVgMKfistnJAfoCUQigIl+JfUaP47GrRKjf6CTPVmw=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css" integrity="sha256-+N4/V/SbAFiW1MPBCXnfnP9QSN3+Keu+NlB+0ev/YKQ=" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.css" integrity="sha256-Vzbj7sDDS/woiFS3uNKo8eIuni59rjyNGtXfstRzStA=" crossorigin="anonymous">
+
+    
+    
+    
+      
+    
+    
+      
+      
+        
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/styles/github.min.css" crossorigin="anonymous" title="hl-light">
+          <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/styles/dracula.min.css" crossorigin="anonymous" title="hl-dark" disabled>
+        
+      
+    
+
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.5.1/leaflet.css" integrity="sha256-SHMGCYmST46SoyGgo4YR/9AlK1vf3ff84Aq9yK4hdqM=" crossorigin="anonymous">
+    
+
+    
+
+    
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/lazysizes/5.1.2/lazysizes.min.js" integrity="sha256-Md1qLToewPeKjfAHU1zyPwOutccPAm5tahnaw7Osw0A=" crossorigin="anonymous" async></script>
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+      
+
+      
+      
+        
+      
+
+      
+    
+      
+
+      
+      
+
+      
+    
+
+  
+
+  
+  
+  
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,700%7CRoboto:400,400italic,700%7CRoboto+Mono&display=swap">
+  
+
+  
+  
+  
+  
+  <link rel="stylesheet" href="/css/academic.css">
+
+  
+
+
+
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-160403362-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+
+  function gtag() {
+      dataLayer.push(arguments);
+  }
+
+  function trackOutboundLink(url) {
+    gtag('event', 'click', {
+         'event_category': 'outbound',
+         'event_label': url,
+         'transport_type': 'beacon',
+         'event_callback': function () {
+           document.location = url;
+         }
+    });
+    console.debug("Outbound link clicked: " + url);
+  }
+
+  function onClickCallback(event) {
+    if ((event.target.tagName !== 'A') || (event.target.host === window.location.host)) {
+      return;
+    }
+    trackOutboundLink(event.target);  
+  }
+
+  gtag('js', new Date());
+  gtag('config', 'UA-160403362-1', {});
+
+  
+  document.addEventListener('click', onClickCallback, false);
+</script>
+
+
+  
+
+
+  
+
+  <link rel="manifest" href="/index.webmanifest">
+  <link rel="icon" type="image/png" href="/images/icon_hu92a9dc9639b79cadf266306904fb01f6_516996_32x32_fill_lanczos_center_2.png">
+  <link rel="apple-touch-icon" type="image/png" href="/images/icon_hu92a9dc9639b79cadf266306904fb01f6_516996_192x192_fill_lanczos_center_2.png">
+
+  <link rel="canonical" href="/post/covid-19-rural-deltanomics/">
+
+  
+  
+  
+  
+  
+    
+    
+  
+  
+  <meta property="twitter:card" content="summary">
+  
+  <meta property="twitter:site" content="@Elliot_Meador">
+  <meta property="twitter:creator" content="@Elliot_Meador">
+  
+  <meta property="og:site_name" content="Deltanomics">
+  <meta property="og:url" content="/post/covid-19-rural-deltanomics/">
+  <meta property="og:title" content="Covid-19 and Rural Areas in the U.S. | Deltanomics">
+  <meta property="og:description" content="Introduction Now that we are square in the middle of the Covid-19 pandemic, I thought it might be beneficial to look at some statistics associated with the number of cases. We’ll differentiate our analysis by focusing on cases of Covid-19 in rural areas of the U.S. There are couple of reasons for this: mainly, rural analytics is my speciality, so while I don’t know much about the virus, I do know some about rural societies and economies; we can easily find pertinant data on rural counties; and, we can utilise some cool built-in R functions to help us along the way."><meta property="og:image" content="/images/icon_hu92a9dc9639b79cadf266306904fb01f6_516996_512x512_fill_lanczos_center_2.png">
+  <meta property="twitter:image" content="/images/icon_hu92a9dc9639b79cadf266306904fb01f6_516996_512x512_fill_lanczos_center_2.png"><meta property="og:locale" content="en-us">
+  
+    
+      <meta property="article:published_time" content="2020-04-26T00:00:00&#43;00:00">
+    
+    <meta property="article:modified_time" content="2020-04-26T19:45:17&#43;01:00">
+  
+
+  
+
+
+    
+
+
+
+
+
+
+  
+
+
+
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "/post/covid-19-rural-deltanomics/"
+  },
+  "headline": "Covid-19 and Rural Areas in the U.S.",
+  
+  "datePublished": "2020-04-26T00:00:00Z",
+  "dateModified": "2020-04-26T19:45:17+01:00",
+  
+  "author": {
+    "@type": "Person",
+    "name": "Elliot Meador PhD"
+  },
+  
+  "publisher": {
+    "@type": "Organization",
+    "name": "Deltanomics",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "img//"
+    }
+  },
+  "description": "Introduction Now that we are square in the middle of the Covid-19 pandemic, I thought it might be beneficial to look at some statistics associated with the number of cases. We’ll differentiate our analysis by focusing on cases of Covid-19 in rural areas of the U.S. There are couple of reasons for this: mainly, rural analytics is my speciality, so while I don’t know much about the virus, I do know some about rural societies and economies; we can easily find pertinant data on rural counties; and, we can utilise some cool built-in R functions to help us along the way."
+}
+</script>
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+
+  <title>Covid-19 and Rural Areas in the U.S. | Deltanomics</title>
+
+</head>
+
+<body id="top" data-spy="scroll" data-offset="70" data-target="#TableOfContents" >
+
+  <aside class="search-results" id="search">
+  <div class="container">
+    <section class="search-header">
+
+      <div class="row no-gutters justify-content-between mb-3">
+        <div class="col-6">
+          <h1>Search</h1>
+        </div>
+        <div class="col-6 col-search-close">
+          <a class="js-search" href="#"><i class="fas fa-times-circle text-muted" aria-hidden="true"></i></a>
+        </div>
+      </div>
+
+      <div id="search-box">
+        
+        <input name="q" id="search-query" placeholder="Search..." autocapitalize="off"
+        autocomplete="off" autocorrect="off" spellcheck="false" type="search">
+        
+      </div>
+
+    </section>
+    <section class="section-search-results">
+
+      <div id="search-hits">
+        
+      </div>
+
+    </section>
+  </div>
+</aside>
+
+
+  
+
+<nav class="navbar navbar-expand-lg navbar-light compensate-for-scrollbar" id="navbar-main">
+  <div class="container">
+
+    
+    
+    <div class="d-none d-lg-inline-flex">
+      <a class="navbar-brand" href="/">Deltanomics</a>
+    </div>
+    
+
+    
+    <button type="button" class="navbar-toggler" data-toggle="collapse"
+            data-target="#navbar-content" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
+    <span><i class="fas fa-bars"></i></span>
+    </button>
+    
+
+    
+    <div class="navbar-brand-mobile-wrapper d-inline-flex d-lg-none">
+      <a class="navbar-brand" href="/">Deltanomics</a>
+    </div>
+    
+
+    
+    
+    <div class="navbar-collapse main-menu-item collapse justify-content-start" id="navbar-content">
+
+      
+      <ul class="navbar-nav d-md-inline-flex">
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#hero"><span>Home</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#posts"><span>Posts</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#projects"><span>Projects</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#featured"><span>Publications</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#contact"><span>Contact</span></a>
+        </li>
+
+        
+        
+
+        
+
+        
+        
+        
+          
+        
+
+        
+        
+        
+        
+        
+        
+          
+          
+          
+            
+          
+          
+        
+
+        <li class="nav-item">
+          <a class="nav-link " href="/#links"><span>Useful Links</span></a>
+        </li>
+
+        
+        
+
+      
+
+        
+      </ul>
+    </div>
+
+    <ul class="nav-icons navbar-nav flex-row ml-auto d-flex pl-md-2">
+      
+      <li class="nav-item">
+        <a class="nav-link js-search" href="#"><i class="fas fa-search" aria-hidden="true"></i></a>
+      </li>
+      
+
+      
+      <li class="nav-item">
+        <a class="nav-link js-dark-toggle" href="#"><i class="fas fa-moon" aria-hidden="true"></i></a>
+      </li>
+      
+
+      
+
+    </ul>
+
+  </div>
+</nav>
+
+
+  <article class="article">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+  
+  
+<div class="article-container pt-3">
+  <h1>Covid-19 and Rural Areas in the U.S.</h1>
+
+  
+
+  
+    
+
+
+<div class="article-metadata">
+
+  
+  
+
+  
+  <span class="article-date">
+    
+    
+      
+          Last updated on
+      
+    
+    Apr 26, 2020
+  </span>
+  
+
+  
+
+  
+  <span class="middot-divider"></span>
+  <span class="article-reading-time">
+    6 min read
+  </span>
+  
+
+  
+  
+  
+
+  
+  
+  <span class="middot-divider"></span>
+  <span class="article-categories">
+    <i class="fas fa-folder mr-1"></i><a href="/categories/r/">R</a></span>
+  
+
+</div>
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+</div>
+
+
+
+  <div class="article-container">
+
+    <div class="article-style">
+      
+
+
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>Now that we are square in the middle of the Covid-19 pandemic, I thought it might be beneficial to look at some statistics associated with the number of cases.
+We’ll differentiate our analysis by focusing on cases of Covid-19 in rural areas of the U.S.
+There are couple of reasons for this: mainly, rural analytics is my speciality, so while I don’t know much about the virus, I do know some about rural societies and economies; we can easily find pertinant data on rural counties; and, we can utilise some cool built-in R functions to help us along the way.
+Before we go on it’s important to note that:</p>
+<ol style="list-style-type: decimal">
+<li>I am not a medical doctor or specialist in viral diseases.</li>
+<li>This post is meant to be a learning resource for people interested in looking at the pandemic from a rural perspective.</li>
+<li>Any potential interesting findings must be further investigated before any judements can be made.</li>
+</ol>
+</div>
+<div id="data" class="section level1">
+<h1>Data</h1>
+<p>The data for this post comes from two places: Covid-19 cases from the <a href="https://github.com/nytimes/covid-19-data">New York Times github</a>; and the <a href="https://www.ers.usda.gov/data-products/rural-urban-continuum-codes/">USDA Rural-Urban Classification Codes</a>.</p>
+<p>Datascientists at The New York Times have been collating data on number of cases of Covid-19 by county in the U.S..
+It is available at their github page, which means that one can easily access and update the data through <em>pull requests</em>.
+The data can also be downloaded and saved to a local drive.</p>
+<p>To get a rural understanding of Covid-19 cases, we’ll use the USDA data on rural-urban classification of U.S. counties, which can be downloaded using the hyperlink above.
+Many countries have geographical classifcations for rural and urban spaces.
+Usually, a low-level geography is chosen that spans an entire country.
+A continuum of rural-urban is used to describe each geographical area that goes from very urban to very rural (though not using those specific labels).</p>
+<p>So we’ll use those two datasets, join them together and investigate how many cases of Covid-19 are found in rural areas within the U.S..</p>
+</div>
+<div id="analysis" class="section level1">
+<h1>Analysis</h1>
+<div id="libraries-and-themes" class="section level2">
+<h2>Libraries and themes</h2>
+<p><code>Tidyverse</code> packages will be used to do most of the heavy lifting.
+I created a logo for Deltanomics - it’s the icon that shows up in your browser tab - that I’m going to stitch on to the plots.
+Of course, you don’t have to do for your analysis, and you can leave it off by omitting the code at the end. The <code>cowplot</code> package is used to help stitch the logo to the <code>ggplot2</code> plots.</p>
+<pre class="r"><code>library(tidyverse)
+library(lubridate)
+library(janitor)
+library(scales)
+library(cowplot)
+
+# USDA Rural-Urban classification codes
+
+
+post_theme &lt;- function(...) {
+  theme(
+    text = 
+      element_text(
+        color = &#39;black&#39;,
+         family = &#39;serif&#39;),
+    axis.text = 
+      element_text(
+        color = &#39;black&#39;),
+    axis.text.x = 
+      element_text(angle = 45, 
+                   hjust = 1),
+    panel.background = 
+      element_blank(),
+    axis.line.x = 
+      element_line(
+        color = &#39;black&#39;),
+    axis.ticks = element_blank(),
+    plot.margin = margin(.75, .75, .75, .75, &#39;cm&#39;),
+    plot.caption = 
+      element_text(hjust = 0,
+                                face = &quot;italic&quot;),
+    plot.title = 
+      element_text(
+        face = &#39;bold&#39;),
+    plot.subtitle = 
+      element_text(face = &#39;bold&#39;),
+    plot.title.position = &quot;plot&quot;,
+    plot.caption.position =  &quot;plot&quot;, 
+    strip.background = 
+      element_blank(), 
+    strip.text = 
+      element_text(
+        face = &#39;bold&#39;)
+  ) +
+    theme(...) # this bit allows us to make changes using this same function instead of calling two theme functions.
+}</code></pre>
+<pre class="r"><code># I created a new R-project to house the Covid-19 data in my Documents directory. 
+covid_county &lt;- read_csv(&#39;~/Documents/R/covid-19-data/us-counties.csv&#39;)
+
+# Pull in the USDA data from a directory I created in my cloud storage.
+rural_urban &lt;-
+  read_csv(&#39;~/OneDrive - SRUC/Data/usda/ruralurbancodes2013.csv&#39;) %&gt;%
+  select(fips,
+         rucc_2013,
+         desc = description)</code></pre>
+<p>Now that we’ve got the data loaded from Covid-19 and USDA Rural-Urban Classifications, we are going to use some of R’s base functionality.
+R has two functions that help with general data analysis and joins: <code>state.name</code>, which has all 50 U.S. state names; and, <code>state.region</code>, which has the 50 U.S. state’s categorised into geographical regions.<br />
+We’ll use this two functions in a <code>tibble</code> to help join the Covid-19 data with the Rural-Urban Classifications.</p>
+<pre class="r"><code>state_region &lt;-
+  tibble(state = state.name,
+         region = state.region)
+
+covid_region &lt;-
+  covid_county %&gt;%
+  left_join(rural_urban,
+            by = &#39;fips&#39;) %&gt;%
+  left_join(state_region,
+            by = &#39;state&#39;) %&gt;%
+  mutate(week =  
+           floor_date(date,
+                      &#39;week&#39;))</code></pre>
+<p>Now we have our working dataframe called <code>covid_region</code>. It has the following variable names: date, county, state, fips, cases, deaths, rucc_2013, desc, region, week.
+We’ll use the <code>description</code> variable to filter out rural counties only.
+There are two classifications of rural areas - those that are adjacent to more metro places and those that are not.
+Those that are not adjacent to metro areas are adjecent other rural areas, which makes them somewhat more remote, as people living there need to travel further to get to service centres.</p>
+<p>We use the <code>group_by</code>/<code>summarise</code> functionality from <code>dplyr</code> to find the sum of Covid-19 cases and deaths by each week, region and for both rural classifications.</p>
+<pre class="r"><code>weekly_regions &lt;- covid_region %&gt;%
+  filter(str_detect(desc,
+                    &#39;rural&#39;)) %&gt;% 
+  group_by(week, region, desc) %&gt;%
+  summarise(cases =
+              sum(cases, na.rm = T),
+            deaths =
+              sum(deaths, na.rm = T)) %&gt;%
+  ungroup() %&gt;%
+  gather(key,
+         value,-c(week,
+                  region,
+                  desc))</code></pre>
+<p>We’re going to make a fancy-looking plot for this post, something that you might like to share on social media or include in a work report.
+To help clean up the plot a bit, we’ll use a few approaches that are layed out in the code below.</p>
+<pre class="r"><code># each label for the x-axis which we&#39;ll use to make some nice looking data labels.
+week_n &lt;- weekly_regions %&gt;% 
+  count(week) %&gt;% 
+  pull(week)
+
+# we&#39;ll use scale_color_manual with our own color choice 
+col_v &lt;- c(&#39;#3E4A89FF&#39;, &#39;#FDE725FF&#39;)
+names(col_v) &lt;- unique(weekly_regions$desc)
+
+# a simple label_wrap function for the legend
+label_wrap &lt;- function(x, n = 25){
+  paste0(str_wrap(x, n), &#39;\n&#39;)
+}
+
+# date labels that use drops today&#39;s date into the caption of the plot.
+today_date &lt;- 
+  as_date(Sys.time()) %&gt;% 
+  format(&#39;%d %B, %Y&#39;)</code></pre>
+<p>OK, now we’ll create the main ggplot that uses <code>facet_wrap</code> to look each region in the U.S. overtime.</p>
+<pre class="r"><code>weekly_regional_gg &lt;- 
+  weekly_regions %&gt;%
+  filter(key == &#39;cases&#39;) %&gt;% 
+  ggplot(aes(week, 
+         value, 
+         group = desc)) +
+  geom_line(size = 1.25, 
+            aes(color = desc))+
+  geom_point(size = 4, 
+             color = &#39;grey90&#39;)+
+  geom_point(size = 3.5, 
+             aes(color = desc))+
+  scale_x_date(breaks = week_n, date_labels = &#39;%d-%b&#39;)+
+  scale_y_continuous(labels = comma) +
+  scale_color_manual(
+    values = col_v, 
+    labels = label_wrap)+
+  facet_wrap( ~ region) +
+  post_theme() </code></pre>
+<p>And now we’ll add the labels and annotations.</p>
+<pre class="r"><code>weekly_regional_gg &lt;- 
+  weekly_regional_gg +  
+  labs(
+    title = &#39;Weekly Total U.S. COVID-19 Cases by Region in Rural Counties&#39;,
+    subtitle = str_wrap(&#39;SOURCE: The New York Times, based on reports from state and local health agencies &amp; the USDA Rural-Urban Continuum Codes (2013).&#39;, 115),
+    x = &#39;\nWeek of&#39;,
+    y = &#39;Total&#39;,
+    color = str_wrap(&#39;USDA Rural-Urban Continuum Codes (2013)&#39;, 25), 
+    fill = str_wrap(&#39;USDA Rural-Urban Continuum Codes (2013)&#39;, 25),
+    caption = str_c(&#39;By Elliot Meador, PhD; @Elliot_Meador\nNOTE: Last week is likely not yet complete.\nProduced &#39;, today_date))</code></pre>
+<p>Lastly, for this plot, let’s stitch the Deltanomics logo on the bottom right of the plot.</p>
+<pre class="r"><code>## Now we start the logo stitching!
+
+(final_plot &lt;- ggdraw() +
+  draw_plot(weekly_regional_gg)+
+  draw_image(&quot;~/Documents/R/deltanomics/themes/hugo-academic/assets/images/icon.png&quot;, 
+             scale = .125, 
+             x = .4, 
+             y = -.4)) </code></pre>
+<p><img src="/post/2020-04-26-covid-19-and-rural-areas-in-the-u-s_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+</div>
+</div>
+
+    </div>
+
+    
+
+
+
+
+
+<div class="article-tags">
+  
+  <a class="badge badge-light" href="/tags/data/">Data</a>
+  
+  <a class="badge badge-light" href="/tags/ggplot/">ggplot</a>
+  
+  <a class="badge badge-light" href="/tags/dplyr/">dplyr</a>
+  
+</div>
+
+
+
+<div class="share-box" aria-hidden="true">
+  <ul class="share">
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://twitter.com/intent/tweet?url=/post/covid-19-rural-deltanomics/&amp;text=Covid-19%20and%20Rural%20Areas%20in%20the%20U.S." target="_blank" rel="noopener" class="share-btn-twitter">
+          <i class="fab fa-twitter"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://www.facebook.com/sharer.php?u=/post/covid-19-rural-deltanomics/&amp;t=Covid-19%20and%20Rural%20Areas%20in%20the%20U.S." target="_blank" rel="noopener" class="share-btn-facebook">
+          <i class="fab fa-facebook"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="mailto:?subject=Covid-19%20and%20Rural%20Areas%20in%20the%20U.S.&amp;body=/post/covid-19-rural-deltanomics/" target="_blank" rel="noopener" class="share-btn-email">
+          <i class="fas fa-envelope"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://www.linkedin.com/shareArticle?url=/post/covid-19-rural-deltanomics/&amp;title=Covid-19%20and%20Rural%20Areas%20in%20the%20U.S." target="_blank" rel="noopener" class="share-btn-linkedin">
+          <i class="fab fa-linkedin-in"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://web.whatsapp.com/send?text=Covid-19%20and%20Rural%20Areas%20in%20the%20U.S.%20/post/covid-19-rural-deltanomics/" target="_blank" rel="noopener" class="share-btn-whatsapp">
+          <i class="fab fa-whatsapp"></i>
+        </a>
+      </li>
+    
+      
+      
+      
+        
+      
+      
+      
+      <li>
+        <a href="https://service.weibo.com/share/share.php?url=/post/covid-19-rural-deltanomics/&amp;title=Covid-19%20and%20Rural%20Areas%20in%20the%20U.S." target="_blank" rel="noopener" class="share-btn-weibo">
+          <i class="fab fa-weibo"></i>
+        </a>
+      </li>
+    
+  </ul>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  
+  
+    
+  
+  
+  <div class="media author-card content-widget-hr">
+    
+      
+      <img class="portrait mr-3" src="/authors/admin/avatar_huec9d6266619a288e2e7f678dceb2b416_36358037_250x250_fill_q90_lanczos_center.jpeg" alt="Avatar">
+    
+
+    <div class="media-body">
+      <h5 class="card-title"><a href="/">Elliot Meador PhD</a></h5>
+      <h6 class="card-subtitle">Research Fellow</h6>
+      <p class="card-text">My research interests include community resilience, sustainable food systems and computational social science.</p>
+      <ul class="network-icon" aria-hidden="true">
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="/#contact" >
+        <i class="fas fa-envelope"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://twitter.com/Elliot_Meador" target="_blank" rel="noopener">
+        <i class="fab fa-twitter"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://scholar.google.co.uk/citations?view_op=list_works&amp;hl=en&amp;user=n6VoEdcAAAAJ&amp;gmla=AJsN-F4VJjBqZgFHlH2yHzmuGpZd9pzzu6B3ma9LxIML6YrIb4F7HcFg46Y3Uq9FM_mpYFRm9W4B-K6_yPX7qhZrgMy0DgLKeEMxCPEuMQJcy10PnTI6cV4Ba_BtwmlKIzrGWpwSY20V" target="_blank" rel="noopener">
+        <i class="ai ai-google-scholar"></i>
+      </a>
+    </li>
+  
+    
+    
+    
+      
+    
+    
+    
+    
+    
+      
+    
+    <li>
+      <a href="https://github.com/ElliotMeador84" target="_blank" rel="noopener">
+        <i class="fab fa-github"></i>
+      </a>
+    </li>
+  
+</ul>
+
+    </div>
+  </div>
+
+
+
+
+
+
+
+
+
+  
+  
+  <div class="article-widget content-widget-hr">
+    <h3>Related</h3>
+    <ul>
+      
+      <li><a href="/post/networks-from-survey-data-creating-mock-data/">Networks from survey data: Creating mock data</a></li>
+      
+    </ul>
+  </div>
+  
+
+
+
+  </div>
+</article>
+
+      
+
+    
+    
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/4.1.4/imagesloaded.pkgd.min.js" integrity="sha256-lqvxZrPLtfffUl2G/e7szqSvPBILGbwmsGE1MKlOi0Q=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.isotope/3.0.6/isotope.pkgd.min.js" integrity="sha256-CBrpuqrMhXwcLLUd5tvQ4euBHCdh7wGlDfNz8vbu/iI=" crossorigin="anonymous"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.5.7/jquery.fancybox.min.js" integrity="sha256-yt2kYMy0w8AbtF89WXb2P1rfjcP/HTHLT7097U8Y5b8=" crossorigin="anonymous"></script>
+
+      
+
+      
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/highlight.min.js" integrity="sha256-1zu+3BnLYV9LdiY85uXMzii3bdrkelyp37e0ZyTAQh0=" crossorigin="anonymous"></script>
+        
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/languages/r.min.js"></script>
+        
+      
+
+    
+
+    
+    
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.5.1/leaflet.js" integrity="sha256-EErZamuLefUnbMBQbsEqu1USa+btR2oIlCpBJbyD4/g=" crossorigin="anonymous"></script>
+    
+
+    
+    
+    <script>const code_highlighting = true;</script>
+    
+
+    
+    
+    
+    
+    
+    
+    <script>
+      const search_config = {"indexURI":"/index.json","minLength":1,"threshold":0.3};
+      const i18n = {"no_results":"No results found","placeholder":"Search...","results":"results found"};
+      const content_type = {
+        'post': "Posts",
+        'project': "Projects",
+        'publication' : "Publications",
+        'talk' : "Talks"
+        };
+    </script>
+    
+
+    
+    
+
+    
+    
+    <script id="search-hit-fuse-template" type="text/x-template">
+      <div class="search-hit" id="summary-{{key}}">
+      <div class="search-hit-content">
+        <div class="search-hit-name">
+          <a href="{{relpermalink}}">{{title}}</a>
+          <div class="article-metadata search-hit-type">{{type}}</div>
+          <p class="search-hit-description">{{snippet}}</p>
+        </div>
+      </div>
+      </div>
+    </script>
+    
+
+    
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/3.2.1/fuse.min.js" integrity="sha256-VzgmKYmhsGNNN4Ph1kMW+BjoYJM2jV5i4IlFoeZA9XI=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/jquery.mark.min.js" integrity="sha256-4HLtjeVgH0eIB3aZ9mLYF6E8oU5chNdjU6p6rrXpl9U=" crossorigin="anonymous"></script>
+    
+
+    
+    
+
+    
+    
+
+    
+    
+    
+    
+    
+    
+    
+    
+    
+      
+    
+    
+    
+    
+    <script src="/js/academic.min.a0d331bcd05dbe8b31e244f796710f08.js"></script>
+
+    
+
+
+
+
+
+
+  
+  
+  <div class="container">
+    <footer class="site-footer">
+  
+  <p class="powered-by">
+    
+      <a href="/privacy/">Privacy Policy</a>
+    
+    
+       &middot; 
+      <a href="/terms/">Terms</a>
+    
+  </p>
+  
+
+  <p class="powered-by">
+    ©2020 &middot; 
+
+    Powered by the
+    <a href="https://sourcethemes.com/academic/" target="_blank" rel="noopener">Academic theme</a> for
+    <a href="https://gohugo.io" target="_blank" rel="noopener">Hugo</a>.
+
+    
+    <span class="float-right" aria-hidden="true">
+      <a href="#" class="back-to-top">
+        <span class="button_icon">
+          <i class="fas fa-chevron-up fa-2x"></i>
+        </span>
+      </a>
+    </span>
+    
+  </p>
+</footer>
+
+  </div>
+  
+
+  
+<div id="modal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Cite</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <pre><code class="tex hljs"></code></pre>
+      </div>
+      <div class="modal-footer">
+        <a class="btn btn-outline-primary my-1 js-copy-cite" href="#" target="_blank">
+          <i class="fas fa-copy"></i> Copy
+        </a>
+        <a class="btn btn-outline-primary my-1 js-download-cite" href="#" target="_blank">
+          <i class="fas fa-download"></i> Download
+        </a>
+        <div id="modal-error"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
