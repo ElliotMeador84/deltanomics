@@ -244,6 +244,94 @@ today_date &amp;lt;-
              x = .4, 
              y = -.4)) &lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&#34;/post/2020-04-26-covid-19-and-rural-areas-in-the-u-s_files/figure-html/unnamed-chunk-8-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;It look as though rural counties in the south are reporting more cases than the rest of the U.S..
+It’s worth investigating the sourthern counties to see if one state/county is pulling the statistics higher for the entire region, or if the trend is true for the majority of counties.
+There are a few ways to do this, but the most straightforward is to replicate the plot above but for sourthern states only.
+The code below does this.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;southern_rural_cases &amp;lt;- covid_region %&amp;gt;% 
+  filter(str_detect(desc, &amp;#39;rural&amp;#39;), 
+         region == &amp;#39;South&amp;#39;) %&amp;gt;% 
+  group_by(week, state, desc) %&amp;gt;% 
+  summarise(total = sum(cases, na.rm = T)) %&amp;gt;% 
+  ungroup() 
+
+viridis &amp;lt;- scales::viridis_pal()
+
+
+southern_state &amp;lt;- southern_rural_cases %&amp;gt;% 
+  count(state) %&amp;gt;% 
+  pull(state)
+
+state_cols &amp;lt;- viridis(length(southern_state))
+
+names(state_cols) &amp;lt;- southern_state
+
+
+labels_df &amp;lt;- southern_rural_cases %&amp;gt;% 
+  group_by(state, desc) %&amp;gt;% 
+  filter(week == max(week)) %&amp;gt;% 
+  ungroup() %&amp;gt;% 
+  mutate(desc = str_wrap(desc, 35))
+
+weeks_lab &amp;lt;- southern_rural_cases %&amp;gt;% 
+  count(week) %&amp;gt;% 
+  pull(week)
+
+southern_plot &amp;lt;- southern_rural_cases %&amp;gt;% 
+  mutate(desc = str_wrap(desc, 35)) %&amp;gt;% 
+  ggplot(aes(week, total, group = state))+
+  geom_line(aes(color = state), 
+            show.legend = F)+
+  geom_point(color = &amp;#39;white&amp;#39;, 
+             size = 2.25)+
+  geom_point(aes(color = state), 
+             size = 2, 
+             show.legend = F)+
+  geom_text(data = labels_df, 
+            aes(label = state, 
+                x = week, 
+                y = total, 
+                color = state),
+            size = 2, 
+            hjust = 0,
+            nudge_x = 1.25,
+            check_overlap = T,
+            show.legend = F)+
+  scale_x_date(breaks = weeks_lab, 
+               date_labels = &amp;#39;%b-%d&amp;#39;)+
+  scale_color_manual(values = state_cols)+
+  scale_y_log10(labels = comma)+
+  facet_grid(~desc)+
+  coord_cartesian(clip = &amp;#39;off&amp;#39;)+
+  post_theme(plot.margin = margin(1.25, 
+                                  1.25, 
+                                  1.25, 
+                                  1.25, &amp;#39;cm&amp;#39;),
+             panel.spacing = unit(2, &amp;quot;lines&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;And just like above, we’ll add our labels seperate.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;southern_plot_ii &amp;lt;- southern_plot+
+  labs(title = &amp;#39;Comparing Covid-19 Cases Across Rural Counties in the Sourtern U.S.&amp;#39;, 
+       subtitle = &amp;#39;SOURCE: The New York Times, based on reports from state and local health agencies &amp;amp;\nThe USDA Rural-Urban Continuum Codes (2013).&amp;#39;,
+       x = &amp;#39;Week of&amp;#39;, 
+       y = &amp;#39;Total\nLog10-scale&amp;#39;, 
+       caption = str_c(&amp;#39;By Elliot Meador, PhD; @Elliot_Meador\nNOTE: Last week is likely not yet complete.\nProduced &amp;#39;, today_date))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Lastly, let’s add the Deltanomics logo.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;(ggdraw() +
+  draw_plot(southern_plot_ii)+
+  draw_image(&amp;quot;~/Documents/R/deltanomics/themes/hugo-academic/assets/images/icon.png&amp;quot;, 
+             scale = .125, 
+             x = .4, 
+             y = -.4)) &lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2020-04-26-covid-19-and-rural-areas-in-the-u-s_files/figure-html/unnamed-chunk-11-1.png&#34; width=&#34;672&#34; /&gt;
+# Key Findings
+It looks like, at least on the surface of things, that rural places in southern counties report more Covid-19 cases than other rural counties across the U.S..
+When we investigated this further by breaking down the states within the sourthern category, we can see that there is somewhat even spread.
+That is, one state is not pulling the rest along, which could obscure the actual trend.&lt;/p&gt;
+&lt;p&gt;I’m from the south east of the U.S. (Mississippi), and I can say with some certainty that Mississippi, Alabama and Georgia have quite high levels of poverty and ill-health that usually accompanies poverty in the U.S..
+It is interesting to see these states reporting higher levels of Covid-19, and it begs the question, “Is there an association between poorer rural places and higher levels of reported cases?”
+Statistically, I think there probably is (though this needs testing).
+Still, even if it is found to be statistically correlated, we still won’t know &lt;strong&gt;&lt;em&gt;why&lt;/em&gt;&lt;/strong&gt; we’re seeing these trends until we do more qualitative work in the region to pair with our quantitative findings.&lt;/p&gt;
+&lt;p&gt;Thanks to the hard work of the folks at the New York Times, we can update our findings over time to see if the trends holds. So stay tuned!&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 </description>
