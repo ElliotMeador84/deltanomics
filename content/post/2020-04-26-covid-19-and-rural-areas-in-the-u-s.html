@@ -178,7 +178,8 @@ today_date &lt;-
              color = &#39;grey90&#39;)+
   geom_point(size = 3.5, 
              aes(color = desc))+
-  scale_x_date(breaks = week_n, date_labels = &#39;%d-%b&#39;)+
+  scale_x_date(breaks = week_n, 
+               date_labels = &#39;%d-%b&#39;)+
   scale_y_continuous(labels = comma) +
   scale_color_manual(
     values = col_v, 
@@ -190,7 +191,7 @@ today_date &lt;-
   weekly_regional_gg +  
   labs(
     title = &#39;Weekly Total U.S. COVID-19 Cases by Region in Rural Counties&#39;,
-    subtitle = str_wrap(&#39;SOURCE: The New York Times, based on reports from state and local health agencies &amp; the USDA Rural-Urban Continuum Codes (2013).&#39;, 115),
+    subtitle = str_wrap(&#39;SOURCE: The New York Times, based on reports from state and local health agencies &amp; the USDA Rural-Urban Continuum Codes (2013).&#39;, 100),
     x = &#39;\nWeek of&#39;,
     y = &#39;Total&#39;,
     color = str_wrap(&#39;USDA Rural-Urban Continuum Codes (2013)&#39;, 25), 
