@@ -118,7 +118,7 @@ rural_urban <-
 Now that we've got the data loaded from Covid-19 and USDA Rural-Urban Classifications, we are going to use some of R's base functionality. 
 R has two functions that help with general data analysis and joins: `state.name`, which has all 50 U.S. state names; and, `state.region`, which has the 50 U.S. state's categorised into geographical regions.  
 We'll use this two functions in a `tibble` to help join the Covid-19 data with the Rural-Urban Classifications.
-```{r, message=F, warning=F, fig.width=12, fig.height=12}
+```{r, message=F, warning=F}
 state_region <-
   tibble(state = state.name,
          region = state.region)
@@ -215,7 +215,7 @@ weekly_regional_gg <-
   weekly_regional_gg +  
   labs(
     title = 'Weekly Total U.S. COVID-19 Cases by Region in Rural Counties',
-    subtitle = str_wrap('SOURCE: The New York Times, based on reports from state and local health agencies & the USDA Rural-Urban Continuum Codes (2013).', 100),
+    subtitle = 'SOURCE: The New York Times, based on reports from state and local health agencies &\nThe USDA Rural-Urban Continuum Codes (2013).',
     x = '\nWeek of',
     y = 'Total',
     color = str_wrap('USDA Rural-Urban Continuum Codes (2013)', 25), 

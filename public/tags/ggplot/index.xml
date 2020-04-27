@@ -186,7 +186,7 @@ today_date &amp;lt;-
   weekly_regional_gg +  
   labs(
     title = &amp;#39;Weekly Total U.S. COVID-19 Cases by Region in Rural Counties&amp;#39;,
-    subtitle = str_wrap(&amp;#39;SOURCE: The New York Times, based on reports from state and local health agencies &amp;amp; the USDA Rural-Urban Continuum Codes (2013).&amp;#39;, 100),
+    subtitle = &amp;#39;SOURCE: The New York Times, based on reports from state and local health agencies &amp;amp;\nThe USDA Rural-Urban Continuum Codes (2013).&amp;#39;,
     x = &amp;#39;\nWeek of&amp;#39;,
     y = &amp;#39;Total&amp;#39;,
     color = str_wrap(&amp;#39;USDA Rural-Urban Continuum Codes (2013)&amp;#39;, 25), 
