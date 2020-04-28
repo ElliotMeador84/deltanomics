@@ -219,7 +219,6 @@ weekly_regional_gg <-
     x = '\nWeek of',
     y = 'Total',
     color = str_wrap('USDA Rural-Urban Continuum Codes (2013)', 25), 
-    fill = str_wrap('USDA Rural-Urban Continuum Codes (2013)', 25),
     caption = str_c('By Elliot Meador, PhD; @Elliot_Meador\nNOTE: Last week is likely not yet complete.\nProduced ', today_date))
 
 ```

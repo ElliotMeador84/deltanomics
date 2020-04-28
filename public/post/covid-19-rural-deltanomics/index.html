@@ -876,7 +876,6 @@ today_date &lt;-
     x = &#39;\nWeek of&#39;,
     y = &#39;Total&#39;,
     color = str_wrap(&#39;USDA Rural-Urban Continuum Codes (2013)&#39;, 25), 
-    fill = str_wrap(&#39;USDA Rural-Urban Continuum Codes (2013)&#39;, 25),
     caption = str_c(&#39;By Elliot Meador, PhD; @Elliot_Meador\nNOTE: Last week is likely not yet complete.\nProduced &#39;, today_date))</code></pre>
 <p>Lastly, for this plot, let’s stitch the Deltanomics logo on the bottom right of the plot.</p>
 <pre class="r"><code>## Now we start the logo stitching!
@@ -887,7 +886,7 @@ today_date &lt;-
              scale = .125, 
              x = .4, 
              y = -.4)) </code></pre>
-<p><img src="/post/2020-04-26-covid-19-and-rural-areas-in-the-u-s_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+<p><img src="2020-04-26-covid-19-and-rural-areas-in-the-u-s_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
 <p>It look as though rural counties in the south are reporting more cases than the rest of the U.S..
 It’s worth investigating the sourthern counties to see if one state/county is pulling the statistics higher for the entire region, or if the trend is true for the majority of counties.
 There are a few ways to do this, but the most straightforward is to replicate the plot above but for sourthern states only.
@@ -966,7 +965,7 @@ southern_plot &lt;- southern_rural_cases %&gt;%
              scale = .125, 
              x = .4, 
              y = -.4)) </code></pre>
-<p><img src="/post/2020-04-26-covid-19-and-rural-areas-in-the-u-s_files/figure-html/unnamed-chunk-11-1.png" width="672" />
+<p><img src="2020-04-26-covid-19-and-rural-areas-in-the-u-s_files/figure-html/unnamed-chunk-11-1.png" width="672" />
 # Key Findings
 It looks like, at least on the surface of things, that rural places in southern counties report more Covid-19 cases than other rural counties across the U.S..
 When we investigated this further by breaking down the states within the sourthern category, we can see that there is somewhat even spread.
