@@ -22,6 +22,8 @@ projects: []
 editor_options: 
   chunk_output_type: console
 ---
+
+#### Last updated on `r Sys.time()`
 # Introduction
 Now that we are square in the middle of the Covid-19 pandemic, I thought it might be beneficial to look at some statistics associated with the number of cases. 
 We'll differentiate our analysis by focusing on cases of Covid-19 in rural areas of the U.S. 
