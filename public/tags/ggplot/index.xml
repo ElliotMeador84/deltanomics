@@ -20,29 +20,29 @@
       <description>
 
 
-&lt;div id=&#34;last-updated-on-2020-05-06-150229&#34; class=&#34;section level4&#34;&gt;
-&lt;h4&gt;Last updated on 2020-05-06 15:02:29&lt;/h4&gt;
+&lt;div id=&#34;last-updated-on-2020-05-10-213557&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Last updated on 2020-05-10 21:35:57&lt;/h4&gt;
 &lt;/div&gt;
 &lt;div id=&#34;introduction&#34; class=&#34;section level1&#34;&gt;
 &lt;h1&gt;Introduction&lt;/h1&gt;
 &lt;p&gt;Now that we are square in the middle of the Covid-19 pandemic, I thought it might be beneficial to look at some statistics associated with the number of cases.
 We’ll differentiate our analysis by focusing on cases of Covid-19 in rural areas of the U.S.
-There are couple of reasons for this: mainly, rural analytics is my speciality, so while I don’t know much about the virus, I do know some about rural societies and economies; we can easily find pertinant data on rural counties; and, we can utilise some cool built-in R functions to help us along the way.
+There are a couple of reasons for this: mainly, rural analytics is my speciality, so while I don’t know much about the virus, I do know some about rural societies and economies; we can easily find pertinent data on rural counties; and, we can utilise some cool built-in R functions to help us along the way.
 Before we go on it’s important to note that:&lt;/p&gt;
 &lt;ol style=&#34;list-style-type: decimal&#34;&gt;
 &lt;li&gt;I am not a medical doctor or specialist in viral diseases.&lt;/li&gt;
 &lt;li&gt;This post is meant to be a learning resource for people interested in looking at the pandemic from a rural perspective.&lt;/li&gt;
-&lt;li&gt;Any potential interesting findings must be further investigated before any judements can be made.&lt;/li&gt;
+&lt;li&gt;Any potential interesting findings must be further investigated before any judgements can be made.&lt;/li&gt;
 &lt;/ol&gt;
 &lt;/div&gt;
 &lt;div id=&#34;data&#34; class=&#34;section level1&#34;&gt;
 &lt;h1&gt;Data&lt;/h1&gt;
 &lt;p&gt;The data for this post comes from two places: Covid-19 cases from the &lt;a href=&#34;https://github.com/nytimes/covid-19-data&#34;&gt;New York Times github&lt;/a&gt;; and the &lt;a href=&#34;https://www.ers.usda.gov/data-products/rural-urban-continuum-codes/&#34;&gt;USDA Rural-Urban Classification Codes&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;Datascientists at The New York Times have been collating data on number of cases of Covid-19 by county in the U.S..
-It is available at their github page, which means that one can easily access and update the data through &lt;em&gt;pull requests&lt;/em&gt;.
+&lt;p&gt;Data scientists at The New York Times have been collating data on the number of cases of Covid-19 by county in the U.S..
+It is available at their GitHub page, which means that one can easily access and update the data through &lt;em&gt;pull requests&lt;/em&gt;.
 The data can also be downloaded and saved to a local drive.&lt;/p&gt;
 &lt;p&gt;To get a rural understanding of Covid-19 cases, we’ll use the USDA data on rural-urban classification of U.S. counties, which can be downloaded using the hyperlink above.
-Many countries have geographical classifcations for rural and urban spaces.
+Many countries have geographical classifications for rural and urban spaces.
 Usually, a low-level geography is chosen that spans an entire country.
 A continuum of rural-urban is used to describe each geographical area that goes from very urban to very rural (though not using those specific labels).&lt;/p&gt;
 &lt;p&gt;So we’ll use those two datasets, join them together and investigate how many cases of Covid-19 are found in rural areas within the U.S..&lt;/p&gt;
@@ -111,7 +111,7 @@ rural_urban &amp;lt;-
          desc = description)&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;Now that we’ve got the data loaded from Covid-19 and USDA Rural-Urban Classifications, we are going to use some of R’s base functionality.
 R has two functions that help with general data analysis and joins: &lt;code&gt;state.name&lt;/code&gt;, which has all 50 U.S. state names; and, &lt;code&gt;state.region&lt;/code&gt;, which has the 50 U.S. state’s categorised into geographical regions.&lt;br /&gt;
-We’ll use this two functions in a &lt;code&gt;tibble&lt;/code&gt; to help join the Covid-19 data with the Rural-Urban Classifications.&lt;/p&gt;
+We’ll use these two functions in a &lt;code&gt;tibble&lt;/code&gt; to help join the Covid-19 data with the Rural-Urban Classifications.&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;state_region &amp;lt;-
   tibble(state = state.name,
          region = state.region)
@@ -125,10 +125,10 @@ covid_region &amp;lt;-
   mutate(week =  
            floor_date(date,
                       &amp;#39;week&amp;#39;))&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Now we have our working dataframe called &lt;code&gt;covid_region&lt;/code&gt;. It has the following variable names: date, county, state, fips, cases, deaths, rucc_2013, desc, region, week.
+&lt;p&gt;Now we have our working data frame called &lt;code&gt;covid_region&lt;/code&gt;. It has the following variable names: date, county, state, fips, cases, deaths, rucc_2013, desc, region, week.
 We’ll use the &lt;code&gt;description&lt;/code&gt; variable to filter out rural counties only.
 There are two classifications of rural areas - those that are adjacent to more metro places and those that are not.
-Those that are not adjacent to metro areas are adjecent other rural areas, which makes them somewhat more remote, as people living there need to travel further to get to service centres.&lt;/p&gt;
+Those that are not adjacent to metro areas are adjacent to other rural areas, which makes them somewhat more remote, as people living there need to travel further to get to service centres.&lt;/p&gt;
 &lt;p&gt;We use the &lt;code&gt;group_by&lt;/code&gt;/&lt;code&gt;summarise&lt;/code&gt; functionality from &lt;code&gt;dplyr&lt;/code&gt; to find the sum of Covid-19 cases and deaths by each week, region and for both rural classifications.&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;weekly_regions &amp;lt;- covid_region %&amp;gt;%
   filter(str_detect(desc,
@@ -144,7 +144,7 @@ Those that are not adjacent to metro areas are adjecent other rural areas, which
                   region,
                   desc))&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;We’re going to make a fancy-looking plot for this post, something that you might like to share on social media or include in a work report.
-To help clean up the plot a bit, we’ll use a few approaches that are layed out in the code below.&lt;/p&gt;
+To help clean up the plot a bit, we’ll use a few approaches that are laid out in the code below.&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# each label for the x-axis which we&amp;#39;ll use to make some nice looking data labels.
 week_n &amp;lt;- weekly_regions %&amp;gt;% 
   count(week) %&amp;gt;% 
@@ -163,7 +163,7 @@ label_wrap &amp;lt;- function(x, n = 25){
 today_date &amp;lt;- 
   as_date(Sys.time()) %&amp;gt;% 
   format(&amp;#39;%d %B, %Y&amp;#39;)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;OK, now we’ll create the main ggplot that uses &lt;code&gt;facet_wrap&lt;/code&gt; to look each region in the U.S. overtime.&lt;/p&gt;
+&lt;p&gt;OK, now we’ll create the main &lt;code&gt;ggplot&lt;/code&gt; that uses &lt;code&gt;facet_wrap&lt;/code&gt; to look at each region in the U.S. over time.&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;weekly_regional_gg &amp;lt;- 
   weekly_regions %&amp;gt;%
   filter(key == &amp;#39;cases&amp;#39;) %&amp;gt;% 
@@ -204,9 +204,9 @@ today_date &amp;lt;-
              x = .4, 
              y = -.4)) &lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&#34;/post/2020-04-26-covid-19-and-rural-areas-in-the-u-s_files/figure-html/unnamed-chunk-8-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;It look as though rural counties in the south are reporting more cases than the rest of the U.S..
-It’s worth investigating the sourthern counties to see if one state/county is pulling the statistics higher for the entire region, or if the trend is true for the majority of counties.
-There are a few ways to do this, but the most straightforward is to replicate the plot above but for sourthern states only.
+&lt;p&gt;It looks as though rural counties in the south are reporting more cases than the rest of the U.S..
+It’s worth investigating the southern counties to see if one state/county is pulling the statistics higher for the entire region, or if the trend is true for the majority of counties.
+There are a few ways to do this, but the most straightforward is to replicate the plot above but for southern states only.
 The code below does this.&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;southern_rural_cases &amp;lt;- covid_region %&amp;gt;% 
   filter(str_detect(desc, &amp;#39;rural&amp;#39;), 
@@ -282,17 +282,19 @@ southern_plot &amp;lt;- southern_rural_cases %&amp;gt;%
              scale = .125, 
              x = .4, 
              y = -.4)) &lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;/post/2020-04-26-covid-19-and-rural-areas-in-the-u-s_files/figure-html/unnamed-chunk-11-1.png&#34; width=&#34;672&#34; /&gt;
-# Key Findings
-It looks like, at least on the surface of things, that rural places in southern counties report more Covid-19 cases than other rural counties across the U.S..
-When we investigated this further by breaking down the states within the sourthern category, we can see that there is somewhat even spread.
+&lt;p&gt;&lt;img src=&#34;/post/2020-04-26-covid-19-and-rural-areas-in-the-u-s_files/figure-html/unnamed-chunk-11-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;key-findings&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Key Findings&lt;/h1&gt;
+&lt;p&gt;It looks like, at least on the surface of things, that rural places in southern counties report more Covid-19 cases than other rural counties across the U.S..
+When we investigated this further by breaking down the states within the southern category, we can see that there is somewhat even spread.
 That is, one state is not pulling the rest along, which could obscure the actual trend.&lt;/p&gt;
-&lt;p&gt;I’m from the south east of the U.S. (Mississippi), and I can say with some certainty that Mississippi, Alabama and Georgia have quite high levels of poverty and ill-health that usually accompanies poverty in the U.S..
+&lt;p&gt;I’m from the south-east of the U.S. (Mississippi), and I can say with some certainty that Mississippi, Alabama and Georgia have quite high levels of poverty and ill-health that usually accompanies poverty in the U.S..
 It is interesting to see these states reporting higher levels of Covid-19, and it begs the question, “Is there an association between poorer rural places and higher levels of reported cases?”
 Statistically, I think there probably is (though this needs testing).
-Still, even if it is found to be statistically correlated, we still won’t know &lt;strong&gt;&lt;em&gt;why&lt;/em&gt;&lt;/strong&gt; we’re seeing these trends until we do more qualitative work in the region to pair with our quantitative findings.&lt;/p&gt;
-&lt;p&gt;Thanks to the hard work of the folks at the New York Times, we can update our findings over time to see if the trends holds. So stay tuned!&lt;/p&gt;
-&lt;/div&gt;
+Even if it is found to be statistically correlated, we still won’t know &lt;strong&gt;&lt;em&gt;why&lt;/em&gt;&lt;/strong&gt; we’re seeing these trends until we do more qualitative work in the region to pair with our quantitative findings.&lt;/p&gt;
+&lt;p&gt;Thanks to the hard work of the folks at the New York Times, we can update our findings over time to see if the trends hold. So stay tuned!&lt;/p&gt;
 &lt;/div&gt;
 </description>
     </item>
