@@ -304,7 +304,7 @@ And just like above, we'll add our labels seperate.
 ```{r, warning=F, message=F}
 
 (southern_plot_ii <- southern_plot+
-  labs(title = 'Comparing Covid-19 Cases Across Rural Counties in the Sourtern U.S.', 
+  labs(title = 'Comparing Covid-19 Cases Across Rural Counties in the Southern U.S.', 
        subtitle = 'SOURCE: The New York Times, based on reports from state and local health agencies &\nThe USDA Rural-Urban Continuum Codes (2013).',
        x = 'Week of', 
        y = 'Total\nLog10-scale', 

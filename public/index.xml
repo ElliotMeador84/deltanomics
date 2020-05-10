@@ -62,8 +62,8 @@
       <description>
 
 
-&lt;div id=&#34;last-updated-on-2020-05-10-214834&#34; class=&#34;section level4&#34;&gt;
-&lt;h4&gt;Last updated on 2020-05-10 21:48:34&lt;/h4&gt;
+&lt;div id=&#34;last-updated-on-2020-05-10-215334&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Last updated on 2020-05-10 21:53:34&lt;/h4&gt;
 &lt;/div&gt;
 &lt;div id=&#34;introduction&#34; class=&#34;section level1&#34;&gt;
 &lt;h1&gt;Introduction&lt;/h1&gt;
@@ -302,7 +302,7 @@ southern_plot &amp;lt;- southern_rural_cases %&amp;gt;%
              panel.spacing = unit(2, &amp;quot;lines&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;And just like above, we’ll add our labels seperate.&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;(southern_plot_ii &amp;lt;- southern_plot+
-  labs(title = &amp;#39;Comparing Covid-19 Cases Across Rural Counties in the Sourtern U.S.&amp;#39;, 
+  labs(title = &amp;#39;Comparing Covid-19 Cases Across Rural Counties in the Southern U.S.&amp;#39;, 
        subtitle = &amp;#39;SOURCE: The New York Times, based on reports from state and local health agencies &amp;amp;\nThe USDA Rural-Urban Continuum Codes (2013).&amp;#39;,
        x = &amp;#39;Week of&amp;#39;, 
        y = &amp;#39;Total\nLog10-scale&amp;#39;, 
