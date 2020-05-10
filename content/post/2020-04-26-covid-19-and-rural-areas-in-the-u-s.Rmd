@@ -211,13 +211,13 @@ weekly_regional_gg <-
     values = col_v, 
     labels = label_wrap)+
   facet_wrap( ~ region) +
-  post_theme() 
+  post_theme()
 
 ```
 
 And now we'll add the labels and annotations. 
 ```{r, warning=F, message=F}
-weekly_regional_gg <- 
+(weekly_regional_gg <- 
   weekly_regional_gg +  
   labs(
     title = 'Weekly Total U.S. COVID-19 Cases by Region in Rural Counties',
@@ -225,7 +225,7 @@ weekly_regional_gg <-
     x = '\nWeek of',
     y = 'Total',
     color = str_wrap('USDA Rural-Urban Continuum Codes (2013)', 25), 
-    caption = str_c('By Elliot Meador, PhD; @Elliot_Meador\nNOTE: Last week may not yet complete.\nProduced ', today_date))
+    caption = str_c('By Elliot Meador, PhD; @Elliot_Meador\nNOTE: Last week may not yet complete.\nProduced ', today_date)))
 
 ```
 
@@ -303,12 +303,12 @@ southern_plot <- southern_rural_cases %>%
 And just like above, we'll add our labels seperate. 
 ```{r, warning=F, message=F}
 
-southern_plot_ii <- southern_plot+
+(southern_plot_ii <- southern_plot+
   labs(title = 'Comparing Covid-19 Cases Across Rural Counties in the Sourtern U.S.', 
        subtitle = 'SOURCE: The New York Times, based on reports from state and local health agencies &\nThe USDA Rural-Urban Continuum Codes (2013).',
        x = 'Week of', 
        y = 'Total\nLog10-scale', 
-       caption = str_c('By Elliot Meador, PhD; @Elliot_Meador\nNOTE: Last week may not yet complete.\nProduced ', today_date))
+       caption = str_c('By Elliot Meador, PhD; @Elliot_Meador\nNOTE: Last week may not yet complete.\nProduced ', today_date)))
 
 ```
 

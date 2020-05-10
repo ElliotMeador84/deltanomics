@@ -25,8 +25,8 @@ editor_options:
 
 
 
-<div id="last-updated-on-2020-05-10-214424" class="section level4">
-<h4>Last updated on 2020-05-10 21:44:24</h4>
+<div id="last-updated-on-2020-05-10-214834" class="section level4">
+<h4>Last updated on 2020-05-10 21:48:34</h4>
 </div>
 <div id="introduction" class="section level1">
 <h1>Introduction</h1>
@@ -187,9 +187,9 @@ today_date &lt;-
     values = col_v, 
     labels = label_wrap)+
   facet_wrap( ~ region) +
-  post_theme() </code></pre>
+  post_theme()</code></pre>
 <p>And now we’ll add the labels and annotations.</p>
-<pre class="r"><code>weekly_regional_gg &lt;- 
+<pre class="r"><code>(weekly_regional_gg &lt;- 
   weekly_regional_gg +  
   labs(
     title = &#39;Weekly Total U.S. COVID-19 Cases by Region in Rural Counties&#39;,
@@ -197,7 +197,8 @@ today_date &lt;-
     x = &#39;\nWeek of&#39;,
     y = &#39;Total&#39;,
     color = str_wrap(&#39;USDA Rural-Urban Continuum Codes (2013)&#39;, 25), 
-    caption = str_c(&#39;By Elliot Meador, PhD; @Elliot_Meador\nNOTE: Last week may not yet complete.\nProduced &#39;, today_date))</code></pre>
+    caption = str_c(&#39;By Elliot Meador, PhD; @Elliot_Meador\nNOTE: Last week may not yet complete.\nProduced &#39;, today_date)))</code></pre>
+<p><img src="/post/2020-04-26-covid-19-and-rural-areas-in-the-u-s_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
 <p>It looks as though rural counties in the south are reporting more cases than the rest of the U.S..
 It’s worth investigating the southern counties to see if one state/county is pulling the statistics higher for the entire region, or if the trend is true for the majority of counties.
 There are a few ways to do this, but the most straightforward is to replicate the plot above but for southern states only.
@@ -263,12 +264,13 @@ southern_plot &lt;- southern_rural_cases %&gt;%
                                   1.25, &#39;cm&#39;),
              panel.spacing = unit(2, &quot;lines&quot;))</code></pre>
 <p>And just like above, we’ll add our labels seperate.</p>
-<pre class="r"><code>southern_plot_ii &lt;- southern_plot+
+<pre class="r"><code>(southern_plot_ii &lt;- southern_plot+
   labs(title = &#39;Comparing Covid-19 Cases Across Rural Counties in the Sourtern U.S.&#39;, 
        subtitle = &#39;SOURCE: The New York Times, based on reports from state and local health agencies &amp;\nThe USDA Rural-Urban Continuum Codes (2013).&#39;,
        x = &#39;Week of&#39;, 
        y = &#39;Total\nLog10-scale&#39;, 
-       caption = str_c(&#39;By Elliot Meador, PhD; @Elliot_Meador\nNOTE: Last week may not yet complete.\nProduced &#39;, today_date))</code></pre>
+       caption = str_c(&#39;By Elliot Meador, PhD; @Elliot_Meador\nNOTE: Last week may not yet complete.\nProduced &#39;, today_date)))</code></pre>
+<p><img src="/post/2020-04-26-covid-19-and-rural-areas-in-the-u-s_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
 </div>
 </div>
 <div id="key-findings" class="section level1">
