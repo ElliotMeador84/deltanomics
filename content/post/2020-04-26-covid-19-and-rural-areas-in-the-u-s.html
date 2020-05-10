@@ -25,8 +25,8 @@ editor_options:
 
 
 
-<div id="last-updated-on-2020-05-10-213557" class="section level4">
-<h4>Last updated on 2020-05-10 21:35:57</h4>
+<div id="last-updated-on-2020-05-10-214424" class="section level4">
+<h4>Last updated on 2020-05-10 21:44:24</h4>
 </div>
 <div id="introduction" class="section level1">
 <h1>Introduction</h1>
@@ -57,8 +57,7 @@ A continuum of rural-urban is used to describe each geographical area that goes 
 <div id="libraries-and-themes" class="section level2">
 <h2>Libraries and themes</h2>
 <p><code>Tidyverse</code> packages will be used to do most of the heavy lifting.
-I created a logo for Deltanomics - it’s the icon that shows up in your browser tab - that I’m going to stitch on to the plots.
-Of course, you don’t have to do for your analysis, and you can leave it off by omitting the code at the end. The <code>cowplot</code> package is used to help stitch the logo to the <code>ggplot2</code> plots.</p>
+We’ll do the data analysis using the <code>dplyr</code> package, and we’ll do our plots with <code>ggplot2</code>.</p>
 <pre class="r"><code>library(tidyverse)
 library(lubridate)
 library(janitor)
@@ -198,17 +197,7 @@ today_date &lt;-
     x = &#39;\nWeek of&#39;,
     y = &#39;Total&#39;,
     color = str_wrap(&#39;USDA Rural-Urban Continuum Codes (2013)&#39;, 25), 
-    caption = str_c(&#39;By Elliot Meador, PhD; @Elliot_Meador\nNOTE: Last week is likely not yet complete.\nProduced &#39;, today_date))</code></pre>
-<p>Lastly, for this plot, let’s stitch the Deltanomics logo on the bottom right of the plot.</p>
-<pre class="r"><code>## Now we start the logo stitching!
-
-(final_plot &lt;- ggdraw() +
-  draw_plot(weekly_regional_gg)+
-  draw_image(&quot;~/Documents/R/deltanomics/themes/hugo-academic/assets/images/icon.png&quot;, 
-             scale = .125, 
-             x = .4, 
-             y = -.4)) </code></pre>
-<p><img src="/post/2020-04-26-covid-19-and-rural-areas-in-the-u-s_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+    caption = str_c(&#39;By Elliot Meador, PhD; @Elliot_Meador\nNOTE: Last week may not yet complete.\nProduced &#39;, today_date))</code></pre>
 <p>It looks as though rural counties in the south are reporting more cases than the rest of the U.S..
 It’s worth investigating the southern counties to see if one state/county is pulling the statistics higher for the entire region, or if the trend is true for the majority of counties.
 There are a few ways to do this, but the most straightforward is to replicate the plot above but for southern states only.
@@ -279,15 +268,7 @@ southern_plot &lt;- southern_rural_cases %&gt;%
        subtitle = &#39;SOURCE: The New York Times, based on reports from state and local health agencies &amp;\nThe USDA Rural-Urban Continuum Codes (2013).&#39;,
        x = &#39;Week of&#39;, 
        y = &#39;Total\nLog10-scale&#39;, 
-       caption = str_c(&#39;By Elliot Meador, PhD; @Elliot_Meador\nNOTE: Last week is likely not yet complete.\nProduced &#39;, today_date))</code></pre>
-<p>Lastly, let’s add the Deltanomics logo.</p>
-<pre class="r"><code>(ggdraw() +
-  draw_plot(southern_plot_ii)+
-  draw_image(&quot;~/Documents/R/deltanomics/themes/hugo-academic/assets/images/icon.png&quot;, 
-             scale = .125, 
-             x = .4, 
-             y = -.4)) </code></pre>
-<p><img src="/post/2020-04-26-covid-19-and-rural-areas-in-the-u-s_files/figure-html/unnamed-chunk-11-1.png" width="672" /></p>
+       caption = str_c(&#39;By Elliot Meador, PhD; @Elliot_Meador\nNOTE: Last week may not yet complete.\nProduced &#39;, today_date))</code></pre>
 </div>
 </div>
 <div id="key-findings" class="section level1">

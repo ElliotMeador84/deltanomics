@@ -56,8 +56,8 @@ So we'll use those two datasets, join them together and investigate how many cas
 ## Libraries and themes
 
 `Tidyverse` packages will be used to do most of the heavy lifting. 
-I created a logo for Deltanomics - it's the icon that shows up in your browser tab - that I'm going to stitch on to the plots. 
-Of course, you don't have to do for your analysis, and you can leave it off by omitting the code at the end. The `cowplot` package is used to help stitch the logo to the `ggplot2` plots.
+We'll do the data analysis using the `dplyr` package, and we'll do our plots with `ggplot2`. 
+
 ```{r, message=F, warning=F}
 library(tidyverse)
 library(lubridate)
@@ -225,20 +225,8 @@ weekly_regional_gg <-
     x = '\nWeek of',
     y = 'Total',
     color = str_wrap('USDA Rural-Urban Continuum Codes (2013)', 25), 
-    caption = str_c('By Elliot Meador, PhD; @Elliot_Meador\nNOTE: Last week is likely not yet complete.\nProduced ', today_date))
+    caption = str_c('By Elliot Meador, PhD; @Elliot_Meador\nNOTE: Last week may not yet complete.\nProduced ', today_date))
 
-```
-
-Lastly, for this plot, let's stitch the Deltanomics logo on the bottom right of the plot. 
-```{r, message=F, warning=F}
-## Now we start the logo stitching!
-
-(final_plot <- ggdraw() +
-  draw_plot(weekly_regional_gg)+
-  draw_image("~/Documents/R/deltanomics/themes/hugo-academic/assets/images/icon.png", 
-             scale = .125, 
-             x = .4, 
-             y = -.4)) 
 ```
 
 It looks as though rural counties in the south are reporting more cases than the rest of the U.S.. 
@@ -320,18 +308,10 @@ southern_plot_ii <- southern_plot+
        subtitle = 'SOURCE: The New York Times, based on reports from state and local health agencies &\nThe USDA Rural-Urban Continuum Codes (2013).',
        x = 'Week of', 
        y = 'Total\nLog10-scale', 
-       caption = str_c('By Elliot Meador, PhD; @Elliot_Meador\nNOTE: Last week is likely not yet complete.\nProduced ', today_date))
+       caption = str_c('By Elliot Meador, PhD; @Elliot_Meador\nNOTE: Last week may not yet complete.\nProduced ', today_date))
 
 ```
-Lastly, let's add the Deltanomics logo. 
-```{r}
-(ggdraw() +
-  draw_plot(southern_plot_ii)+
-  draw_image("~/Documents/R/deltanomics/themes/hugo-academic/assets/images/icon.png", 
-             scale = .125, 
-             x = .4, 
-             y = -.4)) 
-```
+
 
 # Key Findings
 
