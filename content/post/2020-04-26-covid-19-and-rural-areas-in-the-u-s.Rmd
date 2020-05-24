@@ -23,7 +23,7 @@ editor_options:
   chunk_output_type: console
 ---
 
-#### Last updated on `r Sys.time()`
+#### Last updated on `r format(Sys.time(), '%d-%b-%Y')`
 
 # Introduction
 
@@ -225,7 +225,7 @@ And now we'll add the labels and annotations.
     x = '\nWeek of',
     y = 'Total',
     color = str_wrap('USDA Rural-Urban Continuum Codes (2013)', 25), 
-    caption = str_c('By Elliot Meador, PhD; @Elliot_Meador\nNOTE: Last week may not yet complete.\nProduced ', today_date)))
+    caption = str_c('By Elliot Meador, PhD; @Elliot_Meador\nNOTE: Last week may not yet be complete.\nProduced ', today_date)))
 
 ```
 
@@ -234,7 +234,7 @@ It's worth investigating the southern counties to see if one state/county is pul
 There are a few ways to do this, but the most straightforward is to replicate the plot above but for southern states only.
 The code below does this. 
 
-```{r}
+```{r, message=F, warning=F}
 
 southern_rural_cases <- covid_region %>% 
   filter(str_detect(desc, 'rural'), 
@@ -244,7 +244,6 @@ southern_rural_cases <- covid_region %>%
   ungroup() 
 
 viridis <- scales::viridis_pal()
-
 
 southern_state <- southern_rural_cases %>% 
   count(state) %>% 
@@ -308,7 +307,80 @@ And just like above, we'll add our labels seperate.
        subtitle = 'SOURCE: The New York Times, based on reports from state and local health agencies &\nThe USDA Rural-Urban Continuum Codes (2013).',
        x = 'Week of', 
        y = 'Total\nLog10-scale', 
-       caption = str_c('By Elliot Meador, PhD; @Elliot_Meador\nNOTE: Last week may not yet complete.\nProduced ', today_date)))
+       caption = str_c('By Elliot Meador, PhD; @Elliot_Meador\nNOTE: Last week may not yet be complete.\nProduced ', today_date)))
+
+```
+
+# County-level analysis
+In the above analysis we are showing aggregate statistics across states. 
+This give a good overall understanding of high-level trends, but the next step is to look a bit closer at what happening at a more granular level.
+Let's take a look at all rural counties in the U.S. and plot the total cases by the total deaths - which is a common plot I've found online. 
+
+We'll only look at rural counties that have at least 10 recorded cases. 
+We're going to do twist on a standard scatterplot, where we plot the state abbreviation of the county instead of a simple point. 
+We'll also colour all abbreviations of the same state in the same colour; this will help draw the readers's eye to similar states. 
+Lastly, we won't have a colour legend as this many states will lead to a massive legend that will overpower the plot. 
+
+```{r, warning=F, message=F, fig.height=9, fig.width=9}
+covid_county_rural <- covid_county %>%
+  left_join(rural_urban,
+            by = 'fips') %>% 
+  filter(str_detect(desc, 'rural')) %>% 
+  select(-date, -county, -rucc_2013) %>% 
+  group_by(fips) %>% 
+  mutate(tot_deaths = sum(deaths, na.rm = T), 
+         tot_cases = sum(cases, na.rm = T)) %>%   ungroup() %>% 
+  filter(tot_cases > 10, 
+         tot_deaths > 1) %>% # must have at least 10 cases
+  select(-cases, -deaths) %>% 
+  distinct(fips, .keep_all = T)
+  
+
+plot_states <- covid_county_rural %>% 
+  distinct(state) %>% 
+  pull()
+
+state_cols <- 
+  sample(viridis_pal()(length(plot_states)))
+
+
+names(state_cols) <-  sample(plot_states)
+
+
+update_date_anno <- paste('Data updated on',
+      format(max(covid_county$date), '%d-%b-%Y'))
+
+rural_point_plot <- covid_county_rural %>% 
+  left_join(tibble(state = state.name, 
+                   abb = state.abb)) %>% 
+  ggplot(aes(tot_cases, 
+             tot_deaths))+
+  geom_text(aes(label = abb, 
+                color = state), 
+            size = 5,
+            show.legend = F)+
+  scale_x_log10(labels = comma)+
+  scale_y_log10(labels = comma)+
+  scale_fill_manual(values = state_cols)+
+  scale_color_manual(values = state_cols)+
+  post_theme()+
+  labs(title = 'Comparing Covid-19 Cases and Deaths Across Rural Counties in the U.S.', 
+       subtitle = 'SOURCE: The New York Times, based on reports from state and local health agencies &\nThe USDA Rural-Urban Continuum Codes (2013).', 
+       x = 'Total Cases', 
+       y = 'Total Deaths', 
+       caption = paste0('Only counties shown with more than 10 cases and at least 1 death recorded.\nNOTE:Horizontal and vertical axes are on log10 scales.\n',update_date_anno))
+
+
+
+rural_point_plot +
+  theme(text = element_text(size = 15))+
+  annotate('label', 
+           x = 5000, 
+           y = 5, 
+    label = str_wrap('Letters are state abbreviations. Each pair represents a different county within the listed state. State abbreviations are consistently colored.', 40), 
+    size = 3.5, 
+    family = 'serif', 
+    hjust = 0.5)
 
 ```
 

@@ -20,8 +20,8 @@
       <description>
 
 
-&lt;div id=&#34;last-updated-on-2020-05-15-161421&#34; class=&#34;section level4&#34;&gt;
-&lt;h4&gt;Last updated on 2020-05-15 16:14:21&lt;/h4&gt;
+&lt;div id=&#34;last-updated-on-24-may-2020&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Last updated on 24-May-2020&lt;/h4&gt;
 &lt;/div&gt;
 &lt;div id=&#34;introduction&#34; class=&#34;section level1&#34;&gt;
 &lt;h1&gt;Introduction&lt;/h1&gt;
@@ -192,7 +192,7 @@ today_date &amp;lt;-
     x = &amp;#39;\nWeek of&amp;#39;,
     y = &amp;#39;Total&amp;#39;,
     color = str_wrap(&amp;#39;USDA Rural-Urban Continuum Codes (2013)&amp;#39;, 25), 
-    caption = str_c(&amp;#39;By Elliot Meador, PhD; @Elliot_Meador\nNOTE: Last week may not yet complete.\nProduced &amp;#39;, today_date)))&lt;/code&gt;&lt;/pre&gt;
+    caption = str_c(&amp;#39;By Elliot Meador, PhD; @Elliot_Meador\nNOTE: Last week may not yet be complete.\nProduced &amp;#39;, today_date)))&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&#34;/post/2020-04-26-covid-19-and-rural-areas-in-the-u-s_files/figure-html/unnamed-chunk-7-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;p&gt;It looks as though rural counties in the south are reporting more cases than the rest of the U.S..
 It’s worth investigating the southern counties to see if one state/county is pulling the statistics higher for the entire region, or if the trend is true for the majority of counties.
@@ -206,7 +206,6 @@ The code below does this.&lt;/p&gt;
   ungroup() 
 
 viridis &amp;lt;- scales::viridis_pal()
-
 
 southern_state &amp;lt;- southern_rural_cases %&amp;gt;% 
   count(state) %&amp;gt;% 
@@ -264,9 +263,79 @@ southern_plot &amp;lt;- southern_rural_cases %&amp;gt;%
        subtitle = &amp;#39;SOURCE: The New York Times, based on reports from state and local health agencies &amp;amp;\nThe USDA Rural-Urban Continuum Codes (2013).&amp;#39;,
        x = &amp;#39;Week of&amp;#39;, 
        y = &amp;#39;Total\nLog10-scale&amp;#39;, 
-       caption = str_c(&amp;#39;By Elliot Meador, PhD; @Elliot_Meador\nNOTE: Last week may not yet complete.\nProduced &amp;#39;, today_date)))&lt;/code&gt;&lt;/pre&gt;
+       caption = str_c(&amp;#39;By Elliot Meador, PhD; @Elliot_Meador\nNOTE: Last week may not yet be complete.\nProduced &amp;#39;, today_date)))&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&#34;/post/2020-04-26-covid-19-and-rural-areas-in-the-u-s_files/figure-html/unnamed-chunk-9-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;county-level-analysis&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;County-level analysis&lt;/h1&gt;
+&lt;p&gt;In the above analysis we are showing aggregate statistics across states.
+This give a good overall understanding of high-level trends, but the next step is to look a bit closer at what happening at a more granular level.
+Let’s take a look at all rural counties in the U.S. and plot the total cases by the total deaths - which is a common plot I’ve found online.&lt;/p&gt;
+&lt;p&gt;We’ll only look at rural counties that have at least 10 recorded cases.
+We’re going to do twist on a standard scatterplot, where we plot the state abbreviation of the county instead of a simple point.
+We’ll also colour all abbreviations of the same state in the same colour; this will help draw the readers’s eye to similar states.
+Lastly, we won’t have a colour legend as this many states will lead to a massive legend that will overpower the plot.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;covid_county_rural &amp;lt;- covid_county %&amp;gt;%
+  left_join(rural_urban,
+            by = &amp;#39;fips&amp;#39;) %&amp;gt;% 
+  filter(str_detect(desc, &amp;#39;rural&amp;#39;)) %&amp;gt;% 
+  select(-date, -county, -rucc_2013) %&amp;gt;% 
+  group_by(fips) %&amp;gt;% 
+  mutate(tot_deaths = sum(deaths, na.rm = T), 
+         tot_cases = sum(cases, na.rm = T)) %&amp;gt;%   ungroup() %&amp;gt;% 
+  filter(tot_cases &amp;gt; 10, 
+         tot_deaths &amp;gt; 1) %&amp;gt;% # must have at least 10 cases
+  select(-cases, -deaths) %&amp;gt;% 
+  distinct(fips, .keep_all = T)
+  
+
+plot_states &amp;lt;- covid_county_rural %&amp;gt;% 
+  distinct(state) %&amp;gt;% 
+  pull()
+
+state_cols &amp;lt;- 
+  sample(viridis_pal()(length(plot_states)))
+
+
+names(state_cols) &amp;lt;-  sample(plot_states)
+
+
+update_date_anno &amp;lt;- paste(&amp;#39;Data updated on&amp;#39;,
+      format(max(covid_county$date), &amp;#39;%d-%b-%Y&amp;#39;))
+
+rural_point_plot &amp;lt;- covid_county_rural %&amp;gt;% 
+  left_join(tibble(state = state.name, 
+                   abb = state.abb)) %&amp;gt;% 
+  ggplot(aes(tot_cases, 
+             tot_deaths))+
+  geom_text(aes(label = abb, 
+                color = state), 
+            size = 5,
+            show.legend = F)+
+  scale_x_log10(labels = comma)+
+  scale_y_log10(labels = comma)+
+  scale_fill_manual(values = state_cols)+
+  scale_color_manual(values = state_cols)+
+  post_theme()+
+  labs(title = &amp;#39;Comparing Covid-19 Cases and Deaths Across Rural Counties in the U.S.&amp;#39;, 
+       subtitle = &amp;#39;SOURCE: The New York Times, based on reports from state and local health agencies &amp;amp;\nThe USDA Rural-Urban Continuum Codes (2013).&amp;#39;, 
+       x = &amp;#39;Total Cases&amp;#39;, 
+       y = &amp;#39;Total Deaths&amp;#39;, 
+       caption = paste0(&amp;#39;Only counties shown with more than 10 cases and at least 1 death recorded.\nNOTE:Horizontal and vertical axes are on log10 scales.\n&amp;#39;,update_date_anno))
+
+
+
+rural_point_plot +
+  theme(text = element_text(size = 15))+
+  annotate(&amp;#39;label&amp;#39;, 
+           x = 5000, 
+           y = 5, 
+    label = str_wrap(&amp;#39;Letters are state abbreviations. Each pair represents a different county within the listed state. State abbreviations are consistently colored.&amp;#39;, 40), 
+    size = 3.5, 
+    family = &amp;#39;serif&amp;#39;, 
+    hjust = 0.5)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2020-04-26-covid-19-and-rural-areas-in-the-u-s_files/figure-html/unnamed-chunk-10-1.png&#34; width=&#34;864&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;key-findings&#34; class=&#34;section level1&#34;&gt;
 &lt;h1&gt;Key Findings&lt;/h1&gt;

@@ -28,7 +28,7 @@
   
     
   
-  <meta name="description" content="Last updated on 2020-05-15 16:14:21  Introduction Now that we are square in the middle of the Covid-19 pandemic, I thought it might be beneficial to look at some statistics associated with the number of cases. We’ll differentiate our analysis by focusing on cases of Covid-19 in rural areas of the U.S. There are a couple of reasons for this: mainly, rural analytics is my speciality, so while I don’t know much about the virus, I do know some about rural societies and economies; we can easily find pertinent data on rural counties; and, we can utilise some cool built-in R functions to help us along the way.">
+  <meta name="description" content="Last updated on 24-May-2020  Introduction Now that we are square in the middle of the Covid-19 pandemic, I thought it might be beneficial to look at some statistics associated with the number of cases. We’ll differentiate our analysis by focusing on cases of Covid-19 in rural areas of the U.S. There are a couple of reasons for this: mainly, rural analytics is my speciality, so while I don’t know much about the virus, I do know some about rural societies and economies; we can easily find pertinent data on rural counties; and, we can utilise some cool built-in R functions to help us along the way.">
 
   
   <link rel="alternate" hreflang="en-us" href="/post/covid-19-rural-deltanomics/">
@@ -270,7 +270,7 @@
   <meta property="og:site_name" content="Deltanomics">
   <meta property="og:url" content="/post/covid-19-rural-deltanomics/">
   <meta property="og:title" content="Covid-19 and Rural Areas in the U.S. | Deltanomics">
-  <meta property="og:description" content="Last updated on 2020-05-15 16:14:21  Introduction Now that we are square in the middle of the Covid-19 pandemic, I thought it might be beneficial to look at some statistics associated with the number of cases. We’ll differentiate our analysis by focusing on cases of Covid-19 in rural areas of the U.S. There are a couple of reasons for this: mainly, rural analytics is my speciality, so while I don’t know much about the virus, I do know some about rural societies and economies; we can easily find pertinent data on rural counties; and, we can utilise some cool built-in R functions to help us along the way."><meta property="og:image" content="/images/icon_hu92a9dc9639b79cadf266306904fb01f6_516996_512x512_fill_lanczos_center_2.png">
+  <meta property="og:description" content="Last updated on 24-May-2020  Introduction Now that we are square in the middle of the Covid-19 pandemic, I thought it might be beneficial to look at some statistics associated with the number of cases. We’ll differentiate our analysis by focusing on cases of Covid-19 in rural areas of the U.S. There are a couple of reasons for this: mainly, rural analytics is my speciality, so while I don’t know much about the virus, I do know some about rural societies and economies; we can easily find pertinent data on rural counties; and, we can utilise some cool built-in R functions to help us along the way."><meta property="og:image" content="/images/icon_hu92a9dc9639b79cadf266306904fb01f6_516996_512x512_fill_lanczos_center_2.png">
   <meta property="twitter:image" content="/images/icon_hu92a9dc9639b79cadf266306904fb01f6_516996_512x512_fill_lanczos_center_2.png"><meta property="og:locale" content="en-us">
   
     
@@ -322,7 +322,7 @@
       "url": "img//"
     }
   },
-  "description": "Last updated on 2020-05-15 16:14:21  Introduction Now that we are square in the middle of the Covid-19 pandemic, I thought it might be beneficial to look at some statistics associated with the number of cases. We’ll differentiate our analysis by focusing on cases of Covid-19 in rural areas of the U.S. There are a couple of reasons for this: mainly, rural analytics is my speciality, so while I don’t know much about the virus, I do know some about rural societies and economies; we can easily find pertinent data on rural counties; and, we can utilise some cool built-in R functions to help us along the way."
+  "description": "Last updated on 24-May-2020  Introduction Now that we are square in the middle of the Covid-19 pandemic, I thought it might be beneficial to look at some statistics associated with the number of cases. We’ll differentiate our analysis by focusing on cases of Covid-19 in rural areas of the U.S. There are a couple of reasons for this: mainly, rural analytics is my speciality, so while I don’t know much about the virus, I do know some about rural societies and economies; we can easily find pertinent data on rural counties; and, we can utilise some cool built-in R functions to help us along the way."
 }
 </script>
 
@@ -663,7 +663,7 @@
   
   <span class="middot-divider"></span>
   <span class="article-reading-time">
-    8 min read
+    10 min read
   </span>
   
 
@@ -706,8 +706,8 @@
       
 
 
-<div id="last-updated-on-2020-05-15-161421" class="section level4">
-<h4>Last updated on 2020-05-15 16:14:21</h4>
+<div id="last-updated-on-24-may-2020" class="section level4">
+<h4>Last updated on 24-May-2020</h4>
 </div>
 <div id="introduction" class="section level1">
 <h1>Introduction</h1>
@@ -878,7 +878,7 @@ today_date &lt;-
     x = &#39;\nWeek of&#39;,
     y = &#39;Total&#39;,
     color = str_wrap(&#39;USDA Rural-Urban Continuum Codes (2013)&#39;, 25), 
-    caption = str_c(&#39;By Elliot Meador, PhD; @Elliot_Meador\nNOTE: Last week may not yet complete.\nProduced &#39;, today_date)))</code></pre>
+    caption = str_c(&#39;By Elliot Meador, PhD; @Elliot_Meador\nNOTE: Last week may not yet be complete.\nProduced &#39;, today_date)))</code></pre>
 <p><img src="/post/2020-04-26-covid-19-and-rural-areas-in-the-u-s_files/figure-html/unnamed-chunk-7-1.png" width="672" /></p>
 <p>It looks as though rural counties in the south are reporting more cases than the rest of the U.S..
 It’s worth investigating the southern counties to see if one state/county is pulling the statistics higher for the entire region, or if the trend is true for the majority of counties.
@@ -892,7 +892,6 @@ The code below does this.</p>
   ungroup() 
 
 viridis &lt;- scales::viridis_pal()
-
 
 southern_state &lt;- southern_rural_cases %&gt;% 
   count(state) %&gt;% 
@@ -950,9 +949,79 @@ southern_plot &lt;- southern_rural_cases %&gt;%
        subtitle = &#39;SOURCE: The New York Times, based on reports from state and local health agencies &amp;\nThe USDA Rural-Urban Continuum Codes (2013).&#39;,
        x = &#39;Week of&#39;, 
        y = &#39;Total\nLog10-scale&#39;, 
-       caption = str_c(&#39;By Elliot Meador, PhD; @Elliot_Meador\nNOTE: Last week may not yet complete.\nProduced &#39;, today_date)))</code></pre>
+       caption = str_c(&#39;By Elliot Meador, PhD; @Elliot_Meador\nNOTE: Last week may not yet be complete.\nProduced &#39;, today_date)))</code></pre>
 <p><img src="/post/2020-04-26-covid-19-and-rural-areas-in-the-u-s_files/figure-html/unnamed-chunk-9-1.png" width="672" /></p>
 </div>
+</div>
+<div id="county-level-analysis" class="section level1">
+<h1>County-level analysis</h1>
+<p>In the above analysis we are showing aggregate statistics across states.
+This give a good overall understanding of high-level trends, but the next step is to look a bit closer at what happening at a more granular level.
+Let’s take a look at all rural counties in the U.S. and plot the total cases by the total deaths - which is a common plot I’ve found online.</p>
+<p>We’ll only look at rural counties that have at least 10 recorded cases.
+We’re going to do twist on a standard scatterplot, where we plot the state abbreviation of the county instead of a simple point.
+We’ll also colour all abbreviations of the same state in the same colour; this will help draw the readers’s eye to similar states.
+Lastly, we won’t have a colour legend as this many states will lead to a massive legend that will overpower the plot.</p>
+<pre class="r"><code>covid_county_rural &lt;- covid_county %&gt;%
+  left_join(rural_urban,
+            by = &#39;fips&#39;) %&gt;% 
+  filter(str_detect(desc, &#39;rural&#39;)) %&gt;% 
+  select(-date, -county, -rucc_2013) %&gt;% 
+  group_by(fips) %&gt;% 
+  mutate(tot_deaths = sum(deaths, na.rm = T), 
+         tot_cases = sum(cases, na.rm = T)) %&gt;%   ungroup() %&gt;% 
+  filter(tot_cases &gt; 10, 
+         tot_deaths &gt; 1) %&gt;% # must have at least 10 cases
+  select(-cases, -deaths) %&gt;% 
+  distinct(fips, .keep_all = T)
+  
+
+plot_states &lt;- covid_county_rural %&gt;% 
+  distinct(state) %&gt;% 
+  pull()
+
+state_cols &lt;- 
+  sample(viridis_pal()(length(plot_states)))
+
+
+names(state_cols) &lt;-  sample(plot_states)
+
+
+update_date_anno &lt;- paste(&#39;Data updated on&#39;,
+      format(max(covid_county$date), &#39;%d-%b-%Y&#39;))
+
+rural_point_plot &lt;- covid_county_rural %&gt;% 
+  left_join(tibble(state = state.name, 
+                   abb = state.abb)) %&gt;% 
+  ggplot(aes(tot_cases, 
+             tot_deaths))+
+  geom_text(aes(label = abb, 
+                color = state), 
+            size = 5,
+            show.legend = F)+
+  scale_x_log10(labels = comma)+
+  scale_y_log10(labels = comma)+
+  scale_fill_manual(values = state_cols)+
+  scale_color_manual(values = state_cols)+
+  post_theme()+
+  labs(title = &#39;Comparing Covid-19 Cases and Deaths Across Rural Counties in the U.S.&#39;, 
+       subtitle = &#39;SOURCE: The New York Times, based on reports from state and local health agencies &amp;\nThe USDA Rural-Urban Continuum Codes (2013).&#39;, 
+       x = &#39;Total Cases&#39;, 
+       y = &#39;Total Deaths&#39;, 
+       caption = paste0(&#39;Only counties shown with more than 10 cases and at least 1 death recorded.\nNOTE:Horizontal and vertical axes are on log10 scales.\n&#39;,update_date_anno))
+
+
+
+rural_point_plot +
+  theme(text = element_text(size = 15))+
+  annotate(&#39;label&#39;, 
+           x = 5000, 
+           y = 5, 
+    label = str_wrap(&#39;Letters are state abbreviations. Each pair represents a different county within the listed state. State abbreviations are consistently colored.&#39;, 40), 
+    size = 3.5, 
+    family = &#39;serif&#39;, 
+    hjust = 0.5)</code></pre>
+<p><img src="/post/2020-04-26-covid-19-and-rural-areas-in-the-u-s_files/figure-html/unnamed-chunk-10-1.png" width="864" /></p>
 </div>
 <div id="key-findings" class="section level1">
 <h1>Key Findings</h1>
