@@ -311,12 +311,12 @@ southern_plot &amp;lt;- southern_rural_cases %&amp;gt;%
 &lt;/div&gt;
 &lt;div id=&#34;county-level-analysis&#34; class=&#34;section level1&#34;&gt;
 &lt;h1&gt;County-level analysis&lt;/h1&gt;
-&lt;p&gt;In the above analysis we are showing aggregate statistics across states.
-This give a good overall understanding of high-level trends, but the next step is to look a bit closer at what happening at a more granular level.
+&lt;p&gt;In the above analysis, we are showing aggregate statistics across states.
+This gives a good overall understanding of high-level trends, but the next step is to look a bit closer at what happens at a more granular level.
 Let’s take a look at all rural counties in the U.S. and plot the total cases by the total deaths - which is a common plot I’ve found online.&lt;/p&gt;
 &lt;p&gt;We’ll only look at rural counties that have at least 10 recorded cases.
-We’re going to do twist on a standard scatterplot, where we plot the state abbreviation of the county instead of a simple point.
-We’ll also colour all abbreviations of the same state in the same colour; this will help draw the readers’s eye to similar states.
+We’re going to do a twist on a standard scatterplot, where we plot the state abbreviation of the county instead of a simple point.
+We’ll also colour all abbreviations of the same state in the same colour; this will help draw the readers’ eye to similar states.
 Lastly, we won’t have a colour legend as this many states will lead to a massive legend that will overpower the plot.&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;covid_county_rural &amp;lt;- covid_county %&amp;gt;%
   left_join(rural_urban,
