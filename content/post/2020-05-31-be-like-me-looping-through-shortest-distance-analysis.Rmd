@@ -1,0 +1,472 @@
+---
+title: 'Be like me - looping through shortest distance analysis'
+author: Elliot Meador
+date: '2020-05-31'
+slug: sna
+categories:
+  - R
+  - SNA
+tags:
+  - ggraph
+  - tidygraph
+  - network
+subtitle: ''
+summary: ''
+authors: []
+lastmod: '2020-05-31T13:32:01+01:00'
+featured: no
+image:
+  caption: ''
+  focal_point: ''
+  preview_only: no
+projects: []
+editor_options: 
+  chunk_output_type: console
+---
+
+# Introduction
+I've been doing some work lately on social networks that exist between organisations or institutions. 
+This is nice as it builds on some of my dissertation work, and I generally find it quite interesting. 
+Networks that form between organisations are often quite powerful, in that they can illustrate where strong areas of like-minded work exists or where new connections might be useful in strengthing one organation's influence. 
+
+## Why like me?
+Organisational ties -- like personal relationships in business -- can be extremely valuable to a firm's bottom line. 
+These ties are often leveraged and manoeuvred in order to produce some sought-after result. 
+A few examples might be: 
+
+> Do I know anyone at Organisation X who might have more information about some big grant schemed about to be launched?
+
+> Who in my inner circle has ties a business who might provide some venture capital for an idea I have?
+
+The notion of leverage's one's networks is nothing new. It's known as ***social captial*** theory in sociology, and is a well-known tactic taught in business schools. 
+Its applications are too big to get into in this blog post. 
+I'd sugggest taking a look this [Forbes](https://www.forbes.com/sites/forbescoachescouncil/2018/11/27/two-ways-to-leverage-relationships-for-your-business-goals/#672d29eaa0cc) article for a bit more information on why this might benefit you. 
+If you're interested in leveraging one's ties for their personal benefit from an academic perspective you can read some of my published articles or read works by James Coleman, Pierre Bourduea or Robert Putnam from the 1980's and 1990's.
+
+# The nitty-gritty
+## Some data
+Now that we know it's a worthwhile venture to leverage one' network ties, let's take a closer look at how we might approach this from a data perspective. 
+We'll use a portion of the mock data we created in an earlier blog found [here](https://www.thedeltanomics.com/post/networks-from-survey-data-creating-mock-data/). 
+The database created from the code in that blog post is called `create_sna_data`, and we'll be using it for the rest of this post. 
+
+```{r, message=F, warning=F, echo=F}
+# For a tidy framework
+library(tidyverse)
+library(glue)
+library(scales)
+
+# Our graphing libraries
+library(igraph)
+library(tidygraph)
+library(ggraph)
+library(graphlayouts)
+
+
+library(randomNames)
+
+create_sna_data <- 
+  tibble( # let's pull 100 random names to start
+    resp_name = randomNames(100,
+                            which.names = 'both'))
+
+
+g <- make_empty_graph() %>% 
+  add_vertices(2)
+
+# 2. Run a while loop to ensure that a connected
+# graph is created -- this will help smooth over some of the graphing functions for later. 
+# 
+while (is.connected(g)== FALSE) {
+  
+  g <- create_sna_data %>% 
+    mutate(info_one = sample(
+      sample(resp_name, 80), # create 2nd column
+      nrow(.), T)) %>%       # as subset of the
+    as_tbl_graph()           # first.
+}
+
+# send it back to the original name
+create_sna_data <-  g
+
+
+create_sna_data <- create_sna_data %>% 
+  mutate(income_pre_tax = map_chr(degree(create_sna_data), function(x){
+    
+    # random normal using degree as the mean
+    # and a standard deviation of 2.5
+    random_norm <- rnorm(n = 1, 
+                         mean = x, 
+                         sd = sample(2.5, 1, F))
+    
+    dollar(abs(random_norm)*15000, 
+           prefix = '£')
+  }))
+
+
+influencers_df <- map_df(1:10, function(x){
+  
+  # pull a random node name
+  node. <- sample(V(create_sna_data)$name, 1)
+  
+  # get the node id, because to_local_neighborhood requires a numeric identifier (this is due to igraph).
+  
+  node_id. <- match(node., V(create_sna_data)$name)
+  
+  # pull the neighbourhoods of each node from above. 
+  neighbours. <- create_sna_data %>% 
+    to_local_neighborhood(node = node_id., 
+                          order = 1) %>% 
+    .[[1]] %>% 
+    as_tibble() %>% 
+    pull(name)
+  
+  # create a tibble of both values for use in the next step
+  
+  tibble(neighours. = neighbours.,
+         centre = rep(node., length(neighbours.)))
+  
+}) 
+# create new variable for each value returned above.
+
+create_sna_data <- 
+  create_sna_data %>% 
+  mutate(buy_farm_mark = case_when(
+    name %in% influencers_df$centre ~ 'Every meal',
+    name %in% influencers_df$neighours. ~ 'Most meals',
+    T ~ 'Hardly any meals'
+  ), 
+  buy_farm_mark = factor(buy_farm_mark, 
+                         levels = c('Every meal', 
+                                    'Most meals', 
+                                    'Hardly any meals')))
+
+
+
+create_sna_data <- create_sna_data %>% 
+  to_undirected() %>% 
+  mutate(cows_on_farm = 
+           as.factor(group_infomap()))
+
+
+
+create_sna_data <- create_sna_data %>% 
+  mutate(trust_score = round(
+    rescale(
+      as.numeric(cows_on_farm), 
+      c(1, 10))))
+```
+
+
+## Finding what we're looking for
+We're going to be preforming shortest-distance analysis. 
+Shortest distance analysis, also known as shortest paths, is a common algorythm used anytime objects are found along a network. 
+It's common in logistics work, especially regarding travel along a road or rail network.
+GIS analysis uses this approach as well.
+A great example is the Scottish Index of Multiple Deprivation's use of shortest-distance analyis in looking at access as a deprivation in Scotland. 
+Take a look at the SIMD documentation [here](https://statistics.gov.scot/data/scottish-index-of-multiple-deprivation---geographic-access-to-services-indicators) for an overview. 
+
+According to igraph's documentation: 
+
+> ... [shortest distance] calculates the length of all the shortest paths from or to the vertices in the network. [It] calculates one shortest path (the path itself, and not just its length) from or to the given vertex.
+
+
+Let's use the shortest distance function from tidygraph (which implements igraph's `shortest.paths` functionality) using a straight forward approach. 
+
+Below let's look at the shortest distance between two nodes. 
+
+1. First, we'll create a base layout from which to filter for sub-graphs when we want to show a path between two nodes. 
+2. Then, we'll plot the graph using `ggraph`. `ggraph` likes the layout matrices to be in `tibble` form with the column names `x` and `y`.  
+
+```{r, warning=F,message=F}
+
+# create a filtering column called id.
+create_sna_data <- create_sna_data %>% 
+  mutate(id. = row_number())
+
+# use the layout with stress algorythm to create a layout
+layout_df <- create_sna_data %>% 
+  layout_with_stress() %>% 
+  as_tibble() %>% 
+  set_names('x', 'y') 
+
+
+## And now the plot
+create_sna_data %>% 
+  ggraph(layout = layout_df)+ # our layout algorythm from above
+  geom_edge_fan(start_cap = circle(2, 'mm'), 
+                end_cap = circle(2, 'mm'))+
+  geom_node_point(size = 4)+
+  geom_node_text(aes(label = id.), 
+                 size = 2.25, 
+                 color = 'white')+
+  labs(title = 'Full network')
+
+
+```
+
+Now, we'll find the shortest path between two nodes: 75 and 4. 
+We'll plot the shortest path as a network and lay it on top of the network above so we can visualise the path within the network. 
+To do this, we'll calculate the layout tibble first and filter it for the shortest paths network using the `layout_with_stress`function from the `graphlayouts` package.
+Note that the `to_shortest_path` function can handle several shortest paths arguments, and that it returns a list. 
+We'll use the `.[[1]]` notion to grab the first item of the list, which is our shortest paths graph object. Also note that we'll need to pull our nodes that sit along the shortest path from our layout dataframe. 
+We'll use the `slice` function in `dplyr` for this. 
+```{r, message=F, warning=F}
+
+nodes_along_shortest_path <- create_sna_data %>%
+ to_shortest_path(from = c(75), to = c(4)) %>%
+  .[[1]] %>% 
+  as_tibble() %>% 
+  pull(id.)
+
+
+updated_layout <- layout_df %>% 
+  slice(nodes_along_shortest_path)
+
+shortest_path_75_to_4 <- create_sna_data %>%
+ to_shortest_path(from = 75, to = 4) %>% 
+  .[[1]] 
+
+shortest_path_75_to_4 %>% 
+  ggraph(layout = updated_layout)+
+  geom_edge_fan(start_cap = circle(2, 'mm'), 
+                end_cap = circle(2, 'mm'))+
+  geom_node_point(size = 4)+
+  geom_node_text(aes(label = id.), 
+                 size = 2.5, 
+                 color = 'white')+
+  labs(title = 'Shortest path between nodes 75 and 4',
+       subtitle = 'The path shapes between 75 and 4 are directly comparable.\nIt\'s difficult to tell this because the two plots are not scaled 1:1 (they are zoomed to different levels)')
+```
+
+Now, let's use `case_when` to create new variables that flag the shorest path nodes and edges. 
+
+```{r, warning=F, message=F}
+
+create_sna_data_updated <- 
+  create_sna_data %>% 
+  mutate(shortest_path_nodes = ifelse(
+    id. %in% nodes_along_shortest_path, 'Shortest Path', 'Long-way-round'
+  ))
+  
+
+```
+
+Now, let's plot. 
+
+```{r, warning=F, message=F}
+
+color_v <- c('#F46D43', '#3288BD')
+
+names(color_v) <- c('Shortest Path', 'Long-way-round')
+
+create_sna_data_updated %>% 
+  ggraph(layout = layout_df)+
+  geom_edge_fan(start_cap = circle(2, 'mm'), 
+                end_cap = circle(2, 'mm'))+
+  geom_node_point(aes(color = 
+                        shortest_path_nodes), 
+size = 4)+
+  geom_node_text(aes(label = id.,
+                     color = shortest_path_nodes), 
+                 size = 2.5, 
+                 color = 'white')+
+  scale_color_manual(values = color_v, 
+                     name = 'Shortest path between 75 and 4')+
+  theme(legend.position = 'bottom')+ 
+  guides(col = guide_legend(nrow = 2,
+                            reverse = T))+
+  labs(title = 'Network updated with shortest path')
+```
+
+## Leveraging networks
+The notion of leveraging networks comes from the reality that not every node in a network is available to us to draw resources from. 
+For the most part, a node has a useable relationship with only those nodes in its inner circle -- or its one-degree neighbourhood.
+Now, this isn't always the case, but as a very general rule with SNA, the further one node is from another, the less influence they have on one another. SNA can help identify which people could put you in touch with some other person based on a set of pre-defined criteria. 
+SNA helps answer the question:
+
+>Do I know a dude who knows a dude?
+
+### The goal
+So let's suppose our goal is to utilise our own social network to find a potential partner to work on a grant with us. 
+The funder of our grant scheme has a real soft spot for loners -- i.e. one-degree nodes; maybe because before our funder made it big they used to be a one-degree node themselves. 
+***Who knows!***
+Below we see our same network with the one-degree nodes highlighted. 
+```{r, echo = F, warning=F, message=F}
+
+
+color_v_ii <- c(
+  '#D53E4F', 
+  '#5E4FA2'
+)
+
+names(color_v_ii) <- c('One degree heros', 
+                    'All others')
+
+create_sna_data_updated <- 
+  create_sna_data_updated %>% 
+  mutate(degree = 
+           centrality_degree(
+             mode = 'all'), 
+         one_degree = case_when(
+           degree == 1 ~ 'One degree heros', 
+           T ~ 'All others'
+         )) 
+create_sna_data_updated %>% 
+  ggraph(layout = layout_df)+
+  geom_edge_fan(start_cap = circle(2, 'mm'), 
+                end_cap = circle(2, 'mm'))+
+  geom_node_point(aes(color = 
+                        one_degree), 
+size = 4)+
+  geom_node_text(aes(label = id.,
+                     color = shortest_path_nodes), 
+                 size = 2.5, 
+                 color = 'white')+
+  scale_color_manual(values = color_v_ii, 
+                     name = 'One degree')+
+  theme(legend.position = 'bottom')+ 
+  guides(col = guide_legend(nrow = 2,
+                            reverse = T))+
+  labs(title = 'Network showcases nodes with a single degree (edge)')
+
+
+max_degree <- which(betweenness(create_sna_data_updated) == max(betweenness(create_sna_data_updated)))[1]
+
+
+min_degree <- which(betweenness(create_sna_data_updated) == min(betweenness(create_sna_data_updated)))
+```
+
+We'll pretend that we are ***`r names(max_degree)`*** (# `r max_degree`), one of the most well-connected persons in the network (with a betweenness score of `r comma(betweenness(create_sna_data_updated)[max_degree])`).
+
+We know that we want to partner with a node that has only-degree. 
+We will want to approach as many one-degree nodes as possible, as some will turn us down or might not be available to partner on the grant application. 
+
+We also know that we get along with some people better than others, and that we'll have to depend on our relationships to help leverage them. 
+It may sound crazy, but ***`r names(max_degree)`***  (ourself) gets along really well with *people who buy all their food from farmers markets*. 
+So, we'll use this to our advantage by trying to find as many shortest paths to single-degree nodes that are filled with nodes that buy all their meals at farmers markets.
+We'll do this with iterative programming otherwise known as ***looping***. 
+Therefore, our approach is:
+
+1. Assign a numeric scoring value for the column `buy_farm_mark`, with more meals recieving a higher score. 
+2. Identify all shortest paths between `r names(max_degree)` and all one-degree nodes in the network.
+3. Create a scaled score for each path that we can use to decide on who to contact first for partnering on the grant application. 
+
+#### Step 1
+```{r, message=F, warning=F}
+
+farm_buy_n <- 
+  tibble(buy_farm_mark = c('Every meal', 
+                           'Most meals', 
+                           'Hardly any meals'), 
+        farm_mark_score = c(2, 1, 0))
+
+
+create_sna_data_updated <- 
+  create_sna_data_updated %>% 
+  left_join(farm_buy_n, 
+            by = "buy_farm_mark")
+```
+
+
+#### Step 2
+```{r, warning=F, message=F}
+one_degree_names <- names(
+  which(
+    degree(
+      create_sna_data_updated) == 1))
+
+one_degree_ids <- 
+  which(
+    V(create_sna_data_updated)$name %in% 
+      one_degree_names)
+
+max_degree <- which(
+  betweenness(
+    create_sna_data_updated) == max(
+      betweenness(
+        create_sna_data_updated)))[1]
+
+## The loop!!
+all_shortest_one_degre_paths_ls <- 
+  map(one_degree_ids, 
+      function(x){
+        
+create_sna_data_updated %>% 
+          
+  morph(to_shortest_path, max_degree, x) %>% 
+          mutate(selected_node = TRUE) %>% 
+          activate(edges) %>% 
+          mutate(selected_edge = TRUE) %>% 
+          activate(nodes) %>% 
+          unmorph()
+})
+
+```
+
+#### Step 3
+```{r, warning=F, message=F}
+
+all_scores <- 
+  all_shortest_one_degre_paths_ls %>% 
+  map(function(x){
+    x %>% 
+  as_tibble() %>% 
+  filter(selected_node) %>% 
+  summarise(buy_farmers_market_score = sum(farm_mark_score), 
+            n = n()) %>% 
+  mutate(total_score =
+           buy_farmers_market_score + n) %>% 
+  pull(total_score)
+  }) %>% 
+  flatten_dbl()
+  
+  
+highest_score <- which(all_scores == max(all_scores))
+  
+
+color_v_iii <- c('#084081', 
+                 '#A8DDB5')
+
+names(color_v_iii) <- c(T, 'Other')
+
+highest_score_g <- all_shortest_one_degre_paths_ls[[
+  highest_score]] %>% 
+  mutate(selected_node = ifelse(is.na(selected_node), 'Other', selected_node)) %>% 
+  activate(edges) %>% 
+  mutate(selected_edge = ifelse(is.na(selected_edge), 'Other', selected_edge)) 
+
+
+
+highest_score_g %>% 
+    ggraph(layout = layout_df)+
+    geom_edge_fan(aes(color = selected_edge))+
+    geom_node_point(aes(color = selected_node, 
+                        shape = buy_farm_mark), 
+                    size = 3)+
+  scale_color_manual(values = color_v_iii, 
+                     'Node path', 
+                     labels = c('Other', 
+                                'Highest score'
+                                ))+
+  scale_edge_color_manual(values = color_v_iii, 
+                          'Edge path', 
+                     labels = c('Other', 
+                                'Highest score'
+                                ))+
+  scale_shape('Meals bought from\nfarmers market')+
+  labs(title = 'Highest score path graph')
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
