@@ -161,22 +161,26 @@ The funder of our grant scheme has a real soft spot for loners – i.e. one-deg
 <strong><em>Who knows!</em></strong>
 Below we see our same network with the one-degree nodes highlighted.
 <img src="/post/2020-05-31-be-like-me-looping-through-shortest-distance-analysis_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
-<p>We’ll pretend that we are <strong><em>Guerra, Sylvia</em></strong> (# 9), one of the most well-connected persons in the network (with a betweenness score of 3,038).</p>
+<p>We’ll pretend that we are <strong><em>Le, Brianna</em></strong> (# 87), one of the most well-connected persons in the network (with a betweenness score of 3,088).</p>
 <p>We know that we want to partner with a node that has only-degree.
 We will want to approach as many one-degree nodes as possible, as some will turn us down or might not be available to partner on the grant application.</p>
 <p>We also know that we get along with some people better than others and that we’ll have to depend on our relationships to help leverage them.
-It may sound crazy, but <strong><em>Guerra, Sylvia</em></strong> (ourself) gets along really well with <em>people who buy all their food from farmers markets</em>.
+It may sound crazy, but <strong><em>Le, Brianna</em></strong> (ourself) gets along really well with <em>people who buy all their food from farmers markets</em>.
 So, we’ll use this to our advantage by trying to find as many shortest paths to single-degree nodes that are filled with nodes that buy all their meals at farmers markets.
 We’ll do this with iterative programming otherwise known as <strong><em>looping</em></strong>.
 Therefore, our approach is:</p>
 <ol style="list-style-type: decimal">
-<li>Assign a numeric scoring value for the column <code>buy_farm_mark</code>, with more meals receiving a higher score; geodesic distance will also be factored into the score, with nodes further away receiving a higher score. Our final metric takes the following form <code>$$Score_{tot.} = \dfrac{\text{farmers market score}}{\text{distance}}$$</code></li>
-<li>Identify all shortest paths between Guerra, Sylvia and all one-degree nodes in the network.</li>
+<li>Assign a numeric scoring value for the column <code>buy_farm_mark</code>, with more meals receiving a higher score; geodesic distance will also be factored into the score, with nodes further away receiving a higher score.</li>
+<li>Identify all shortest paths between Le, Brianna and all one-degree nodes in the network.</li>
 <li>Create a scaled score for each path that we can use to decide on who to contact first for partnering on the grant application.</li>
 </ol>
 <div id="step-1" class="section level4">
 <h4>Step 1</h4>
-<pre class="r"><code>farm_buy_n &lt;- 
+<pre class="r"><code># Those who buy every meal from the farmers 
+# market get a score of 5, 3 for most meals
+# and 0 for hardly any meals.  We&#39;ll create 
+# a tibble and merge it with data frame. 
+farm_buy_n &lt;- 
   tibble(buy_farm_mark = c(&#39;Every meal&#39;, 
                            &#39;Most meals&#39;, 
                            &#39;Hardly any meals&#39;), 
@@ -190,16 +194,19 @@ create_sna_data_updated &lt;-
 </div>
 <div id="step-2" class="section level4">
 <h4>Step 2</h4>
-<pre class="r"><code>one_degree_names &lt;- names(
+<pre class="r"><code># get all one-degree node 
+one_degree_names &lt;- names(
   which(
     degree(
       create_sna_data_updated) == 1))
 
+# and pull out their names.
 one_degree_ids &lt;- 
   which(
     V(create_sna_data_updated)$name %in% 
       one_degree_names)
 
+# Find the max betweeness for the starting node.
 max_degree &lt;- which(
   betweenness(
     create_sna_data_updated) == max(
@@ -207,8 +214,9 @@ max_degree &lt;- which(
         create_sna_data_updated)))[1]
 
 ## The loop!!
+## 
 all_shortest_one_degre_paths_ls &lt;- 
-  map(one_degree_ids, 
+  map(one_degree_ids, # our one-degree nodes are here
       function(x){
         
 create_sna_data_updated %&gt;% 
@@ -223,7 +231,11 @@ create_sna_data_updated %&gt;%
 </div>
 <div id="step-3" class="section level4">
 <h4>Step 3</h4>
-<pre class="r"><code>all_scores &lt;- 
+<pre class="r"><code># Create the scores and flatten the list
+# into a numeric vector that we can use to 
+# subset by.
+
+all_scores &lt;- 
   all_shortest_one_degre_paths_ls %&gt;%
   map(function(x){
     x %&gt;% 

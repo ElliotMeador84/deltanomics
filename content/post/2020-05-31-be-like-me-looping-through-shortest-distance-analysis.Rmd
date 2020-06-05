@@ -326,13 +326,16 @@ So, we'll use this to our advantage by trying to find as many shortest paths to 
 We'll do this with iterative programming otherwise known as ***looping***. 
 Therefore, our approach is:
 
-1. Assign a numeric scoring value for the column `buy_farm_mark`, with more meals receiving a higher score; geodesic distance will also be factored into the score, with nodes further away receiving a higher score. Our final metric takes the following form `$$Score_{tot.} = \dfrac{\text{farmers market score}}{\text{distance}}$$`
+1. Assign a numeric scoring value for the column `buy_farm_mark`, with more meals receiving a higher score; geodesic distance will also be factored into the score, with nodes further away receiving a higher score. 
 2. Identify all shortest paths between `r names(max_degree)` and all one-degree nodes in the network.
 3. Create a scaled score for each path that we can use to decide on who to contact first for partnering on the grant application. 
 
 #### Step 1
 ```{r, message=F, warning=F}
-
+# Those who buy every meal from the farmers 
+# market get a score of 5, 3 for most meals
+# and 0 for hardly any meals.  We'll create 
+# a tibble and merge it with data frame. 
 farm_buy_n <- 
   tibble(buy_farm_mark = c('Every meal', 
                            'Most meals', 
@@ -349,16 +352,20 @@ create_sna_data_updated <-
 
 #### Step 2
 ```{r, warning=F, message=F}
+
+# get all one-degree node 
 one_degree_names <- names(
   which(
     degree(
       create_sna_data_updated) == 1))
 
+# and pull out their names.
 one_degree_ids <- 
   which(
     V(create_sna_data_updated)$name %in% 
       one_degree_names)
 
+# Find the max betweeness for the starting node.
 max_degree <- which(
   betweenness(
     create_sna_data_updated) == max(
@@ -366,8 +373,9 @@ max_degree <- which(
         create_sna_data_updated)))[1]
 
 ## The loop!!
+## 
 all_shortest_one_degre_paths_ls <- 
-  map(one_degree_ids, 
+  map(one_degree_ids, # our one-degree nodes are here
       function(x){
         
 create_sna_data_updated %>% 
@@ -384,6 +392,10 @@ create_sna_data_updated %>%
 
 #### Step 3
 ```{r, warning=F, message=F}
+
+# Create the scores and flatten the list
+# into a numeric vector that we can use to 
+# subset by.
 
 all_scores <- 
   all_shortest_one_degre_paths_ls %>%
