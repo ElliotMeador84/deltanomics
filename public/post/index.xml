@@ -24,22 +24,22 @@
 &lt;h1&gt;Introduction&lt;/h1&gt;
 &lt;p&gt;I’ve been doing some work lately on social networks that exist between organisations or institutions.
 This is nice as it builds on some of my dissertation work, and I generally find it quite interesting.
-Networks that form between organisations are often quite powerful, in that they can illustrate where strong areas of like-minded work exists or where new connections might be useful in strengthing one organation’s influence.&lt;/p&gt;
+Networks that form between organisations are often quite powerful, in that they can illustrate where strong areas of like-minded work exist or where new connections might be useful in strengthing one organisation’s influence.&lt;/p&gt;
 &lt;div id=&#34;why-like-me&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Why like me?&lt;/h2&gt;
 &lt;p&gt;Organisational ties – like personal relationships in business – can be extremely valuable to a firm’s bottom line.
-These ties are often leveraged and manoeuvred in order to produce some sought-after result.
+These ties are often leveraged and manoeuvred to produce some sought-after result.
 A few examples might be:&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;Do I know anyone at Organisation X who might have more information about some big grant schemed about to be launched?&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;blockquote&gt;
-&lt;p&gt;Who in my inner circle has ties a business who might provide some venture capital for an idea I have?&lt;/p&gt;
+&lt;p&gt;Who in my inner circle has ties to a business who might provide some venture capital for an idea I have?&lt;/p&gt;
 &lt;/blockquote&gt;
-&lt;p&gt;The notion of leverage’s one’s networks is nothing new. It’s known as &lt;strong&gt;&lt;em&gt;social captial&lt;/em&gt;&lt;/strong&gt; theory in sociology, and is a well-known tactic taught in business schools.
+&lt;p&gt;The notion of leverage’s one’s networks is nothing new. It’s known as &lt;strong&gt;&lt;em&gt;social capital&lt;/em&gt;&lt;/strong&gt; theory in sociology and is a well-known tactic taught in business schools.
 Its applications are too big to get into in this blog post.
-I’d sugggest taking a look this &lt;a href=&#34;https://www.forbes.com/sites/forbescoachescouncil/2018/11/27/two-ways-to-leverage-relationships-for-your-business-goals/#672d29eaa0cc&#34;&gt;Forbes&lt;/a&gt; article for a bit more information on why this might benefit you.
-If you’re interested in leveraging one’s ties for their personal benefit from an academic perspective you can read some of my published articles or read works by James Coleman, Pierre Bourduea or Robert Putnam from the 1980’s and 1990’s.&lt;/p&gt;
+I’d suggest taking a look at this &lt;a href=&#34;https://www.forbes.com/sites/forbescoachescouncil/2018/11/27/two-ways-to-leverage-relationships-for-your-business-goals/#672d29eaa0cc&#34;&gt;Forbes&lt;/a&gt; article for a bit more information on why this might benefit you.
+If you’re interested in leveraging one’s ties for their benefit from an academic perspective you can read some of my published articles or read works by James Coleman, Pierre Bourdeau or Robert Putnam from the 1980s and 1990s.&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div id=&#34;the-nitty-gritty&#34; class=&#34;section level1&#34;&gt;
@@ -53,10 +53,10 @@ The database created from the code in that blog post is called &lt;code&gt;creat
 &lt;div id=&#34;finding-what-were-looking-for&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Finding what we’re looking for&lt;/h2&gt;
 &lt;p&gt;We’re going to be preforming shortest-distance analysis.
-Shortest distance analysis, also known as shortest paths, is a common algorythm used anytime objects are found along a network.
+Shortest distance analysis, also known as shortest paths, is a common algorithm used anytime objects are found within a network.
 It’s common in logistics work, especially regarding travel along a road or rail network.
 GIS analysis uses this approach as well.
-A great example is the Scottish Index of Multiple Deprivation’s use of shortest-distance analyis in looking at access as a deprivation in Scotland.
+A great example is the Scottish Index of Multiple Deprivation’s use of shortest-distance analysis in looking at access as a form of deprivation in Scotland.
 Take a look at the SIMD documentation &lt;a href=&#34;https://statistics.gov.scot/data/scottish-index-of-multiple-deprivation---geographic-access-to-services-indicators&#34;&gt;here&lt;/a&gt; for an overview.&lt;/p&gt;
 &lt;p&gt;According to igraph’s documentation:&lt;/p&gt;
 &lt;blockquote&gt;
@@ -76,7 +76,7 @@ create_sna_data &amp;lt;- create_sna_data %&amp;gt;%
 layout_df &amp;lt;- create_sna_data %&amp;gt;% 
   layout_with_stress() %&amp;gt;% 
   as_tibble() %&amp;gt;% 
-  set_names(&amp;#39;x&amp;#39;, &amp;#39;y&amp;#39;) 
+  set_names(c(&amp;#39;x&amp;#39;, &amp;#39;y&amp;#39;) )
 
 
 ## And now the plot
@@ -93,63 +93,30 @@ create_sna_data %&amp;gt;%
 &lt;p&gt;Now, we’ll find the shortest path between two nodes: 75 and 4.
 We’ll plot the shortest path as a network and lay it on top of the network above so we can visualise the path within the network.
 To do this, we’ll calculate the layout tibble first and filter it for the shortest paths network using the &lt;code&gt;layout_with_stress&lt;/code&gt;function from the &lt;code&gt;graphlayouts&lt;/code&gt; package.
-Note that the &lt;code&gt;to_shortest_path&lt;/code&gt; function can handle several shortest paths arguments, and that it returns a list.
-We’ll use the &lt;code&gt;.[[1]]&lt;/code&gt; notion to grab the first item of the list, which is our shortest paths graph object. Also note that we’ll need to pull our nodes that sit along the shortest path from our layout dataframe.
+Note that the &lt;code&gt;to_shortest_path&lt;/code&gt; function can handle several shortest paths arguments and that it returns a list.
+We’ll use the &lt;code&gt;.[[1]]&lt;/code&gt; notation to grab the first item of the list, which is our shortest paths graph object. Also, note that we’ll need to pull our nodes that sit along the shortest path from our layout data frame.
 We’ll use the &lt;code&gt;slice&lt;/code&gt; function in &lt;code&gt;dplyr&lt;/code&gt; for this.&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;nodes_along_shortest_path &amp;lt;- create_sna_data %&amp;gt;%
- to_shortest_path(from = c(75), to = c(4)) %&amp;gt;%
-  .[[1]] %&amp;gt;% 
-  as_tibble() %&amp;gt;% 
-  pull(id.)
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;create_sna_data_4_75 &amp;lt;- 
+  create_sna_data %&amp;gt;%
+  morph(to_shortest_path, 75, 4) %&amp;gt;% 
+  mutate(selected_node = T) %&amp;gt;% 
+    activate(edges) %&amp;gt;% 
+    mutate(selected_edge = T) %&amp;gt;% 
+  activate(nodes) %&amp;gt;% 
+    unmorph()
 
-
-updated_layout &amp;lt;- layout_df %&amp;gt;% 
-  slice(nodes_along_shortest_path)
-
-shortest_path_75_to_4 &amp;lt;- create_sna_data %&amp;gt;%
- to_shortest_path(from = 75, to = 4) %&amp;gt;% 
-  .[[1]] 
-
-shortest_path_75_to_4 %&amp;gt;% 
-  ggraph(layout = updated_layout)+
-  geom_edge_fan(start_cap = circle(2, &amp;#39;mm&amp;#39;), 
+create_sna_data_4_75 %&amp;gt;% 
+  ggraph(layout = layout_df)+
+  geom_edge_fan(aes(color = selected_edge),
+                start_cap = circle(2, &amp;#39;mm&amp;#39;), 
                 end_cap = circle(2, &amp;#39;mm&amp;#39;))+
-  geom_node_point(size = 4)+
+  geom_node_point(aes(color = selected_node),
+                  size = 4)+
   geom_node_text(aes(label = id.), 
                  size = 2.5, 
                  color = &amp;#39;white&amp;#39;)+
-  labs(title = &amp;#39;Shortest path between nodes 75 and 4&amp;#39;,
-       subtitle = &amp;#39;The path shapes between 75 and 4 are directly comparable.\nIt\&amp;#39;s difficult to tell this because the two plots are not scaled 1:1 (they are zoomed to different levels)&amp;#39;)&lt;/code&gt;&lt;/pre&gt;
+  labs(title = &amp;#39;Shortest path between nodes 75 and 4&amp;#39;)&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;&lt;img src=&#34;/post/2020-05-31-be-like-me-looping-through-shortest-distance-analysis_files/figure-html/unnamed-chunk-3-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;Now, let’s use &lt;code&gt;case_when&lt;/code&gt; to create new variables that flag the shorest path nodes and edges.&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;create_sna_data_updated &amp;lt;- 
-  create_sna_data %&amp;gt;% 
-  mutate(shortest_path_nodes = ifelse(
-    id. %in% nodes_along_shortest_path, &amp;#39;Shortest Path&amp;#39;, &amp;#39;Long-way-round&amp;#39;
-  ))&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Now, let’s plot.&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;color_v &amp;lt;- c(&amp;#39;#F46D43&amp;#39;, &amp;#39;#3288BD&amp;#39;)
-
-names(color_v) &amp;lt;- c(&amp;#39;Shortest Path&amp;#39;, &amp;#39;Long-way-round&amp;#39;)
-
-create_sna_data_updated %&amp;gt;% 
-  ggraph(layout = layout_df)+
-  geom_edge_fan(start_cap = circle(2, &amp;#39;mm&amp;#39;), 
-                end_cap = circle(2, &amp;#39;mm&amp;#39;))+
-  geom_node_point(aes(color = 
-                        shortest_path_nodes), 
-size = 4)+
-  geom_node_text(aes(label = id.,
-                     color = shortest_path_nodes), 
-                 size = 2.5, 
-                 color = &amp;#39;white&amp;#39;)+
-  scale_color_manual(values = color_v, 
-                     name = &amp;#39;Shortest path between 75 and 4&amp;#39;)+
-  theme(legend.position = &amp;#39;bottom&amp;#39;)+ 
-  guides(col = guide_legend(nrow = 2,
-                            reverse = T))+
-  labs(title = &amp;#39;Network updated with shortest path&amp;#39;)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;/post/2020-05-31-be-like-me-looping-through-shortest-distance-analysis_files/figure-html/unnamed-chunk-5-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
 &lt;/div&gt;
 &lt;div id=&#34;leveraging-networks&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Leveraging networks&lt;/h2&gt;
@@ -162,22 +129,22 @@ SNA helps answer the question:&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;div id=&#34;the-goal&#34; class=&#34;section level3&#34;&gt;
 &lt;h3&gt;The goal&lt;/h3&gt;
-&lt;p&gt;So let’s suppose our goal is to utilise our own social network to find a potential partner to work on a grant with us.
+&lt;p&gt;So let’s suppose our goal is to utilise our social network to find a potential partner to work on a grant with us.
 The funder of our grant scheme has a real soft spot for loners – i.e. one-degree nodes; maybe because before our funder made it big they used to be a one-degree node themselves.
 &lt;strong&gt;&lt;em&gt;Who knows!&lt;/em&gt;&lt;/strong&gt;
 Below we see our same network with the one-degree nodes highlighted.
-&lt;img src=&#34;/post/2020-05-31-be-like-me-looping-through-shortest-distance-analysis_files/figure-html/unnamed-chunk-6-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;We’ll pretend that we are &lt;strong&gt;&lt;em&gt;Mercurio, Kristin&lt;/em&gt;&lt;/strong&gt; (# 36), one of the most well-connected persons in the network (with a betweenness score of 3,541).&lt;/p&gt;
+&lt;img src=&#34;/post/2020-05-31-be-like-me-looping-through-shortest-distance-analysis_files/figure-html/unnamed-chunk-4-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;We’ll pretend that we are &lt;strong&gt;&lt;em&gt;Hines, Keith&lt;/em&gt;&lt;/strong&gt; (# 43), one of the most well-connected persons in the network (with a betweenness score of 2,663).&lt;/p&gt;
 &lt;p&gt;We know that we want to partner with a node that has only-degree.
 We will want to approach as many one-degree nodes as possible, as some will turn us down or might not be available to partner on the grant application.&lt;/p&gt;
-&lt;p&gt;We also know that we get along with some people better than others, and that we’ll have to depend on our relationships to help leverage them.
-It may sound crazy, but &lt;strong&gt;&lt;em&gt;Mercurio, Kristin&lt;/em&gt;&lt;/strong&gt; (ourself) gets along really well with &lt;em&gt;people who buy all their food from farmers markets&lt;/em&gt;.
+&lt;p&gt;We also know that we get along with some people better than others and that we’ll have to depend on our relationships to help leverage them.
+It may sound crazy, but &lt;strong&gt;&lt;em&gt;Hines, Keith&lt;/em&gt;&lt;/strong&gt; (ourself) gets along really well with &lt;em&gt;people who buy all their food from farmers markets&lt;/em&gt;.
 So, we’ll use this to our advantage by trying to find as many shortest paths to single-degree nodes that are filled with nodes that buy all their meals at farmers markets.
 We’ll do this with iterative programming otherwise known as &lt;strong&gt;&lt;em&gt;looping&lt;/em&gt;&lt;/strong&gt;.
 Therefore, our approach is:&lt;/p&gt;
 &lt;ol style=&#34;list-style-type: decimal&#34;&gt;
-&lt;li&gt;Assign a numeric scoring value for the column &lt;code&gt;buy_farm_mark&lt;/code&gt;, with more meals recieving a higher score.&lt;/li&gt;
-&lt;li&gt;Identify all shortest paths between Mercurio, Kristin and all one-degree nodes in the network.&lt;/li&gt;
+&lt;li&gt;Assign a numeric scoring value for the column &lt;code&gt;buy_farm_mark&lt;/code&gt;, with more meals receiving a higher score; geodesic distance will also be factored into the score, with nodes further away receiving a higher score. Our final metric takes the following form &lt;span class=&#34;math display&#34;&gt;\[Score_{tot.} = \dfrac{\text{farmers market score}}{\text{distance}}\]&lt;/span&gt;&lt;/li&gt;
+&lt;li&gt;Identify all shortest paths between Hines, Keith and all one-degree nodes in the network.&lt;/li&gt;
 &lt;li&gt;Create a scaled score for each path that we can use to decide on who to contact first for partnering on the grant application.&lt;/li&gt;
 &lt;/ol&gt;
 &lt;div id=&#34;step-1&#34; class=&#34;section level4&#34;&gt;
@@ -186,7 +153,7 @@ Therefore, our approach is:&lt;/p&gt;
   tibble(buy_farm_mark = c(&amp;#39;Every meal&amp;#39;, 
                            &amp;#39;Most meals&amp;#39;, 
                            &amp;#39;Hardly any meals&amp;#39;), 
-        farm_mark_score = c(2, 1, 0))
+        farm_mark_score = c(5, 3, 0))
 
 
 create_sna_data_updated &amp;lt;- 
@@ -224,32 +191,34 @@ create_sna_data_updated %&amp;gt;%
           activate(edges) %&amp;gt;% 
           mutate(selected_edge = TRUE) %&amp;gt;% 
           activate(nodes) %&amp;gt;% 
-          unmorph()
+  unmorph()
 })&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;div id=&#34;step-3&#34; class=&#34;section level4&#34;&gt;
 &lt;h4&gt;Step 3&lt;/h4&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;all_scores &amp;lt;- 
-  all_shortest_one_degre_paths_ls %&amp;gt;% 
+  all_shortest_one_degre_paths_ls %&amp;gt;%
   map(function(x){
     x %&amp;gt;% 
-  as_tibble() %&amp;gt;% 
   filter(selected_node) %&amp;gt;% 
-  summarise(buy_farmers_market_score = sum(farm_mark_score), 
-            n = n()) %&amp;gt;% 
-  mutate(total_score =
-           buy_farmers_market_score + n) %&amp;gt;% 
+  as_tibble() %&amp;gt;% 
+  summarise(total_farm = sum(farm_mark_score), 
+            n = n(), 
+            total_score = total_farm / n) %&amp;gt;% 
   pull(total_score)
   }) %&amp;gt;% 
   flatten_dbl()
   
-  
-highest_score &amp;lt;- which(all_scores == max(all_scores))
-  
-
-color_v_iii &amp;lt;- c(&amp;#39;#084081&amp;#39;, 
+highest_score &amp;lt;- 
+  which(all_scores == max(all_scores))[[1]]&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;And now let’s take a look at the final results.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;results&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Results&lt;/h3&gt;
+&lt;p&gt;Let’s plot our final results using the code below.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;color_v_iii &amp;lt;- c(&amp;#39;#084081&amp;#39;, 
                  &amp;#39;#A8DDB5&amp;#39;)
-
 names(color_v_iii) &amp;lt;- c(T, &amp;#39;Other&amp;#39;)
 
 highest_score_g &amp;lt;- all_shortest_one_degre_paths_ls[[
@@ -258,9 +227,11 @@ highest_score_g &amp;lt;- all_shortest_one_degre_paths_ls[[
   activate(edges) %&amp;gt;% 
   mutate(selected_edge = ifelse(is.na(selected_edge), &amp;#39;Other&amp;#39;, selected_edge)) 
 
-
-
 highest_score_g %&amp;gt;% 
+  activate(nodes) %&amp;gt;% 
+    mutate(buy_farm_mark = factor(buy_farm_mark, levels = c(&amp;#39;Every meal&amp;#39;, 
+           &amp;#39;Most meals&amp;#39;, 
+           &amp;#39;Hardly any meals&amp;#39;))) %&amp;gt;% 
     ggraph(layout = layout_df)+
     geom_edge_fan(aes(color = selected_edge))+
     geom_node_point(aes(color = selected_node, 
@@ -277,9 +248,10 @@ highest_score_g %&amp;gt;%
                                 &amp;#39;Highest score&amp;#39;
                                 ))+
   scale_shape(&amp;#39;Meals bought from\nfarmers market&amp;#39;)+
-  labs(title = &amp;#39;Highest score path graph&amp;#39;)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;/post/2020-05-31-be-like-me-looping-through-shortest-distance-analysis_files/figure-html/unnamed-chunk-9-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
-&lt;/div&gt;
+  labs(title = &amp;#39;Highest scoring-paths graph&amp;#39;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2020-05-31-be-like-me-looping-through-shortest-distance-analysis_files/figure-html/unnamed-chunk-8-1.png&#34; width=&#34;672&#34; /&gt;
+We can see that our approach to identifying the most appropriate project partner favours those nodes that eat every meal with food bought from the farmers market.
+Of course, this is just a demonstration of how looping can be used with network analysis to find optimum routes within a network.&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
