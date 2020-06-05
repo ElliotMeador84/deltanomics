@@ -665,7 +665,7 @@ Why like me?"><meta property="og:image" content="/images/icon_hu92a9dc9639b79cad
   
   <span class="middot-divider"></span>
   <span class="article-reading-time">
-    7 min read
+    8 min read
   </span>
   
 
@@ -781,8 +781,7 @@ create_sna_data %&gt;%
 <p>Now, we’ll find the shortest path between two nodes: 75 and 4.
 We’ll plot the shortest path as a network and lay it on top of the network above so we can visualise the path within the network.
 To do this, we’ll calculate the layout tibble first and filter it for the shortest paths network using the <code>layout_with_stress</code>function from the <code>graphlayouts</code> package.
-Note that the <code>to_shortest_path</code> function can handle several shortest paths arguments and that it returns a list.
-We’ll use the <code>.[[1]]</code> notation to grab the first item of the list, which is our shortest paths graph object. Also, note that we’ll need to pull our nodes that sit along the shortest path from our layout data frame.
+Note that we’ll need to pull our nodes that sit along the shortest path from our layout data frame.
 We’ll use the <code>slice</code> function in <code>dplyr</code> for this.</p>
 <pre class="r"><code>create_sna_data_4_75 &lt;- 
   create_sna_data %&gt;%
@@ -793,7 +792,21 @@ We’ll use the <code>slice</code> function in <code>dplyr</code> for this.</p>
   activate(nodes) %&gt;% 
     unmorph()
 
+colors_v &lt;- c(&#39;tomato&#39;, 
+  &#39;skyblue&#39;)
+
+names(colors_v) &lt;- 
+  c(&#39;TRUE&#39;, &#39;Other&#39;)
+
+
 create_sna_data_4_75 %&gt;% 
+  mutate(selected_node = ifelse(
+    is.na(selected_node), &#39;Other&#39;, selected_node
+  )) %&gt;% 
+  activate(edges) %&gt;% 
+  mutate(selected_edge = ifelse(
+    is.na(selected_edge), &#39;Other&#39;, selected_edge
+  )) %&gt;% 
   ggraph(layout = layout_df)+
   geom_edge_fan(aes(color = selected_edge),
                 start_cap = circle(2, &#39;mm&#39;), 
@@ -803,6 +816,14 @@ create_sna_data_4_75 %&gt;%
   geom_node_text(aes(label = id.), 
                  size = 2.5, 
                  color = &#39;white&#39;)+
+  scale_color_manual(values = colors_v, 
+                     name = &#39;Nodes&#39;, 
+                     label = c(&#39;Other&#39;, 
+                               &#39;Shortest path&#39;))+
+  scale_edge_color_manual(values = colors_v, 
+                     name = &#39;Edges&#39;, 
+                     label = c(&#39;Other&#39;, 
+                               &#39;Shortest path&#39;))+
   labs(title = &#39;Shortest path between nodes 75 and 4&#39;)</code></pre>
 <p><img src="/post/2020-05-31-be-like-me-looping-through-shortest-distance-analysis_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
 </div>
@@ -822,17 +843,17 @@ The funder of our grant scheme has a real soft spot for loners – i.e. one-deg
 <strong><em>Who knows!</em></strong>
 Below we see our same network with the one-degree nodes highlighted.
 <img src="/post/2020-05-31-be-like-me-looping-through-shortest-distance-analysis_files/figure-html/unnamed-chunk-4-1.png" width="672" /></p>
-<p>We’ll pretend that we are <strong><em>Hines, Keith</em></strong> (# 43), one of the most well-connected persons in the network (with a betweenness score of 2,663).</p>
+<p>We’ll pretend that we are <strong><em>Guerra, Sylvia</em></strong> (# 9), one of the most well-connected persons in the network (with a betweenness score of 3,038).</p>
 <p>We know that we want to partner with a node that has only-degree.
 We will want to approach as many one-degree nodes as possible, as some will turn us down or might not be available to partner on the grant application.</p>
 <p>We also know that we get along with some people better than others and that we’ll have to depend on our relationships to help leverage them.
-It may sound crazy, but <strong><em>Hines, Keith</em></strong> (ourself) gets along really well with <em>people who buy all their food from farmers markets</em>.
+It may sound crazy, but <strong><em>Guerra, Sylvia</em></strong> (ourself) gets along really well with <em>people who buy all their food from farmers markets</em>.
 So, we’ll use this to our advantage by trying to find as many shortest paths to single-degree nodes that are filled with nodes that buy all their meals at farmers markets.
 We’ll do this with iterative programming otherwise known as <strong><em>looping</em></strong>.
 Therefore, our approach is:</p>
 <ol style="list-style-type: decimal">
-<li>Assign a numeric scoring value for the column <code>buy_farm_mark</code>, with more meals receiving a higher score; geodesic distance will also be factored into the score, with nodes further away receiving a higher score. Our final metric takes the following form <span class="math display">\[Score_{tot.} = \dfrac{\text{farmers market score}}{\text{distance}}\]</span></li>
-<li>Identify all shortest paths between Hines, Keith and all one-degree nodes in the network.</li>
+<li>Assign a numeric scoring value for the column <code>buy_farm_mark</code>, with more meals receiving a higher score; geodesic distance will also be factored into the score, with nodes further away receiving a higher score. Our final metric takes the following form <code>$$Score_{tot.} = \dfrac{\text{farmers market score}}{\text{distance}}$$</code></li>
+<li>Identify all shortest paths between Guerra, Sylvia and all one-degree nodes in the network.</li>
 <li>Create a scaled score for each path that we can use to decide on who to contact first for partnering on the grant application.</li>
 </ol>
 <div id="step-1" class="section level4">

@@ -207,8 +207,7 @@ create_sna_data %>%
 Now, we'll find the shortest path between two nodes: 75 and 4. 
 We'll plot the shortest path as a network and lay it on top of the network above so we can visualise the path within the network. 
 To do this, we'll calculate the layout tibble first and filter it for the shortest paths network using the `layout_with_stress`function from the `graphlayouts` package.
-Note that the `to_shortest_path` function can handle several shortest paths arguments and that it returns a list. 
-We'll use the `.[[1]]` notation to grab the first item of the list, which is our shortest paths graph object. Also, note that we'll need to pull our nodes that sit along the shortest path from our layout data frame. 
+Note that we'll need to pull our nodes that sit along the shortest path from our layout data frame. 
 We'll use the `slice` function in `dplyr` for this. 
 ```{r, message=F, warning=F}
 
@@ -222,7 +221,21 @@ create_sna_data_4_75 <-
   activate(nodes) %>% 
     unmorph()
 
+colors_v <- c('tomato', 
+  'skyblue')
+
+names(colors_v) <- 
+  c('TRUE', 'Other')
+
+
 create_sna_data_4_75 %>% 
+  mutate(selected_node = ifelse(
+    is.na(selected_node), 'Other', selected_node
+  )) %>% 
+  activate(edges) %>% 
+  mutate(selected_edge = ifelse(
+    is.na(selected_edge), 'Other', selected_edge
+  )) %>% 
   ggraph(layout = layout_df)+
   geom_edge_fan(aes(color = selected_edge),
                 start_cap = circle(2, 'mm'), 
@@ -232,6 +245,14 @@ create_sna_data_4_75 %>%
   geom_node_text(aes(label = id.), 
                  size = 2.5, 
                  color = 'white')+
+  scale_color_manual(values = colors_v, 
+                     name = 'Nodes', 
+                     label = c('Other', 
+                               'Shortest path'))+
+  scale_edge_color_manual(values = colors_v, 
+                     name = 'Edges', 
+                     label = c('Other', 
+                               'Shortest path'))+
   labs(title = 'Shortest path between nodes 75 and 4')
 ```
 
@@ -268,6 +289,7 @@ create_sna_data_updated <-
            degree == 1 ~ 'One degree heros', 
            T ~ 'All others'
          )) 
+
 create_sna_data_updated %>% 
   ggraph(layout = layout_df)+
   geom_edge_fan(start_cap = circle(2, 'mm'), 
@@ -304,7 +326,7 @@ So, we'll use this to our advantage by trying to find as many shortest paths to 
 We'll do this with iterative programming otherwise known as ***looping***. 
 Therefore, our approach is:
 
-1. Assign a numeric scoring value for the column `buy_farm_mark`, with more meals receiving a higher score; geodesic distance will also be factored into the score, with nodes further away receiving a higher score. Our final metric takes the following form $$Score_{tot.} = \dfrac{\text{farmers market score}}{\text{distance}}$$
+1. Assign a numeric scoring value for the column `buy_farm_mark`, with more meals receiving a higher score; geodesic distance will also be factored into the score, with nodes further away receiving a higher score. Our final metric takes the following form `$$Score_{tot.} = \dfrac{\text{farmers market score}}{\text{distance}}$$`
 2. Identify all shortest paths between `r names(max_degree)` and all one-degree nodes in the network.
 3. Create a scaled score for each path that we can use to decide on who to contact first for partnering on the grant application. 
 
