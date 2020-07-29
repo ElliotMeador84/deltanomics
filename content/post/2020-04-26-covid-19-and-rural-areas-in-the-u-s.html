@@ -146,13 +146,20 @@ Those that are not adjacent to metro areas are adjacent to other rural areas, wh
   gather(key,
          value,-c(week,
                   region,
-                  desc))</code></pre>
+                  desc)) %&gt;% 
+  drop_na()</code></pre>
 <p>We’re going to make a fancy-looking plot for this post, something that you might like to share on social media or include in a work report.
 To help clean up the plot a bit, we’ll use a few approaches that are laid out in the code below.</p>
 <pre class="r"><code># each label for the x-axis which we&#39;ll use to make some nice looking data labels.
 week_n &lt;- weekly_regions %&gt;% 
   count(week) %&gt;% 
   pull(week)
+
+##------ Wed Jul 29 21:41:05 2020 ------##
+# added this to clean up the x-axis
+month_n &lt;- week_n %&gt;% 
+  floor_date(&#39;month&#39;) %&gt;% 
+  unique()
 
 # we&#39;ll use scale_color_manual with our own color choice 
 col_v &lt;- c(&#39;#3E4A89FF&#39;, &#39;#FDE725FF&#39;)
@@ -180,14 +187,16 @@ today_date &lt;-
              color = &#39;grey90&#39;)+
   geom_point(size = 3.5, 
              aes(color = desc))+
-  scale_x_date(breaks = week_n, 
+  scale_x_date(breaks = month_n, 
                date_labels = &#39;%d-%b&#39;)+
   scale_y_continuous(labels = comma) +
   scale_color_manual(
     values = col_v, 
-    labels = label_wrap)+
+    labels = label_wrap,
+    name = &#39;Rural classification&#39;)+
   facet_wrap( ~ region) +
-  post_theme()</code></pre>
+  post_theme()+
+  labs(caption = &#39;Severe drop-offs may indicate that data was most recently updated earlier in the week.&#39;)</code></pre>
 <p>And now we’ll add the labels and annotations.</p>
 <pre class="r"><code>(weekly_regional_gg &lt;- 
   weekly_regional_gg +  

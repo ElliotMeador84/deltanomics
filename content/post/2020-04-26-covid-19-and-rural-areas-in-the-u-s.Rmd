@@ -160,7 +160,8 @@ weekly_regions <- covid_region %>%
   gather(key,
          value,-c(week,
                   region,
-                  desc))
+                  desc)) %>% 
+  drop_na()
 
 ```
 
@@ -172,6 +173,12 @@ To help clean up the plot a bit, we'll use a few approaches that are laid out in
 week_n <- weekly_regions %>% 
   count(week) %>% 
   pull(week)
+
+##------ Wed Jul 29 21:41:05 2020 ------##
+# added this to clean up the x-axis
+month_n <- week_n %>% 
+  floor_date('month') %>% 
+  unique()
 
 # we'll use scale_color_manual with our own color choice 
 col_v <- c('#3E4A89FF', '#FDE725FF')
@@ -204,14 +211,16 @@ weekly_regional_gg <-
              color = 'grey90')+
   geom_point(size = 3.5, 
              aes(color = desc))+
-  scale_x_date(breaks = week_n, 
+  scale_x_date(breaks = month_n, 
                date_labels = '%d-%b')+
   scale_y_continuous(labels = comma) +
   scale_color_manual(
     values = col_v, 
-    labels = label_wrap)+
+    labels = label_wrap,
+    name = 'Rural classification')+
   facet_wrap( ~ region) +
-  post_theme()
+  post_theme()+
+  labs(caption = 'Severe drop-offs may indicate that data was most recently updated earlier in the week.')
 
 ```
 
