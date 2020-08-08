@@ -5,7 +5,7 @@
     <link>/authors/admin/</link>
       <atom:link href="/authors/admin/index.xml" rel="self" type="application/rss+xml" />
     <description>Deltanomics</description>
-    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>©2020</copyright><lastBuildDate>Sat, 22 Feb 2020 00:00:00 +0000</lastBuildDate>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>©2020</copyright><lastBuildDate>Sat, 08 Aug 2020 00:00:00 +0000</lastBuildDate>
     <image>
       <url>/images/icon_hu92a9dc9639b79cadf266306904fb01f6_516996_512x512_fill_lanczos_center_2.png</url>
       <title>Deltanomics</title>
@@ -13,10 +13,18 @@
     </image>
     
     <item>
+      <title>Supporting sustainable and resilient food systems</title>
+      <link>/talk/isna/</link>
+      <pubDate>Sat, 08 Aug 2020 00:00:00 +0000</pubDate>
+      <guid>/talk/isna/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>Crop Production in Northern Britian</title>
-      <link>/talk/example/</link>
+      <link>/talk/nbcp/</link>
       <pubDate>Sat, 22 Feb 2020 00:00:00 +0000</pubDate>
-      <guid>/talk/example/</guid>
+      <guid>/talk/nbcp/</guid>
       <description></description>
     </item>
     
