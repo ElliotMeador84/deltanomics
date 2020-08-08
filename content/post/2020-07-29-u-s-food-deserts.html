@@ -1,0 +1,365 @@
+---
+title: U.S. Food Deserts
+author: ''
+date: '2020-07-29'
+slug: food-deserts-data-clean-merge
+categories:
+  - R
+  - Rural
+tags:
+  - Data
+  - dplyr
+  - ggplot
+subtitle: ''
+summary: ''
+authors: []
+lastmod: '2020-07-29T23:11:33+01:00'
+featured: no
+image:
+  caption: ''
+  focal_point: ''
+  preview_only: no
+projects: []
+editor_options: 
+  chunk_output_type: console
+---
+
+<script src="/rmarkdown-libs/kePrint/kePrint.js"></script>
+
+
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>A huge issue today related to food and rural population research are food deserts.
+Food deserts are a complicated issue, but the idea centres on a simple premise: areas, where it’s hard to reach a grocery store or access food, can be thought of as food deserts.
+If you’re interested in knowing more about the discourse on food deserts, than I’d recommend looking into these papers:</p>
+<p>We’ll use a custom theme for <code>ggplot2</code> plots made with this code.
+Note the <code>...</code> notation, which allows us to make on-the-fly changes without calling another <code>theme</code> argument.</p>
+<pre class="r"><code>post_theme &lt;- function(...) {
+  theme(
+    text = 
+      element_text(
+        color = &#39;black&#39;,
+         family = &#39;serif&#39;),
+    axis.text = 
+      element_text(
+        color = &#39;black&#39;, 
+        size = 12.5),
+    panel.background = 
+      element_blank(),
+    axis.line.x = 
+      element_line(
+        color = &#39;black&#39;),
+    axis.ticks = element_blank(),
+    plot.margin = margin(.75, .75, .75, .75, &#39;cm&#39;),
+    plot.caption = 
+      element_text(hjust = 0,
+                                face = &quot;italic&quot;),
+    plot.title = 
+      element_text(
+        face = &#39;bold&#39;),
+    plot.subtitle = 
+      element_text(face = &#39;bold&#39;),
+    plot.title.position = &quot;plot&quot;,
+    plot.caption.position =  &quot;plot&quot;, 
+    strip.background = 
+      element_blank(), 
+    strip.text = 
+      element_text(
+        face = &#39;bold&#39;)
+  ) +
+    theme(...) # this bit allows us to make changes using this same function instead of calling two theme functions.
+}</code></pre>
+</div>
+<div id="the-data" class="section level1">
+<h1>The data</h1>
+<p>Data for this post is on food deserts and comes from Kaggle. Kaggle is a great resource for aspiring data scientists and experienced ones.
+Specifically, the page called <a href="https://www.kaggle.com/tcrammond/food-access-and-food-deserts?select=food_access_variable_lookup.csv">Food Deserts in the US: Food access for sub-populations of the United States</a>.
+You can download the data directly from the link in the sentence above.
+The code below reads in the data.</p>
+<pre class="r"><code>library(tidyverse)
+library(janitor)
+library(knitr)
+library(kableExtra)
+library(glue)
+library(tidytext)
+library(scales)
+
+# For mapping and census data
+library(tigris)
+library(leaflet)
+
+
+# File 1
+food_access_research_atlas &lt;- 
+  read_csv(&#39;~/Downloads/665808_1173338_bundle_archive/food_access_research_atlas.csv&#39;) %&gt;% 
+  clean_names()
+
+# File 2
+lookup &lt;- 
+  read_csv(&#39;~/Downloads/665808_1173338_bundle_archive/food_access_variable_lookup.csv&#39;) %&gt;% 
+  clean_names()
+
+# Pull in the USDA data from a directory I created in my cloud storage.
+rural_urban &lt;-
+  read_csv(&#39;~/OneDrive - SRUC/Data/usda/ruralurbancodes2013.csv&#39;) %&gt;%
+  select(state, 
+         county = county_name,
+         rucc_2013,
+         desc = description)</code></pre>
+<p>An interesting caveat with the data is that it comes in two files.
+One file is the data, and the other file is what’s known as a data dictionary or data lookup.
+The lookup file is a database that explains what each variable is.</p>
+<div id="linking-with-rural-urban-classification-data" class="section level2">
+<h2>Linking with rural-urban classification data</h2>
+<p>There isn’t a really good indicator of rural/urban classification in the data, so, as usual, we’ll need to add one.
+I’ve used the USDA Rural-Urban Classifications before in the post on <a href="https://www.thedeltanomics.com/post/covid-19-rural-deltanomics/">Covid-19 and Rural Areas in the U.S.</a>.</p>
+<pre class="r"><code>clean_names &lt;- 
+  function(x){
+    x &lt;- str_to_lower(x)
+    x &lt;- str_remove_all(x, &#39;county&#39;)
+    x &lt;- str_remove_all(x, &#39;[[:digit:]]&#39;)
+    x &lt;- str_squish(x)
+    x &lt;- str_trim(x)
+    x
+  }
+
+
+rural_urban &lt;- 
+  rural_urban %&gt;% 
+  mutate(county = clean_names(county)) %&gt;% 
+  rename(abb = state) %&gt;% 
+  left_join(
+tibble(abb = state.abb, 
+       state = clean_names(state.name))) %&gt;% 
+  mutate(state_county = 
+           glue(&#39;{state} {county}&#39;)) %&gt;% 
+  select(state_county, rucc_2013, desc)</code></pre>
+<pre><code>## Joining, by = &quot;abb&quot;</code></pre>
+<pre class="r"><code>rural_food_desert &lt;- 
+  food_access_research_atlas %&gt;% 
+  mutate(state = clean_names(state),
+            county = clean_names(county),
+            state_county = 
+                  glue(&#39;{state} {county}&#39;)) %&gt;% 
+  left_join(rural_urban, 
+            by = &#39;state_county&#39;) %&gt;% 
+  filter(str_detect(desc, &#39;rural&#39;))</code></pre>
+</div>
+</div>
+<div id="working-with-lookup-files---a-closer-look-at-snap" class="section level1">
+<h1>Working with lookup files - A closer look at SNAP</h1>
+<p>Lookup files are often called <em>data dictionaries</em>.
+Data dictionaries are a common component of many large datasets that are widely publically used.
+As previously mentioned, quite often, a data dictionary or lookup is just another file that accompanies the primary data.</p>
+<p>It isn’t “data” is the traditional sense (i.e. we aren’t going to be performing cross-tabulations on it anytime soon.), but it is a useful approach to treat it just as any other data file.
+For instance:</p>
+<ol style="list-style-type: decimal">
+<li>We can append data dictionaries/lookups to the central database as we did previously.</li>
+<li>We can use natural language processing on the data dictionaries to get a better understanding of the data holds; and,</li>
+<li>We can use data tools like <code>dplyr</code> and <code>purrr</code> to pick apart the lookup file and make it more manageable.</li>
+</ol>
+<p>Let’s say we are interested in looking at SNAP.
+SNAP is short for <em>Supplemental Nutrition Assistance Program</em>.
+According to the <a href="https://www.fns.usda.gov/snap/supplemental-nutrition-assistance-program">USDA’s website</a>:</p>
+<blockquote>
+<p>SNAP provides nutrition benefits to supplement the food budget of needy families so they can purchase healthy food and move towards self-sufficiency.</p>
+</blockquote>
+<p>We can use <code>dplyr</code> and the <code>kable</code> function from <code>knitr</code> to quickly search and display the results for variables on SNAP.</p>
+<pre class="r"><code>lookup %&gt;% 
+  filter(str_detect(description, &#39;SNAP&#39;)) %&gt;% 
+  mutate(long_name = 
+           str_trunc(long_name, 10)) %&gt;% 
+  kable(format = &#39;html&#39;, booktab = T) %&gt;% 
+  kable_styling()</code></pre>
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:left;">
+field
+</th>
+<th style="text-align:left;">
+long_name
+</th>
+<th style="text-align:left;">
+description
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+lasnaphalf
+</td>
+<td style="text-align:left;">
+Low acc…
+</td>
+<td style="text-align:left;">
+Housing units receiving SNAP benefits count beyond 1/2 mile from supermarket
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+lasnaphalfshare
+</td>
+<td style="text-align:left;">
+Low acc…
+</td>
+<td style="text-align:left;">
+Share of tract housing units receiving SNAP benefits count beyond 1/2 mile from supermarket
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+lasnap1
+</td>
+<td style="text-align:left;">
+Low acc…
+</td>
+<td style="text-align:left;">
+Housing units receiving SNAP benefits count beyond 1 mile from supermarket
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+lasnap1share
+</td>
+<td style="text-align:left;">
+Low acc…
+</td>
+<td style="text-align:left;">
+Share of tract housing units receiving SNAP benefits count beyond 1 mile from supermarket
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+lasnap10
+</td>
+<td style="text-align:left;">
+Low acc…
+</td>
+<td style="text-align:left;">
+Housing units receiving SNAP benefits count beyond 10 miles from supermarket
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+lasnap10share
+</td>
+<td style="text-align:left;">
+Low acc…
+</td>
+<td style="text-align:left;">
+Share of tract housing units receiving SNAP benefits count beyond 10 miles from supermarket
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+lasnap20
+</td>
+<td style="text-align:left;">
+Low acc…
+</td>
+<td style="text-align:left;">
+Housing units receiving SNAP benefits count beyond 20 miles from supermarket
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+lasnap20share
+</td>
+<td style="text-align:left;">
+Low acc…
+</td>
+<td style="text-align:left;">
+Share of tract housing units receiving SNAP benefits count beyond 20 miles from supermarket
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+TractSNAP
+</td>
+<td style="text-align:left;">
+Tract h…
+</td>
+<td style="text-align:left;">
+Total count of housing units receiving SNAP benefits in tract
+</td>
+</tr>
+</tbody>
+</table>
+<p>Glancing at the table above, there appear to be nine variables that cover SNAP benefits.
+Also, it appears that SNAP variables are often distinguished by have either <em>number</em> or <em>share</em>, which means that the variable has either total counts of percents of occurrence.</p>
+<p>Let’s take a look at some and compare them by state.
+We’ll use the verb <code>contains</code> within <code>dyplyr</code> to grab variables contain <em>SNAP</em>.</p>
+<pre class="r"><code>rural_food_desert_snap &lt;- 
+  rural_food_desert %&gt;% 
+  select(state, county, desc, census_tract,
+         contains(&#39;snap&#39;)) </code></pre>
+</div>
+<div id="travel-distance-and-rural-urban-snap" class="section level1">
+<h1>Travel distance and rural-urban SNAP</h1>
+<p>Now that we have our data in a way that we like it let’s do some quick plots, first looking at state and county levels, then looking at rural-urban areas.</p>
+<div id="travel-distance" class="section level2">
+<h2>Travel distance</h2>
+<pre class="r"><code>county_snap_dist &lt;-
+  rural_food_desert_snap %&gt;% 
+  mutate(id = group_indices(., census_tract)) %&gt;% 
+  select(state, county, desc, census_tract,contains(&#39;share&#39;)) %&gt;% 
+  pivot_longer(-c(state, 
+                  county, 
+                  desc, 
+                  census_tract),
+               names_to =  &#39;snap_dist&#39;, 
+               values_to = &#39;rate&#39;) %&gt;% 
+  mutate(snap_dist = 
+           parse_number(snap_dist), 
+         snap_dist = 
+           replace_na(snap_dist, .5)) </code></pre>
+<p>Let’s quickly take a look at the top rate (percent) of people in census tracts for each distance from a grocery store.
+We’ll look at only those people classified as living in rural counties.</p>
+<p>The plot below is a boxplot that shows the spread of rate SNAP recievers accross distances to supermarkets.
+It shows that there is a great deal of variability in terms of distance as well as a high number of people who have to travel quite far.
+The rate of SNAP recievers appears to be negatively correlated with distance, meaning that the rate of SNAP recievers decreases as distance increases.</p>
+<pre class="r"><code>county_snap_dist %&gt;%
+  ggplot(aes(as.factor(snap_dist),rate))+
+  geom_boxplot(aes(fill = as.factor(snap_dist)), 
+               show.legend = F)+
+  scale_fill_viridis_d(direction = -1)+
+  scale_y_continuous(labels = percent)+
+  post_theme(
+    axis.title.x = 
+      element_text(face = &#39;italic&#39;),
+             axis.title.y = 
+               element_text(angle = 0, 
+                            hjust= 1, 
+                            face = &#39;italic&#39;))+
+  labs(title = &#39;Relationship between percent of SNAP recievers and food deserts&#39;,
+       subtitle = &#39;Rural and Remote areas in the US according to USDA classification&#39;,
+       x = &#39;Miles to nearest supermarket&#39;,
+       y = &#39;Percent recieving\nSNAP&#39;)+
+  annotate(&#39;rect&#39;, xmin = 3.9, xmax = 4.1, ymin = .1, ymax = .35, color = &#39;#C4C4C4&#39;, alpha = .25)+
+  annotate(&#39;text&#39;, x = 3.65, y = .425, label = str_wrap(&#39;Upwards of 35% of residents in these census tract travel 20 or miles to a grocery store and recive government food benefits.&#39;, 30), hjust= .5, size = 2.5)+
+  annotate(&#39;segment&#39;, 
+           x  = 3.85, 
+           xend = 4, 
+           y = .385, 
+           yend = .36, 
+           arrow = arrow(type = &#39;closed&#39;, 
+                         length = unit(1, &#39;mm&#39;)))</code></pre>
+<p><img src="/post/2020-07-29-u-s-food-deserts_files/figure-html/unnamed-chunk-8-1.png" width="672" /></p>
+</div>
+</div>
+<div id="a-closer-look-with-leaflet" class="section level1">
+<h1>A closer look with Leaflet</h1>
+<p>Our data is aggregated by census tract and is therefore geographical by nature.
+Mapping in R has made huge developments in the past 5 to 10 years, and any work with rural/urban analysis can usually be benefited through some geo-spatial analysis.
+So learning to make maps is always helpful!</p>
+<div id="leaflet-maps" class="section level2">
+<h2>Leaflet maps</h2>
+<p>The <code>leaflet</code> package is a fantastic way to make interative maps with a relatively small amount of code.
+It works really well will with the <code>sf</code> package for geocomputional analysis.
+In addition, we can use the <code>tigris</code> package to get census tract information straight in R.
+<code>tigris</code> can return <code>sf</code> objects, making for speedy workflow between the three packages.</p>
+<p>Below, we’ll take a look those census tracts that have a large proportion of the population that have to travel 20 or miles to a supermarket and that have a high percentage of SNAP recipients.</p>
+</div>
+</div>

@@ -18,17 +18,57 @@
   </url>
   
   <url>
-    <loc>/post/sna/</loc>
-    <lastmod>2020-05-31T13:32:01+01:00</lastmod>
+    <loc>/categories/</loc>
+    <lastmod>2020-07-29T23:11:33+01:00</lastmod>
   </url>
   
   <url>
-    <loc>/categories/</loc>
-    <lastmod>2020-05-31T13:32:01+01:00</lastmod>
+    <loc>/tags/data/</loc>
+    <lastmod>2020-07-29T23:11:33+01:00</lastmod>
   </url>
   
   <url>
     <loc>/</loc>
+    <lastmod>2020-07-29T23:11:33+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/dplyr/</loc>
+    <lastmod>2020-07-29T23:11:33+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/ggplot/</loc>
+    <lastmod>2020-07-29T23:11:33+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/post/</loc>
+    <lastmod>2020-07-29T23:11:33+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/categories/r/</loc>
+    <lastmod>2020-07-29T23:11:33+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/categories/rural/</loc>
+    <lastmod>2020-07-29T23:11:33+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/</loc>
+    <lastmod>2020-07-29T23:11:33+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/post/food-deserts-data-clean-merge/</loc>
+    <lastmod>2020-07-29T23:11:33+01:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/post/sna/</loc>
     <lastmod>2020-05-31T13:32:01+01:00</lastmod>
   </url>
   
@@ -43,48 +83,13 @@
   </url>
   
   <url>
-    <loc>/post/</loc>
-    <lastmod>2020-05-31T13:32:01+01:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/categories/r/</loc>
-    <lastmod>2020-05-31T13:32:01+01:00</lastmod>
-  </url>
-  
-  <url>
     <loc>/categories/sna/</loc>
-    <lastmod>2020-05-31T13:32:01+01:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/</loc>
     <lastmod>2020-05-31T13:32:01+01:00</lastmod>
   </url>
   
   <url>
     <loc>/tags/tidygraph/</loc>
     <lastmod>2020-05-31T13:32:01+01:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/post/covid-19-rural-deltanomics/</loc>
-    <lastmod>2020-04-26T19:45:17+01:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/data/</loc>
-    <lastmod>2020-04-26T19:45:17+01:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/dplyr/</loc>
-    <lastmod>2020-04-26T19:45:17+01:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/ggplot/</loc>
-    <lastmod>2020-04-26T19:45:17+01:00</lastmod>
   </url>
   
   <url>
@@ -213,6 +218,10 @@
   
   <url>
     <loc>/courses/</loc>
+  </url>
+  
+  <url>
+    <loc>/post/covid-19-rural-deltanomics/</loc>
   </url>
   
   <url>

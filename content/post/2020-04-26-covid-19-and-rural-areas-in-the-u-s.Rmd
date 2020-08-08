@@ -1,7 +1,7 @@
 ---
 title: Covid-19 and Rural Areas in the U.S.
 author: Elliot Meador
-date: '2020-04-26'
+date: ''
 slug: covid-19-rural-deltanomics
 categories:
   - R
@@ -12,7 +12,7 @@ tags:
 subtitle: ''
 summary: ''
 authors: []
-lastmod: '2020-04-26T19:45:17+01:00'
+lastmod: ''
 featured: no
 image:
   caption: ''
@@ -22,7 +22,7 @@ projects: []
 editor_options: 
   chunk_output_type: console
 ---
-
+#### First published on 26-April-2020
 #### Last updated on `r format(Sys.time(), '%d-%b-%Y')`
 
 # Introduction

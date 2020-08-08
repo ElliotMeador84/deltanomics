@@ -5,7 +5,7 @@
     <link>/tags/data/</link>
       <atom:link href="/tags/data/index.xml" rel="self" type="application/rss+xml" />
     <description>Data</description>
-    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>©2020</copyright><lastBuildDate>Sun, 26 Apr 2020 00:00:00 +0000</lastBuildDate>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>©2020</copyright><lastBuildDate>Wed, 29 Jul 2020 00:00:00 +0000</lastBuildDate>
     <image>
       <url>/images/icon_hu92a9dc9639b79cadf266306904fb01f6_516996_512x512_fill_lanczos_center_2.png</url>
       <title>Data</title>
@@ -13,56 +13,22 @@
     </image>
     
     <item>
-      <title>Covid-19 and Rural Areas in the U.S.</title>
-      <link>/post/covid-19-rural-deltanomics/</link>
-      <pubDate>Sun, 26 Apr 2020 00:00:00 +0000</pubDate>
-      <guid>/post/covid-19-rural-deltanomics/</guid>
+      <title>U.S. Food Deserts</title>
+      <link>/post/food-deserts-data-clean-merge/</link>
+      <pubDate>Wed, 29 Jul 2020 00:00:00 +0000</pubDate>
+      <guid>/post/food-deserts-data-clean-merge/</guid>
       <description>
+&lt;script src=&#34;/rmarkdown-libs/kePrint/kePrint.js&#34;&gt;&lt;/script&gt;
 
 
-&lt;div id=&#34;last-updated-on-29-jul-2020&#34; class=&#34;section level4&#34;&gt;
-&lt;h4&gt;Last updated on 29-Jul-2020&lt;/h4&gt;
-&lt;/div&gt;
 &lt;div id=&#34;introduction&#34; class=&#34;section level1&#34;&gt;
 &lt;h1&gt;Introduction&lt;/h1&gt;
-&lt;p&gt;Now that we are square in the middle of the Covid-19 pandemic, I thought it might be beneficial to look at some statistics associated with the number of cases.
-We’ll differentiate our analysis by focusing on cases of Covid-19 in rural areas of the U.S.
-There are a couple of reasons for this: mainly, rural analytics is my speciality, so while I don’t know much about the virus, I do know some about rural societies and economies; we can easily find pertinent data on rural counties; and, we can utilise some cool built-in R functions to help us along the way.
-Before we go on it’s important to note that:&lt;/p&gt;
-&lt;ol style=&#34;list-style-type: decimal&#34;&gt;
-&lt;li&gt;I am not a medical doctor or specialist in viral diseases.&lt;/li&gt;
-&lt;li&gt;This post is meant to be a learning resource for people interested in looking at the pandemic from a rural perspective.&lt;/li&gt;
-&lt;li&gt;Any potential interesting findings must be further investigated before any judgements can be made.&lt;/li&gt;
-&lt;/ol&gt;
-&lt;/div&gt;
-&lt;div id=&#34;data&#34; class=&#34;section level1&#34;&gt;
-&lt;h1&gt;Data&lt;/h1&gt;
-&lt;p&gt;The data for this post comes from two places: Covid-19 cases from the &lt;a href=&#34;https://github.com/nytimes/covid-19-data&#34;&gt;New York Times github&lt;/a&gt;; and the &lt;a href=&#34;https://www.ers.usda.gov/data-products/rural-urban-continuum-codes/&#34;&gt;USDA Rural-Urban Classification Codes&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;Data scientists at The New York Times have been collating data on the number of cases of Covid-19 by county in the U.S..
-It is available at their GitHub page, which means that one can easily access and update the data through &lt;em&gt;pull requests&lt;/em&gt;.
-The data can also be downloaded and saved to a local drive.&lt;/p&gt;
-&lt;p&gt;To get a rural understanding of Covid-19 cases, we’ll use the USDA data on rural-urban classification of U.S. counties, which can be downloaded using the hyperlink above.
-Many countries have geographical classifications for rural and urban spaces.
-Usually, a low-level geography is chosen that spans an entire country.
-A continuum of rural-urban is used to describe each geographical area that goes from very urban to very rural (though not using those specific labels).&lt;/p&gt;
-&lt;p&gt;So we’ll use those two datasets, join them together and investigate how many cases of Covid-19 are found in rural areas within the U.S..&lt;/p&gt;
-&lt;/div&gt;
-&lt;div id=&#34;analysis&#34; class=&#34;section level1&#34;&gt;
-&lt;h1&gt;Analysis&lt;/h1&gt;
-&lt;div id=&#34;libraries-and-themes&#34; class=&#34;section level2&#34;&gt;
-&lt;h2&gt;Libraries and themes&lt;/h2&gt;
-&lt;p&gt;&lt;code&gt;Tidyverse&lt;/code&gt; packages will be used to do most of the heavy lifting.
-We’ll do the data analysis using the &lt;code&gt;dplyr&lt;/code&gt; package, and we’ll do our plots with &lt;code&gt;ggplot2&lt;/code&gt;.&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(tidyverse)
-library(lubridate)
-library(janitor)
-library(scales)
-library(cowplot)
-
-# USDA Rural-Urban classification codes
-
-
-post_theme &amp;lt;- function(...) {
+&lt;p&gt;A huge issue today related to food and rural population research are food deserts.
+Food deserts are a complicated issue, but the idea centres on a simple premise: areas, where it’s hard to reach a grocery store or access food, can be thought of as food deserts.
+If you’re interested in knowing more about the discourse on food deserts, than I’d recommend looking into these papers:&lt;/p&gt;
+&lt;p&gt;We’ll use a custom theme for &lt;code&gt;ggplot2&lt;/code&gt; plots made with this code.
+Note the &lt;code&gt;...&lt;/code&gt; notation, which allows us to make on-the-fly changes without calling another &lt;code&gt;theme&lt;/code&gt; argument.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;post_theme &amp;lt;- function(...) {
   theme(
     text = 
       element_text(
@@ -70,10 +36,8 @@ post_theme &amp;lt;- function(...) {
          family = &amp;#39;serif&amp;#39;),
     axis.text = 
       element_text(
-        color = &amp;#39;black&amp;#39;),
-    axis.text.x = 
-      element_text(angle = 45, 
-                   hjust = 1),
+        color = &amp;#39;black&amp;#39;, 
+        size = 12.5),
     panel.background = 
       element_blank(),
     axis.line.x = 
@@ -99,263 +63,299 @@ post_theme &amp;lt;- function(...) {
   ) +
     theme(...) # this bit allows us to make changes using this same function instead of calling two theme functions.
 }&lt;/code&gt;&lt;/pre&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# I created a new R-project to house the Covid-19 data in my Documents directory. 
-covid_county &amp;lt;- read_csv(&amp;#39;~/Documents/R/covid-19-data/us-counties.csv&amp;#39;)
+&lt;/div&gt;
+&lt;div id=&#34;the-data&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;The data&lt;/h1&gt;
+&lt;p&gt;Data for this post is on food deserts and comes from Kaggle. Kaggle is a great resource for aspiring data scientists and experienced ones.
+Specifically, the page called &lt;a href=&#34;https://www.kaggle.com/tcrammond/food-access-and-food-deserts?select=food_access_variable_lookup.csv&#34;&gt;Food Deserts in the US: Food access for sub-populations of the United States&lt;/a&gt;.
+You can download the data directly from the link in the sentence above.
+The code below reads in the data.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(tidyverse)
+library(janitor)
+library(knitr)
+library(kableExtra)
+library(glue)
+library(tidytext)
+library(scales)
+
+# For mapping and census data
+library(tigris)
+library(leaflet)
+
+
+# File 1
+food_access_research_atlas &amp;lt;- 
+  read_csv(&amp;#39;~/Downloads/665808_1173338_bundle_archive/food_access_research_atlas.csv&amp;#39;) %&amp;gt;% 
+  clean_names()
+
+# File 2
+lookup &amp;lt;- 
+  read_csv(&amp;#39;~/Downloads/665808_1173338_bundle_archive/food_access_variable_lookup.csv&amp;#39;) %&amp;gt;% 
+  clean_names()
 
 # Pull in the USDA data from a directory I created in my cloud storage.
 rural_urban &amp;lt;-
   read_csv(&amp;#39;~/OneDrive - SRUC/Data/usda/ruralurbancodes2013.csv&amp;#39;) %&amp;gt;%
-  select(fips,
+  select(state, 
+         county = county_name,
          rucc_2013,
          desc = description)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Now that we’ve got the data loaded from Covid-19 and USDA Rural-Urban Classifications, we are going to use some of R’s base functionality.
-R has two functions that help with general data analysis and joins: &lt;code&gt;state.name&lt;/code&gt;, which has all 50 U.S. state names; and, &lt;code&gt;state.region&lt;/code&gt;, which has the 50 U.S. state’s categorised into geographical regions.&lt;br /&gt;
-We’ll use these two functions in a &lt;code&gt;tibble&lt;/code&gt; to help join the Covid-19 data with the Rural-Urban Classifications.&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;state_region &amp;lt;-
-  tibble(state = state.name,
-         region = state.region)
-
-covid_region &amp;lt;-
-  covid_county %&amp;gt;%
-  left_join(rural_urban,
-            by = &amp;#39;fips&amp;#39;) %&amp;gt;%
-  left_join(state_region,
-            by = &amp;#39;state&amp;#39;) %&amp;gt;%
-  mutate(week =  
-           floor_date(date,
-                      &amp;#39;week&amp;#39;))&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Now we have our working data frame called &lt;code&gt;covid_region&lt;/code&gt;. It has the following variable names: date, county, state, fips, cases, deaths, rucc_2013, desc, region, week.
-We’ll use the &lt;code&gt;description&lt;/code&gt; variable to filter out rural counties only.
-There are two classifications of rural areas - those that are adjacent to more metro places and those that are not.
-Those that are not adjacent to metro areas are adjacent to other rural areas, which makes them somewhat more remote, as people living there need to travel further to get to service centres.&lt;/p&gt;
-&lt;p&gt;We use the &lt;code&gt;group_by&lt;/code&gt;/&lt;code&gt;summarise&lt;/code&gt; functionality from &lt;code&gt;dplyr&lt;/code&gt; to find the sum of Covid-19 cases and deaths by each week, region and for both rural classifications.&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;weekly_regions &amp;lt;- covid_region %&amp;gt;%
-  filter(str_detect(desc,
-                    &amp;#39;rural&amp;#39;)) %&amp;gt;% 
-  group_by(week, region, desc) %&amp;gt;%
-  summarise(cases =
-              sum(cases, na.rm = T),
-            deaths =
-              sum(deaths, na.rm = T)) %&amp;gt;%
-  ungroup() %&amp;gt;%
-  gather(key,
-         value,-c(week,
-                  region,
-                  desc)) %&amp;gt;% 
-  drop_na()&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;We’re going to make a fancy-looking plot for this post, something that you might like to share on social media or include in a work report.
-To help clean up the plot a bit, we’ll use a few approaches that are laid out in the code below.&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# each label for the x-axis which we&amp;#39;ll use to make some nice looking data labels.
-week_n &amp;lt;- weekly_regions %&amp;gt;% 
-  count(week) %&amp;gt;% 
-  pull(week)
-
-##------ Wed Jul 29 21:41:05 2020 ------##
-# added this to clean up the x-axis
-month_n &amp;lt;- week_n %&amp;gt;% 
-  floor_date(&amp;#39;month&amp;#39;) %&amp;gt;% 
-  unique()
-
-# we&amp;#39;ll use scale_color_manual with our own color choice 
-col_v &amp;lt;- c(&amp;#39;#3E4A89FF&amp;#39;, &amp;#39;#FDE725FF&amp;#39;)
-names(col_v) &amp;lt;- unique(weekly_regions$desc)
-
-# a simple label_wrap function for the legend
-label_wrap &amp;lt;- function(x, n = 25){
-  paste0(str_wrap(x, n), &amp;#39;\n&amp;#39;)
-}
-
-# date labels that use drops today&amp;#39;s date into the caption of the plot.
-today_date &amp;lt;- 
-  as_date(Sys.time()) %&amp;gt;% 
-  format(&amp;#39;%d %B, %Y&amp;#39;)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;OK, now we’ll create the main &lt;code&gt;ggplot&lt;/code&gt; that uses &lt;code&gt;facet_wrap&lt;/code&gt; to look at each region in the U.S. over time.&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;weekly_regional_gg &amp;lt;- 
-  weekly_regions %&amp;gt;%
-  filter(key == &amp;#39;cases&amp;#39;) %&amp;gt;% 
-  ggplot(aes(week, 
-         value, 
-         group = desc)) +
-  geom_line(size = 1.25, 
-            aes(color = desc))+
-  geom_point(size = 4, 
-             color = &amp;#39;grey90&amp;#39;)+
-  geom_point(size = 3.5, 
-             aes(color = desc))+
-  scale_x_date(breaks = month_n, 
-               date_labels = &amp;#39;%d-%b&amp;#39;)+
-  scale_y_continuous(labels = comma) +
-  scale_color_manual(
-    values = col_v, 
-    labels = label_wrap,
-    name = &amp;#39;Rural classification&amp;#39;)+
-  facet_wrap( ~ region) +
-  post_theme()+
-  labs(caption = &amp;#39;Severe drop-offs may indicate that data was most recently updated earlier in the week.&amp;#39;)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;And now we’ll add the labels and annotations.&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;(weekly_regional_gg &amp;lt;- 
-  weekly_regional_gg +  
-  labs(
-    title = &amp;#39;Weekly Total U.S. COVID-19 Cases by Region in Rural Counties&amp;#39;,
-    subtitle = &amp;#39;SOURCE: The New York Times, based on reports from state and local health agencies &amp;amp;\nThe USDA Rural-Urban Continuum Codes (2013).&amp;#39;,
-    x = &amp;#39;\nWeek of&amp;#39;,
-    y = &amp;#39;Total&amp;#39;,
-    color = str_wrap(&amp;#39;USDA Rural-Urban Continuum Codes (2013)&amp;#39;, 25), 
-    caption = str_c(&amp;#39;By Elliot Meador, PhD; @Elliot_Meador\nNOTE: Last week may not yet be complete.\nProduced &amp;#39;, today_date)))&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;/post/2020-04-26-covid-19-and-rural-areas-in-the-u-s_files/figure-html/unnamed-chunk-7-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
-&lt;p&gt;It looks as though rural counties in the south are reporting more cases than the rest of the U.S..
-It’s worth investigating the southern counties to see if one state/county is pulling the statistics higher for the entire region, or if the trend is true for the majority of counties.
-There are a few ways to do this, but the most straightforward is to replicate the plot above but for southern states only.
-The code below does this.&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;southern_rural_cases &amp;lt;- covid_region %&amp;gt;% 
-  filter(str_detect(desc, &amp;#39;rural&amp;#39;), 
-         region == &amp;#39;South&amp;#39;) %&amp;gt;% 
-  group_by(week, state, desc) %&amp;gt;% 
-  summarise(total = sum(cases, na.rm = T)) %&amp;gt;% 
-  ungroup() 
-
-viridis &amp;lt;- scales::viridis_pal()
-
-southern_state &amp;lt;- southern_rural_cases %&amp;gt;% 
-  count(state) %&amp;gt;% 
-  pull(state)
-
-state_cols &amp;lt;- viridis(length(southern_state))
-
-names(state_cols) &amp;lt;- southern_state
+&lt;p&gt;An interesting caveat with the data is that it comes in two files.
+One file is the data, and the other file is what’s known as a data dictionary or data lookup.
+The lookup file is a database that explains what each variable is.&lt;/p&gt;
+&lt;div id=&#34;linking-with-rural-urban-classification-data&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Linking with rural-urban classification data&lt;/h2&gt;
+&lt;p&gt;There isn’t a really good indicator of rural/urban classification in the data, so, as usual, we’ll need to add one.
+I’ve used the USDA Rural-Urban Classifications before in the post on &lt;a href=&#34;https://www.thedeltanomics.com/post/covid-19-rural-deltanomics/&#34;&gt;Covid-19 and Rural Areas in the U.S.&lt;/a&gt;.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;clean_names &amp;lt;- 
+  function(x){
+    x &amp;lt;- str_to_lower(x)
+    x &amp;lt;- str_remove_all(x, &amp;#39;county&amp;#39;)
+    x &amp;lt;- str_remove_all(x, &amp;#39;[[:digit:]]&amp;#39;)
+    x &amp;lt;- str_squish(x)
+    x &amp;lt;- str_trim(x)
+    x
+  }
 
 
-labels_df &amp;lt;- southern_rural_cases %&amp;gt;% 
-  group_by(state, desc) %&amp;gt;% 
-  filter(week == max(week)) %&amp;gt;% 
-  ungroup() %&amp;gt;% 
-  mutate(desc = str_wrap(desc, 35))
-
-weeks_lab &amp;lt;- southern_rural_cases %&amp;gt;% 
-  count(week) %&amp;gt;% 
-  pull(week)
-
-southern_plot &amp;lt;- southern_rural_cases %&amp;gt;% 
-  mutate(desc = str_wrap(desc, 35)) %&amp;gt;% 
-  ggplot(aes(week, total, group = state))+
-  geom_line(aes(color = state), 
-            show.legend = F)+
-  geom_point(color = &amp;#39;white&amp;#39;, 
-             size = 2.25)+
-  geom_point(aes(color = state), 
-             size = 2, 
-             show.legend = F)+
-  geom_text(data = labels_df, 
-            aes(label = state, 
-                x = week, 
-                y = total, 
-                color = state),
-            size = 2, 
-            hjust = 0,
-            nudge_x = 1.25,
-            check_overlap = T,
-            show.legend = F)+
-  scale_x_date(breaks = weeks_lab, 
-               date_labels = &amp;#39;%b-%d&amp;#39;)+
-  scale_color_manual(values = state_cols)+
-  scale_y_log10(labels = comma)+
-  facet_grid(~desc)+
-  coord_cartesian(clip = &amp;#39;off&amp;#39;)+
-  post_theme(plot.margin = margin(1.25, 
-                                  1.25, 
-                                  1.25, 
-                                  1.25, &amp;#39;cm&amp;#39;),
-             panel.spacing = unit(2, &amp;quot;lines&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;And just like above, we’ll add our labels seperate.&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;(southern_plot_ii &amp;lt;- southern_plot+
-  labs(title = &amp;#39;Comparing Covid-19 Cases Across Rural Counties in the Southern U.S.&amp;#39;, 
-       subtitle = &amp;#39;SOURCE: The New York Times, based on reports from state and local health agencies &amp;amp;\nThe USDA Rural-Urban Continuum Codes (2013).&amp;#39;,
-       x = &amp;#39;Week of&amp;#39;, 
-       y = &amp;#39;Total\nLog10-scale&amp;#39;, 
-       caption = str_c(&amp;#39;By Elliot Meador, PhD; @Elliot_Meador\nNOTE: Last week may not yet be complete.\nProduced &amp;#39;, today_date)))&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;/post/2020-04-26-covid-19-and-rural-areas-in-the-u-s_files/figure-html/unnamed-chunk-9-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+rural_urban &amp;lt;- 
+  rural_urban %&amp;gt;% 
+  mutate(county = clean_names(county)) %&amp;gt;% 
+  rename(abb = state) %&amp;gt;% 
+  left_join(
+tibble(abb = state.abb, 
+       state = clean_names(state.name))) %&amp;gt;% 
+  mutate(state_county = 
+           glue(&amp;#39;{state} {county}&amp;#39;)) %&amp;gt;% 
+  select(state_county, rucc_2013, desc)&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;## Joining, by = &amp;quot;abb&amp;quot;&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;rural_food_desert &amp;lt;- 
+  food_access_research_atlas %&amp;gt;% 
+  mutate(state = clean_names(state),
+            county = clean_names(county),
+            state_county = 
+                  glue(&amp;#39;{state} {county}&amp;#39;)) %&amp;gt;% 
+  left_join(rural_urban, 
+            by = &amp;#39;state_county&amp;#39;) %&amp;gt;% 
+  filter(str_detect(desc, &amp;#39;rural&amp;#39;))&lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
 &lt;/div&gt;
-&lt;div id=&#34;county-level-analysis&#34; class=&#34;section level1&#34;&gt;
-&lt;h1&gt;County-level analysis&lt;/h1&gt;
-&lt;p&gt;In the above analysis, we are showing aggregate statistics across states.
-This gives a good overall understanding of high-level trends, but the next step is to look a bit closer at what happens at a more granular level.
-Let’s take a look at all rural counties in the U.S. and plot the total cases by the total deaths - which is a common plot I’ve found online.&lt;/p&gt;
-&lt;p&gt;We’ll only look at rural counties that have at least 10 recorded cases.
-We’re going to do a twist on a standard scatterplot, where we plot the state abbreviation of the county instead of a simple point.
-We’ll also colour all abbreviations of the same state in the same colour; this will help draw the readers’ eye to similar states.
-Lastly, we won’t have a colour legend as this many states will lead to a massive legend that will overpower the plot.&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;covid_county_rural &amp;lt;- covid_county %&amp;gt;%
-  left_join(rural_urban,
-            by = &amp;#39;fips&amp;#39;) %&amp;gt;% 
-  filter(str_detect(desc, &amp;#39;rural&amp;#39;)) %&amp;gt;% 
-  select(-date, -county, -rucc_2013) %&amp;gt;% 
-  group_by(fips) %&amp;gt;% 
-  mutate(tot_deaths = sum(deaths, na.rm = T), 
-         tot_cases = sum(cases, na.rm = T)) %&amp;gt;%   ungroup() %&amp;gt;% 
-  filter(tot_cases &amp;gt; 10, 
-         tot_deaths &amp;gt; 1) %&amp;gt;% # must have at least 10 cases
-  select(-cases, -deaths) %&amp;gt;% 
-  distinct(fips, .keep_all = T)
-  
-
-plot_states &amp;lt;- covid_county_rural %&amp;gt;% 
-  distinct(state) %&amp;gt;% 
-  pull()
-
-state_cols &amp;lt;- 
-  sample(viridis_pal()(length(plot_states)))
-
-
-names(state_cols) &amp;lt;-  sample(plot_states)
-
-
-update_date_anno &amp;lt;- paste(&amp;#39;Data updated on&amp;#39;,
-      format(max(covid_county$date), &amp;#39;%d-%b-%Y&amp;#39;))
-
-rural_point_plot &amp;lt;- covid_county_rural %&amp;gt;% 
-  left_join(tibble(state = state.name, 
-                   abb = state.abb)) %&amp;gt;% 
-  ggplot(aes(tot_cases, 
-             tot_deaths))+
-  geom_text(aes(label = abb, 
-                color = state), 
-            size = 5,
-            show.legend = F)+
-  scale_x_log10(labels = comma)+
-  scale_y_log10(labels = comma)+
-  scale_fill_manual(values = state_cols)+
-  scale_color_manual(values = state_cols)+
-  post_theme()+
-  labs(title = &amp;#39;Comparing Covid-19 Cases and Deaths Across Rural Counties in the U.S.&amp;#39;, 
-       subtitle = &amp;#39;SOURCE: The New York Times, based on reports from state and local health agencies &amp;amp;\nThe USDA Rural-Urban Continuum Codes (2013).&amp;#39;, 
-       x = &amp;#39;Total Cases&amp;#39;, 
-       y = &amp;#39;Total Deaths&amp;#39;, 
-       caption = paste0(&amp;#39;Only counties shown with more than 10 cases and at least 1 death recorded.\nNOTE:Horizontal and vertical axes are on log10 scales.\n&amp;#39;,update_date_anno))
-
-
-
-rural_point_plot +
-  theme(text = element_text(size = 15))+
-  annotate(&amp;#39;label&amp;#39;, 
-           x = 5000, 
-           y = 5, 
-    label = str_wrap(&amp;#39;Letters are state abbreviations. Each pair represents a different county within the listed state. State abbreviations are consistently colored.&amp;#39;, 40), 
-    size = 3.5, 
-    family = &amp;#39;serif&amp;#39;, 
-    hjust = 0.5)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;/post/2020-04-26-covid-19-and-rural-areas-in-the-u-s_files/figure-html/unnamed-chunk-10-1.png&#34; width=&#34;864&#34; /&gt;&lt;/p&gt;
+&lt;div id=&#34;working-with-lookup-files---a-closer-look-at-snap&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Working with lookup files - A closer look at SNAP&lt;/h1&gt;
+&lt;p&gt;Lookup files are often called &lt;em&gt;data dictionaries&lt;/em&gt;.
+Data dictionaries are a common component of many large datasets that are widely publically used.
+As previously mentioned, quite often, a data dictionary or lookup is just another file that accompanies the primary data.&lt;/p&gt;
+&lt;p&gt;It isn’t “data” is the traditional sense (i.e. we aren’t going to be performing cross-tabulations on it anytime soon.), but it is a useful approach to treat it just as any other data file.
+For instance:&lt;/p&gt;
+&lt;ol style=&#34;list-style-type: decimal&#34;&gt;
+&lt;li&gt;We can append data dictionaries/lookups to the central database as we did previously.&lt;/li&gt;
+&lt;li&gt;We can use natural language processing on the data dictionaries to get a better understanding of the data holds; and,&lt;/li&gt;
+&lt;li&gt;We can use data tools like &lt;code&gt;dplyr&lt;/code&gt; and &lt;code&gt;purrr&lt;/code&gt; to pick apart the lookup file and make it more manageable.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Let’s say we are interested in looking at SNAP.
+SNAP is short for &lt;em&gt;Supplemental Nutrition Assistance Program&lt;/em&gt;.
+According to the &lt;a href=&#34;https://www.fns.usda.gov/snap/supplemental-nutrition-assistance-program&#34;&gt;USDA’s website&lt;/a&gt;:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;SNAP provides nutrition benefits to supplement the food budget of needy families so they can purchase healthy food and move towards self-sufficiency.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;We can use &lt;code&gt;dplyr&lt;/code&gt; and the &lt;code&gt;kable&lt;/code&gt; function from &lt;code&gt;knitr&lt;/code&gt; to quickly search and display the results for variables on SNAP.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;lookup %&amp;gt;% 
+  filter(str_detect(description, &amp;#39;SNAP&amp;#39;)) %&amp;gt;% 
+  mutate(long_name = 
+           str_trunc(long_name, 10)) %&amp;gt;% 
+  kable(format = &amp;#39;html&amp;#39;, booktab = T) %&amp;gt;% 
+  kable_styling()&lt;/code&gt;&lt;/pre&gt;
+&lt;table class=&#34;table&#34; style=&#34;margin-left: auto; margin-right: auto;&#34;&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th style=&#34;text-align:left;&#34;&gt;
+field
+&lt;/th&gt;
+&lt;th style=&#34;text-align:left;&#34;&gt;
+long_name
+&lt;/th&gt;
+&lt;th style=&#34;text-align:left;&#34;&gt;
+description
+&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+lasnaphalf
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Low acc…
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Housing units receiving SNAP benefits count beyond 1/2 mile from supermarket
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+lasnaphalfshare
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Low acc…
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Share of tract housing units receiving SNAP benefits count beyond 1/2 mile from supermarket
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+lasnap1
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Low acc…
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Housing units receiving SNAP benefits count beyond 1 mile from supermarket
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+lasnap1share
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Low acc…
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Share of tract housing units receiving SNAP benefits count beyond 1 mile from supermarket
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+lasnap10
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Low acc…
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Housing units receiving SNAP benefits count beyond 10 miles from supermarket
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+lasnap10share
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Low acc…
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Share of tract housing units receiving SNAP benefits count beyond 10 miles from supermarket
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+lasnap20
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Low acc…
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Housing units receiving SNAP benefits count beyond 20 miles from supermarket
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+lasnap20share
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Low acc…
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Share of tract housing units receiving SNAP benefits count beyond 20 miles from supermarket
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+TractSNAP
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Tract h…
+&lt;/td&gt;
+&lt;td style=&#34;text-align:left;&#34;&gt;
+Total count of housing units receiving SNAP benefits in tract
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;Glancing at the table above, there appear to be nine variables that cover SNAP benefits.
+Also, it appears that SNAP variables are often distinguished by have either &lt;em&gt;number&lt;/em&gt; or &lt;em&gt;share&lt;/em&gt;, which means that the variable has either total counts of percents of occurrence.&lt;/p&gt;
+&lt;p&gt;Let’s take a look at some and compare them by state.
+We’ll use the verb &lt;code&gt;contains&lt;/code&gt; within &lt;code&gt;dyplyr&lt;/code&gt; to grab variables contain &lt;em&gt;SNAP&lt;/em&gt;.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;rural_food_desert_snap &amp;lt;- 
+  rural_food_desert %&amp;gt;% 
+  select(state, county, desc, census_tract,
+         contains(&amp;#39;snap&amp;#39;)) &lt;/code&gt;&lt;/pre&gt;
 &lt;/div&gt;
-&lt;div id=&#34;key-findings&#34; class=&#34;section level1&#34;&gt;
-&lt;h1&gt;Key Findings&lt;/h1&gt;
-&lt;p&gt;It looks like, at least on the surface of things, that rural places in southern counties report more Covid-19 cases than other rural counties across the U.S..
-When we investigated this further by breaking down the states within the southern category, we can see that there is somewhat even spread.
-That is, one state is not pulling the rest along, which could obscure the actual trend.&lt;/p&gt;
-&lt;p&gt;I’m from the south-east of the U.S. (Mississippi), and I can say with some certainty that Mississippi, Alabama and Georgia have quite high levels of poverty and ill-health that usually accompanies poverty in the U.S..
-It is interesting to see these states reporting higher levels of Covid-19, and it begs the question, “Is there an association between poorer rural places and higher levels of reported cases?”
-Statistically, I think there probably is (though this needs testing).
-Even if it is found to be statistically correlated, we still won’t know &lt;strong&gt;&lt;em&gt;why&lt;/em&gt;&lt;/strong&gt; we’re seeing these trends until we do more qualitative work in the region to pair with our quantitative findings.&lt;/p&gt;
-&lt;p&gt;Thanks to the hard work of the folks at the New York Times, we can update our findings over time to see if the trends hold. So stay tuned!&lt;/p&gt;
+&lt;div id=&#34;travel-distance-and-rural-urban-snap&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Travel distance and rural-urban SNAP&lt;/h1&gt;
+&lt;p&gt;Now that we have our data in a way that we like it let’s do some quick plots, first looking at state and county levels, then looking at rural-urban areas.&lt;/p&gt;
+&lt;div id=&#34;travel-distance&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Travel distance&lt;/h2&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;county_snap_dist &amp;lt;-
+  rural_food_desert_snap %&amp;gt;% 
+  mutate(id = group_indices(., census_tract)) %&amp;gt;% 
+  select(state, county, desc, census_tract,contains(&amp;#39;share&amp;#39;)) %&amp;gt;% 
+  pivot_longer(-c(state, 
+                  county, 
+                  desc, 
+                  census_tract),
+               names_to =  &amp;#39;snap_dist&amp;#39;, 
+               values_to = &amp;#39;rate&amp;#39;) %&amp;gt;% 
+  mutate(snap_dist = 
+           parse_number(snap_dist), 
+         snap_dist = 
+           replace_na(snap_dist, .5)) &lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Let’s quickly take a look at the top rate (percent) of people in census tracts for each distance from a grocery store.
+We’ll look at only those people classified as living in rural counties.&lt;/p&gt;
+&lt;p&gt;The plot below is a boxplot that shows the spread of rate SNAP recievers accross distances to supermarkets.
+It shows that there is a great deal of variability in terms of distance as well as a high number of people who have to travel quite far.
+The rate of SNAP recievers appears to be negatively correlated with distance, meaning that the rate of SNAP recievers decreases as distance increases.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;county_snap_dist %&amp;gt;%
+  ggplot(aes(as.factor(snap_dist),rate))+
+  geom_boxplot(aes(fill = as.factor(snap_dist)), 
+               show.legend = F)+
+  scale_fill_viridis_d(direction = -1)+
+  scale_y_continuous(labels = percent)+
+  post_theme(
+    axis.title.x = 
+      element_text(face = &amp;#39;italic&amp;#39;),
+             axis.title.y = 
+               element_text(angle = 0, 
+                            hjust= 1, 
+                            face = &amp;#39;italic&amp;#39;))+
+  labs(title = &amp;#39;Relationship between percent of SNAP recievers and food deserts&amp;#39;,
+       subtitle = &amp;#39;Rural and Remote areas in the US according to USDA classification&amp;#39;,
+       x = &amp;#39;Miles to nearest supermarket&amp;#39;,
+       y = &amp;#39;Percent recieving\nSNAP&amp;#39;)+
+  annotate(&amp;#39;rect&amp;#39;, xmin = 3.9, xmax = 4.1, ymin = .1, ymax = .35, color = &amp;#39;#C4C4C4&amp;#39;, alpha = .25)+
+  annotate(&amp;#39;text&amp;#39;, x = 3.65, y = .425, label = str_wrap(&amp;#39;Upwards of 35% of residents in these census tract travel 20 or miles to a grocery store and recive government food benefits.&amp;#39;, 30), hjust= .5, size = 2.5)+
+  annotate(&amp;#39;segment&amp;#39;, 
+           x  = 3.85, 
+           xend = 4, 
+           y = .385, 
+           yend = .36, 
+           arrow = arrow(type = &amp;#39;closed&amp;#39;, 
+                         length = unit(1, &amp;#39;mm&amp;#39;)))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2020-07-29-u-s-food-deserts_files/figure-html/unnamed-chunk-8-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;a-closer-look-with-leaflet&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;A closer look with Leaflet&lt;/h1&gt;
+&lt;p&gt;Our data is aggregated by census tract and is therefore geographical by nature.
+Mapping in R has made huge developments in the past 5 to 10 years, and any work with rural/urban analysis can usually be benefited through some geo-spatial analysis.
+So learning to make maps is always helpful!&lt;/p&gt;
+&lt;div id=&#34;leaflet-maps&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Leaflet maps&lt;/h2&gt;
+&lt;p&gt;The &lt;code&gt;leaflet&lt;/code&gt; package is a fantastic way to make interative maps with a relatively small amount of code.
+It works really well will with the &lt;code&gt;sf&lt;/code&gt; package for geocomputional analysis.
+In addition, we can use the &lt;code&gt;tigris&lt;/code&gt; package to get census tract information straight in R.
+&lt;code&gt;tigris&lt;/code&gt; can return &lt;code&gt;sf&lt;/code&gt; objects, making for speedy workflow between the three packages.&lt;/p&gt;
+&lt;p&gt;Below, we’ll take a look those census tracts that have a large proportion of the population that have to travel 20 or miles to a supermarket and that have a high percentage of SNAP recipients.&lt;/p&gt;
+&lt;/div&gt;
 &lt;/div&gt;
 </description>
     </item>
@@ -702,6 +702,357 @@ Most meals
 &lt;/tbody&gt;
 &lt;/table&gt;
 &lt;/div&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+    <item>
+      <title>Covid-19 and Rural Areas in the U.S.</title>
+      <link>/post/covid-19-rural-deltanomics/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      <guid>/post/covid-19-rural-deltanomics/</guid>
+      <description>
+
+
+&lt;div id=&#34;first-published-on-26-april-2020&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;First published on 26-April-2020&lt;/h4&gt;
+&lt;/div&gt;
+&lt;div id=&#34;last-updated-on-08-aug-2020&#34; class=&#34;section level4&#34;&gt;
+&lt;h4&gt;Last updated on 08-Aug-2020&lt;/h4&gt;
+&lt;/div&gt;
+&lt;div id=&#34;introduction&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Introduction&lt;/h1&gt;
+&lt;p&gt;Now that we are square in the middle of the Covid-19 pandemic, I thought it might be beneficial to look at some statistics associated with the number of cases.
+We’ll differentiate our analysis by focusing on cases of Covid-19 in rural areas of the U.S.
+There are a couple of reasons for this: mainly, rural analytics is my speciality, so while I don’t know much about the virus, I do know some about rural societies and economies; we can easily find pertinent data on rural counties; and, we can utilise some cool built-in R functions to help us along the way.
+Before we go on it’s important to note that:&lt;/p&gt;
+&lt;ol style=&#34;list-style-type: decimal&#34;&gt;
+&lt;li&gt;I am not a medical doctor or specialist in viral diseases.&lt;/li&gt;
+&lt;li&gt;This post is meant to be a learning resource for people interested in looking at the pandemic from a rural perspective.&lt;/li&gt;
+&lt;li&gt;Any potential interesting findings must be further investigated before any judgements can be made.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/div&gt;
+&lt;div id=&#34;data&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Data&lt;/h1&gt;
+&lt;p&gt;The data for this post comes from two places: Covid-19 cases from the &lt;a href=&#34;https://github.com/nytimes/covid-19-data&#34;&gt;New York Times github&lt;/a&gt;; and the &lt;a href=&#34;https://www.ers.usda.gov/data-products/rural-urban-continuum-codes/&#34;&gt;USDA Rural-Urban Classification Codes&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Data scientists at The New York Times have been collating data on the number of cases of Covid-19 by county in the U.S..
+It is available at their GitHub page, which means that one can easily access and update the data through &lt;em&gt;pull requests&lt;/em&gt;.
+The data can also be downloaded and saved to a local drive.&lt;/p&gt;
+&lt;p&gt;To get a rural understanding of Covid-19 cases, we’ll use the USDA data on rural-urban classification of U.S. counties, which can be downloaded using the hyperlink above.
+Many countries have geographical classifications for rural and urban spaces.
+Usually, a low-level geography is chosen that spans an entire country.
+A continuum of rural-urban is used to describe each geographical area that goes from very urban to very rural (though not using those specific labels).&lt;/p&gt;
+&lt;p&gt;So we’ll use those two datasets, join them together and investigate how many cases of Covid-19 are found in rural areas within the U.S..&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;analysis&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Analysis&lt;/h1&gt;
+&lt;div id=&#34;libraries-and-themes&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Libraries and themes&lt;/h2&gt;
+&lt;p&gt;&lt;code&gt;Tidyverse&lt;/code&gt; packages will be used to do most of the heavy lifting.
+We’ll do the data analysis using the &lt;code&gt;dplyr&lt;/code&gt; package, and we’ll do our plots with &lt;code&gt;ggplot2&lt;/code&gt;.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(tidyverse)
+library(lubridate)
+library(janitor)
+library(scales)
+library(cowplot)
+
+# USDA Rural-Urban classification codes
+
+
+post_theme &amp;lt;- function(...) {
+  theme(
+    text = 
+      element_text(
+        color = &amp;#39;black&amp;#39;,
+         family = &amp;#39;serif&amp;#39;),
+    axis.text = 
+      element_text(
+        color = &amp;#39;black&amp;#39;),
+    axis.text.x = 
+      element_text(angle = 45, 
+                   hjust = 1),
+    panel.background = 
+      element_blank(),
+    axis.line.x = 
+      element_line(
+        color = &amp;#39;black&amp;#39;),
+    axis.ticks = element_blank(),
+    plot.margin = margin(.75, .75, .75, .75, &amp;#39;cm&amp;#39;),
+    plot.caption = 
+      element_text(hjust = 0,
+                                face = &amp;quot;italic&amp;quot;),
+    plot.title = 
+      element_text(
+        face = &amp;#39;bold&amp;#39;),
+    plot.subtitle = 
+      element_text(face = &amp;#39;bold&amp;#39;),
+    plot.title.position = &amp;quot;plot&amp;quot;,
+    plot.caption.position =  &amp;quot;plot&amp;quot;, 
+    strip.background = 
+      element_blank(), 
+    strip.text = 
+      element_text(
+        face = &amp;#39;bold&amp;#39;)
+  ) +
+    theme(...) # this bit allows us to make changes using this same function instead of calling two theme functions.
+}&lt;/code&gt;&lt;/pre&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# I created a new R-project to house the Covid-19 data in my Documents directory. 
+covid_county &amp;lt;- read_csv(&amp;#39;~/Documents/R/covid-19-data/us-counties.csv&amp;#39;)
+
+# Pull in the USDA data from a directory I created in my cloud storage.
+rural_urban &amp;lt;-
+  read_csv(&amp;#39;~/OneDrive - SRUC/Data/usda/ruralurbancodes2013.csv&amp;#39;) %&amp;gt;%
+  select(fips,
+         rucc_2013,
+         desc = description)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Now that we’ve got the data loaded from Covid-19 and USDA Rural-Urban Classifications, we are going to use some of R’s base functionality.
+R has two functions that help with general data analysis and joins: &lt;code&gt;state.name&lt;/code&gt;, which has all 50 U.S. state names; and, &lt;code&gt;state.region&lt;/code&gt;, which has the 50 U.S. state’s categorised into geographical regions.&lt;br /&gt;
+We’ll use these two functions in a &lt;code&gt;tibble&lt;/code&gt; to help join the Covid-19 data with the Rural-Urban Classifications.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;state_region &amp;lt;-
+  tibble(state = state.name,
+         region = state.region)
+
+covid_region &amp;lt;-
+  covid_county %&amp;gt;%
+  left_join(rural_urban,
+            by = &amp;#39;fips&amp;#39;) %&amp;gt;%
+  left_join(state_region,
+            by = &amp;#39;state&amp;#39;) %&amp;gt;%
+  mutate(week =  
+           floor_date(date,
+                      &amp;#39;week&amp;#39;))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Now we have our working data frame called &lt;code&gt;covid_region&lt;/code&gt;. It has the following variable names: date, county, state, fips, cases, deaths, rucc_2013, desc, region, week.
+We’ll use the &lt;code&gt;description&lt;/code&gt; variable to filter out rural counties only.
+There are two classifications of rural areas - those that are adjacent to more metro places and those that are not.
+Those that are not adjacent to metro areas are adjacent to other rural areas, which makes them somewhat more remote, as people living there need to travel further to get to service centres.&lt;/p&gt;
+&lt;p&gt;We use the &lt;code&gt;group_by&lt;/code&gt;/&lt;code&gt;summarise&lt;/code&gt; functionality from &lt;code&gt;dplyr&lt;/code&gt; to find the sum of Covid-19 cases and deaths by each week, region and for both rural classifications.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;weekly_regions &amp;lt;- covid_region %&amp;gt;%
+  filter(str_detect(desc,
+                    &amp;#39;rural&amp;#39;)) %&amp;gt;% 
+  group_by(week, region, desc) %&amp;gt;%
+  summarise(cases =
+              sum(cases, na.rm = T),
+            deaths =
+              sum(deaths, na.rm = T)) %&amp;gt;%
+  ungroup() %&amp;gt;%
+  gather(key,
+         value,-c(week,
+                  region,
+                  desc)) %&amp;gt;% 
+  drop_na()&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;We’re going to make a fancy-looking plot for this post, something that you might like to share on social media or include in a work report.
+To help clean up the plot a bit, we’ll use a few approaches that are laid out in the code below.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# each label for the x-axis which we&amp;#39;ll use to make some nice looking data labels.
+week_n &amp;lt;- weekly_regions %&amp;gt;% 
+  count(week) %&amp;gt;% 
+  pull(week)
+
+##------ Wed Jul 29 21:41:05 2020 ------##
+# added this to clean up the x-axis
+month_n &amp;lt;- week_n %&amp;gt;% 
+  floor_date(&amp;#39;month&amp;#39;) %&amp;gt;% 
+  unique()
+
+# we&amp;#39;ll use scale_color_manual with our own color choice 
+col_v &amp;lt;- c(&amp;#39;#3E4A89FF&amp;#39;, &amp;#39;#FDE725FF&amp;#39;)
+names(col_v) &amp;lt;- unique(weekly_regions$desc)
+
+# a simple label_wrap function for the legend
+label_wrap &amp;lt;- function(x, n = 25){
+  paste0(str_wrap(x, n), &amp;#39;\n&amp;#39;)
+}
+
+# date labels that use drops today&amp;#39;s date into the caption of the plot.
+today_date &amp;lt;- 
+  as_date(Sys.time()) %&amp;gt;% 
+  format(&amp;#39;%d %B, %Y&amp;#39;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;OK, now we’ll create the main &lt;code&gt;ggplot&lt;/code&gt; that uses &lt;code&gt;facet_wrap&lt;/code&gt; to look at each region in the U.S. over time.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;weekly_regional_gg &amp;lt;- 
+  weekly_regions %&amp;gt;%
+  filter(key == &amp;#39;cases&amp;#39;) %&amp;gt;% 
+  ggplot(aes(week, 
+         value, 
+         group = desc)) +
+  geom_line(size = 1.25, 
+            aes(color = desc))+
+  geom_point(size = 4, 
+             color = &amp;#39;grey90&amp;#39;)+
+  geom_point(size = 3.5, 
+             aes(color = desc))+
+  scale_x_date(breaks = month_n, 
+               date_labels = &amp;#39;%d-%b&amp;#39;)+
+  scale_y_continuous(labels = comma) +
+  scale_color_manual(
+    values = col_v, 
+    labels = label_wrap,
+    name = &amp;#39;Rural classification&amp;#39;)+
+  facet_wrap( ~ region) +
+  post_theme()+
+  labs(caption = &amp;#39;Severe drop-offs may indicate that data was most recently updated earlier in the week.&amp;#39;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;And now we’ll add the labels and annotations.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;(weekly_regional_gg &amp;lt;- 
+  weekly_regional_gg +  
+  labs(
+    title = &amp;#39;Weekly Total U.S. COVID-19 Cases by Region in Rural Counties&amp;#39;,
+    subtitle = &amp;#39;SOURCE: The New York Times, based on reports from state and local health agencies &amp;amp;\nThe USDA Rural-Urban Continuum Codes (2013).&amp;#39;,
+    x = &amp;#39;\nWeek of&amp;#39;,
+    y = &amp;#39;Total&amp;#39;,
+    color = str_wrap(&amp;#39;USDA Rural-Urban Continuum Codes (2013)&amp;#39;, 25), 
+    caption = str_c(&amp;#39;By Elliot Meador, PhD; @Elliot_Meador\nNOTE: Last week may not yet be complete.\nProduced &amp;#39;, today_date)))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2020-04-26-covid-19-and-rural-areas-in-the-u-s_files/figure-html/unnamed-chunk-7-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;It looks as though rural counties in the south are reporting more cases than the rest of the U.S..
+It’s worth investigating the southern counties to see if one state/county is pulling the statistics higher for the entire region, or if the trend is true for the majority of counties.
+There are a few ways to do this, but the most straightforward is to replicate the plot above but for southern states only.
+The code below does this.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;southern_rural_cases &amp;lt;- covid_region %&amp;gt;% 
+  filter(str_detect(desc, &amp;#39;rural&amp;#39;), 
+         region == &amp;#39;South&amp;#39;) %&amp;gt;% 
+  group_by(week, state, desc) %&amp;gt;% 
+  summarise(total = sum(cases, na.rm = T)) %&amp;gt;% 
+  ungroup() 
+
+viridis &amp;lt;- scales::viridis_pal()
+
+southern_state &amp;lt;- southern_rural_cases %&amp;gt;% 
+  count(state) %&amp;gt;% 
+  pull(state)
+
+state_cols &amp;lt;- viridis(length(southern_state))
+
+names(state_cols) &amp;lt;- southern_state
+
+
+labels_df &amp;lt;- southern_rural_cases %&amp;gt;% 
+  group_by(state, desc) %&amp;gt;% 
+  filter(week == max(week)) %&amp;gt;% 
+  ungroup() %&amp;gt;% 
+  mutate(desc = str_wrap(desc, 35))
+
+weeks_lab &amp;lt;- southern_rural_cases %&amp;gt;% 
+  count(week) %&amp;gt;% 
+  pull(week)
+
+southern_plot &amp;lt;- southern_rural_cases %&amp;gt;% 
+  mutate(desc = str_wrap(desc, 35)) %&amp;gt;% 
+  ggplot(aes(week, total, group = state))+
+  geom_line(aes(color = state), 
+            show.legend = F)+
+  geom_point(color = &amp;#39;white&amp;#39;, 
+             size = 2.25)+
+  geom_point(aes(color = state), 
+             size = 2, 
+             show.legend = F)+
+  geom_text(data = labels_df, 
+            aes(label = state, 
+                x = week, 
+                y = total, 
+                color = state),
+            size = 2, 
+            hjust = 0,
+            nudge_x = 1.25,
+            check_overlap = T,
+            show.legend = F)+
+  scale_x_date(breaks = weeks_lab, 
+               date_labels = &amp;#39;%b-%d&amp;#39;)+
+  scale_color_manual(values = state_cols)+
+  scale_y_log10(labels = comma)+
+  facet_grid(~desc)+
+  coord_cartesian(clip = &amp;#39;off&amp;#39;)+
+  post_theme(plot.margin = margin(1.25, 
+                                  1.25, 
+                                  1.25, 
+                                  1.25, &amp;#39;cm&amp;#39;),
+             panel.spacing = unit(2, &amp;quot;lines&amp;quot;))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;And just like above, we’ll add our labels seperate.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;(southern_plot_ii &amp;lt;- southern_plot+
+  labs(title = &amp;#39;Comparing Covid-19 Cases Across Rural Counties in the Southern U.S.&amp;#39;, 
+       subtitle = &amp;#39;SOURCE: The New York Times, based on reports from state and local health agencies &amp;amp;\nThe USDA Rural-Urban Continuum Codes (2013).&amp;#39;,
+       x = &amp;#39;Week of&amp;#39;, 
+       y = &amp;#39;Total\nLog10-scale&amp;#39;, 
+       caption = str_c(&amp;#39;By Elliot Meador, PhD; @Elliot_Meador\nNOTE: Last week may not yet be complete.\nProduced &amp;#39;, today_date)))&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2020-04-26-covid-19-and-rural-areas-in-the-u-s_files/figure-html/unnamed-chunk-9-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;county-level-analysis&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;County-level analysis&lt;/h1&gt;
+&lt;p&gt;In the above analysis, we are showing aggregate statistics across states.
+This gives a good overall understanding of high-level trends, but the next step is to look a bit closer at what happens at a more granular level.
+Let’s take a look at all rural counties in the U.S. and plot the total cases by the total deaths - which is a common plot I’ve found online.&lt;/p&gt;
+&lt;p&gt;We’ll only look at rural counties that have at least 10 recorded cases.
+We’re going to do a twist on a standard scatterplot, where we plot the state abbreviation of the county instead of a simple point.
+We’ll also colour all abbreviations of the same state in the same colour; this will help draw the readers’ eye to similar states.
+Lastly, we won’t have a colour legend as this many states will lead to a massive legend that will overpower the plot.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;covid_county_rural &amp;lt;- covid_county %&amp;gt;%
+  left_join(rural_urban,
+            by = &amp;#39;fips&amp;#39;) %&amp;gt;% 
+  filter(str_detect(desc, &amp;#39;rural&amp;#39;)) %&amp;gt;% 
+  select(-date, -county, -rucc_2013) %&amp;gt;% 
+  group_by(fips) %&amp;gt;% 
+  mutate(tot_deaths = sum(deaths, na.rm = T), 
+         tot_cases = sum(cases, na.rm = T)) %&amp;gt;%   ungroup() %&amp;gt;% 
+  filter(tot_cases &amp;gt; 10, 
+         tot_deaths &amp;gt; 1) %&amp;gt;% # must have at least 10 cases
+  select(-cases, -deaths) %&amp;gt;% 
+  distinct(fips, .keep_all = T)
+  
+
+plot_states &amp;lt;- covid_county_rural %&amp;gt;% 
+  distinct(state) %&amp;gt;% 
+  pull()
+
+state_cols &amp;lt;- 
+  sample(viridis_pal()(length(plot_states)))
+
+
+names(state_cols) &amp;lt;-  sample(plot_states)
+
+
+update_date_anno &amp;lt;- paste(&amp;#39;Data updated on&amp;#39;,
+      format(max(covid_county$date), &amp;#39;%d-%b-%Y&amp;#39;))
+
+rural_point_plot &amp;lt;- covid_county_rural %&amp;gt;% 
+  left_join(tibble(state = state.name, 
+                   abb = state.abb)) %&amp;gt;% 
+  ggplot(aes(tot_cases, 
+             tot_deaths))+
+  geom_text(aes(label = abb, 
+                color = state), 
+            size = 5,
+            show.legend = F)+
+  scale_x_log10(labels = comma)+
+  scale_y_log10(labels = comma)+
+  scale_fill_manual(values = state_cols)+
+  scale_color_manual(values = state_cols)+
+  post_theme()+
+  labs(title = &amp;#39;Comparing Covid-19 Cases and Deaths Across Rural Counties in the U.S.&amp;#39;, 
+       subtitle = &amp;#39;SOURCE: The New York Times, based on reports from state and local health agencies &amp;amp;\nThe USDA Rural-Urban Continuum Codes (2013).&amp;#39;, 
+       x = &amp;#39;Total Cases&amp;#39;, 
+       y = &amp;#39;Total Deaths&amp;#39;, 
+       caption = paste0(&amp;#39;Only counties shown with more than 10 cases and at least 1 death recorded.\nNOTE:Horizontal and vertical axes are on log10 scales.\n&amp;#39;,update_date_anno))
+
+
+
+rural_point_plot +
+  theme(text = element_text(size = 15))+
+  annotate(&amp;#39;label&amp;#39;, 
+           x = 5000, 
+           y = 5, 
+    label = str_wrap(&amp;#39;Letters are state abbreviations. Each pair represents a different county within the listed state. State abbreviations are consistently colored.&amp;#39;, 40), 
+    size = 3.5, 
+    family = &amp;#39;serif&amp;#39;, 
+    hjust = 0.5)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2020-04-26-covid-19-and-rural-areas-in-the-u-s_files/figure-html/unnamed-chunk-10-1.png&#34; width=&#34;864&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;key-findings&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Key Findings&lt;/h1&gt;
+&lt;p&gt;It looks like, at least on the surface of things, that rural places in southern counties report more Covid-19 cases than other rural counties across the U.S..
+When we investigated this further by breaking down the states within the southern category, we can see that there is somewhat even spread.
+That is, one state is not pulling the rest along, which could obscure the actual trend.&lt;/p&gt;
+&lt;p&gt;I’m from the south-east of the U.S. (Mississippi), and I can say with some certainty that Mississippi, Alabama and Georgia have quite high levels of poverty and ill-health that usually accompanies poverty in the U.S..
+It is interesting to see these states reporting higher levels of Covid-19, and it begs the question, “Is there an association between poorer rural places and higher levels of reported cases?”
+Statistically, I think there probably is (though this needs testing).
+Even if it is found to be statistically correlated, we still won’t know &lt;strong&gt;&lt;em&gt;why&lt;/em&gt;&lt;/strong&gt; we’re seeing these trends until we do more qualitative work in the region to pair with our quantitative findings.&lt;/p&gt;
+&lt;p&gt;Thanks to the hard work of the folks at the New York Times, we can update our findings over time to see if the trends hold. So stay tuned!&lt;/p&gt;
 &lt;/div&gt;
 </description>
     </item>
