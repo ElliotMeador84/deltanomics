@@ -1,5 +1,5 @@
 ---
-abstract: Talk presented on findings from social media networks related to community supported agriculture.
+abstract: International Network for Social Science Network Analysis. Talk presented on findings from social media networks related to community supported agriculture.
 address:
   city: Paris
   country: France
@@ -10,6 +10,6 @@ date: "2020-08-08"
 featured: false
 location: Paris, Frace
 math: true
-summary: International Network for Social Network Analysis. This talk occured virtually due to Covid-19 restrictions on travel.
+summary: International Network for Social Network Analysis. Spoke on results from the TGRAINS project. This talk occured virtually due to Covid-19 restrictions on travel.
 title: Supporting sustainable and resilient food systems
 ---

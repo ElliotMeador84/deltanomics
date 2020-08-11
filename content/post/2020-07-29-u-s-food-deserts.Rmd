@@ -93,6 +93,20 @@ library(scales)
 # For mapping and census data
 library(tigris)
 library(leaflet)
+library(maps)
+
+map <- purrr::map
+
+data("county.fips")
+county.fips <- 
+ county.fips %>% 
+  as_tibble()
+
+data("state.fips")
+
+state.fips <- 
+  state.fips %>% 
+  as_tibble()
 
 
 # File 1
@@ -290,45 +304,67 @@ top_5_perc_20m_ls <-
   top_5_perc_20m %>% 
   mutate(id = LETTERS[1:nrow(.)]) %>% 
   split(.$id)
-  
 
 
+# retrieve all census tract polygons per county
 top_5_20_sf_ls <- 
   map(top_5_perc_20m_ls, 
     possibly(function(x){
-      tracts(state = x$state, 
+    .y <-   tracts(state = x$state, 
              county = x$county, 
-             cb = T)
+             cb = T) 
+    
+    .y$census_tract <- x$census_tract
+    .y$rate <- x$rate
+    .y$dist <- x$snap_dist
+    .y$desc <- x$desc
+    .y$id <-  x$id
+    .y$county <-  x$county
+    .y$state <-  x$state
+
+    return(.y)
+    
     }, NULL)) 
 
-## need to find matches here
-top_5_20_sf_ls$A %>% 
-  as_tibble() %>% 
-  mutate(leng = str_length(AFFGEOID)) %>% 
-  pull(leng)
 
-top_5_perc_20m %>% 
-  mutate(leng = str_length(census_tract)) %>% 
-  pull(leng)
-
-
-
-map(top_5_20_sf_ls, function(x){
-  x %>% 
-    as_tibble() 
-  # %>% 
-  #   left_join(top_5_perc_20m, 
-  #             by = c('census_tract' = 
-  #                      'TRACTCE'))
-})
-
+# NOTE do.call to combine the sf objects
+top_5_20_sf <- 
+  do.call(rbind,top_5_20_sf_ls) 
 
 ```
 
+It only takes a few lines of code to produce a great map in `leaflet`. 
+Below you can see the polygons of the top 25 SNAP recipients in food deserts that are 20 miles or more to supermarkets. 
+And, while it is inciteful in its own right, it leaves us wanting something more. 
+With the help of `HTML` we can turn this map into something fantastic!
+```{r}
+leaflet(top_5_20_sf) %>% 
+  addProviderTiles("CartoDB.Positron") %>% 
+  addPolygons(color = "tomato")
+```
+
+### Leaflet to the next level 
+`HTML` is essential a coding approach to formatting web applications. 
+Officially `HTML` is: 
+
+>Hypertext Markup Language (HTML) is the standard markup language for documents designed to be displayed in a web browser. It can be assisted by technologies such as Cascading Style Sheets (CSS) and scripting languages such as JavaScript.
+
+First, we'll use `HTML` to create some tooltips that provide users information when they hover over polygons in the map. 
+
+```{r}
+tooltip <- top_5_20_sf %>% 
+  as_tibble() %>% 
+  mutate(county = str_to_title(county), 
+         state = str_to_title(state), 
+         rate = percent(rate)) %>% 
+  transmute(tip = glue('County: {county} <br> State: {state} <br> Distance to supermarket <br> {dist} <br> SNAP percent: {rate} <br> Tract: {census_tract}'))
 
 
-
-
+leaflet(top_5_20_sf) %>% 
+  addProviderTiles("OpenStreetMap") %>%
+  addPolygons(color = "black", 
+              popup = tooltip$tip)
+```
 
 
 
