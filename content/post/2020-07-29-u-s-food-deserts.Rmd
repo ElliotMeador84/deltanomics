@@ -367,6 +367,32 @@ leaflet(top_5_20_sf) %>%
 ```
 
 
+Test ~
+
+```{r}
+library(leaflet)
+library(readr)
+point_data <- read_csv("http://environmentalcomputing.net/wp-content/uploads/2018/03/point_data.csv")
+ 
+leaflet(point_data) %>% 
+  fitBounds(lng1 = min(point_data$lon) - 0.11, 
+            lat1 = min(point_data$lat) - 0.11,
+            lng2 = max(point_data$lon) + 0.11, 
+            lat2 = max(point_data$lat) + 0.11) %>% 
+  addCircleMarkers(~lon, ~lat,
+                   radius = 3,
+                   opacity = 100,
+                   color = "white", 
+                   label = as.character(point_data$Site), 
+                   labelOptions = labelOptions(noHide = TRUE, 
+                                               textOnly = TRUE, 
+                                               style = list(color = "white"),
+                                               direction = "auto",
+                                               offset = c(0, -10))) %>% 
+  addScaleBar(options = list(imperial = FALSE)) %>%
+  addProviderTiles(providers$Esri.WorldImagery)
+```
+
 
 
 
