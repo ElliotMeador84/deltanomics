@@ -94,6 +94,7 @@ library(scales)
 library(tigris)
 library(leaflet)
 library(maps)
+library(widgetframe)
 
 map <- purrr::map
 
@@ -340,7 +341,9 @@ With the help of `HTML` we can turn this map into something fantastic!
 ```{r}
 leaflet(top_5_20_sf) %>% 
   addProviderTiles("CartoDB.Positron") %>% 
-  addPolygons(color = "tomato")
+  addPolygons(color = "tomato") %>% 
+  frameWidget()
+  
 ```
 
 ### Leaflet to the next level 
@@ -363,6 +366,8 @@ tooltip <- top_5_20_sf %>%
 leaflet(top_5_20_sf) %>% 
   addProviderTiles("OpenStreetMap") %>%
   addPolygons(color = "black", 
-              popup = tooltip$tip)
+              popup = tooltip$tip) %>% 
+  frameWidget()
+
 ```
 
