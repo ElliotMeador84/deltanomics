@@ -355,6 +355,10 @@ Officially `HTML` is:
 First, we'll use `HTML` to create some tooltips that provide users information when they hover over polygons in the map. 
 
 ```{r}
+timestamp()
+```
+
+```{r}
 tooltip <- top_5_20_sf %>% 
   as_tibble() %>% 
   mutate(county = str_to_title(county), 
@@ -363,11 +367,12 @@ tooltip <- top_5_20_sf %>%
   transmute(tip = glue('County: {county} <br> State: {state} <br> Distance to supermarket <br> {dist} <br> SNAP percent: {rate} <br> Tract: {census_tract}'))
 
 
-leaflet(top_5_20_sf) %>% 
+l_ii <- leaflet(top_5_20_sf) %>% 
   addProviderTiles("OpenStreetMap") %>%
   addPolygons(color = "black", 
-              popup = tooltip$tip) %>% 
-  frameWidget()
+              popup = tooltip$tip) 
+
+frameWidget(l_ii, width = "100%")
 
 ```
 
