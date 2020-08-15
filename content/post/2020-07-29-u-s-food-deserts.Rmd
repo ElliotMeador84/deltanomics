@@ -25,7 +25,7 @@ editor_options:
 ---
 
 # Introduction
-A huge issue today related to food and rural population research are food deserts. 
+A considerable issue today related to food and rural population research are food deserts. 
 Food deserts are a complicated issue, but the idea centres on a simple premise: areas, where it's hard to reach a grocery store or access food, can be thought of as food deserts. 
 If you're interested in knowing more about the discourse on food deserts, than I'd recommend looking into these papers: 
 
@@ -76,7 +76,8 @@ post_theme <- function(...) {
 
 
 # The data
-Data for this post is on food deserts and comes from Kaggle. Kaggle is a great resource for aspiring data scientists and experienced ones. 
+Data for this post is on food deserts and comes from Kaggle. 
+Kaggle is an excellent resource for aspiring data scientists and experienced ones. 
 Specifically, the page called [Food Deserts in the US: Food access for sub-populations of the United States](https://www.kaggle.com/tcrammond/food-access-and-food-deserts?select=food_access_variable_lookup.csv).
 You can download the data directly from the link in the sentence above. 
 The code below reads in the data. 
@@ -93,9 +94,10 @@ library(scales)
 # For mapping and census data
 library(tigris)
 library(leaflet)
+library(leaflet.extras)
 library(maps)
+library(sf)
 library(widgetframe)
-
 map <- purrr::map
 
 data("county.fips")
@@ -132,17 +134,15 @@ rural_urban <-
 ```{r hidden_scratch, echo=F}
 food_access_research_atlas_names <- names(food_access_research_atlas)
 ```
-
-An interesting caveat with the data is that it comes in two files. 
+An exciting caveat with the data is that it comes in two files. 
 One file is the data, and the other file is what's known as a data dictionary or data lookup. 
 The lookup file is a database that explains what each variable is. 
  
 ## Linking with rural-urban classification data
-There isn't a really good indicator of rural/urban classification in the data, so, as usual, we'll need to add one. 
+There isn't a perfect indicator of rural/urban classification in the data, so, as usual, we'll need to add one. 
 I've used the USDA Rural-Urban Classifications before in the post on [Covid-19 and Rural Areas in the U.S.](https://www.thedeltanomics.com/post/covid-19-rural-deltanomics/). 
 
 ```{r}
-
 clean_names <- 
   function(x){
     x <- str_to_lower(x)
@@ -152,7 +152,6 @@ clean_names <-
     x <- str_trim(x)
     x
   }
-
 
 rural_urban <- 
   rural_urban %>% 
@@ -164,8 +163,6 @@ tibble(abb = state.abb,
   mutate(state_county = 
            glue('{state} {county}')) %>% 
   select(state_county, rucc_2013, desc)
-  
-
 
 rural_food_desert <- 
   food_access_research_atlas %>% 
@@ -174,21 +171,17 @@ rural_food_desert <-
             state_county = 
                   glue('{state} {county}')) %>% 
   left_join(rural_urban, 
-            by = 'state_county') %>% 
-  filter(str_detect(desc, 'rural'))
-
-
+            by = 'state_county')
 ```
-
 # Working with lookup files - A closer look at SNAP
 Lookup files are often called *data dictionaries*.
-Data dictionaries are a common component of many large datasets that are widely publically used.
+Data dictionaries are a common component of many large datasets that are used extensively in the public sphere.
 As previously mentioned, quite often, a data dictionary or lookup is just another file that accompanies the primary data. 
 
-It isn't "data" is the traditional sense (i.e. we aren't going to be performing cross-tabulations on it anytime soon.), but it is a useful approach to treat it just as any other data file.
+It isn't "data" in the traditional sense (i.e. we aren't going to be performing cross-tabulations on it anytime soon), but it is a useful approach to treat it just like any other data file.
 For instance: 
 
-1. We can append data dictionaries/lookups to the central database as we did previously. 
+1. We can append data dictionaries/lookups to the central database as we did previously;
 2. We can use natural language processing on the data dictionaries to get a better understanding of the data holds; and, 
 3. We can use data tools like `dplyr` and `purrr` to pick apart the lookup file and make it more manageable.  
 
@@ -207,35 +200,40 @@ lookup %>%
   kable(format = 'html', booktab = T) %>% 
   kable_styling()
 ```
-
-Glancing at the table above, there appear to be nine variables that cover SNAP benefits. 
+Glancing at the table above, one will quickly see nine variables cover SNAP benefits. 
 Also, it appears that SNAP variables are often distinguished by have either *number* or *share*, which means that the variable has either total counts of percents of occurrence. 
 
 Let's take a look at some and compare them by state. 
 We'll use the verb `contains` within `dyplyr` to grab variables contain *SNAP*. 
-
 ```{r}
 rural_food_desert_snap <- 
   rural_food_desert %>% 
-  select(state, county, desc, census_tract,
+  select(state, county, desc, census_tract, median_family_income,
          contains('snap')) 
   
 ```
-
-
-# Travel distance and rural-urban SNAP
-Now that we have our data in a way that we like it let's do some quick plots, first looking at state and county levels, then looking at rural-urban areas. 
+# Getting things tidy 
+Before going forward we'll need to tidy our data a bit. 
+Note the use of `pivot_longer` instead of `spread`; `pivot_longer` and `pivot_wider` are `dplyr`'s new verb names for changing between wide and long formats. 
+We won't discuss the major changes here, but it's good practice to read over big changes like this; you can do so [https://cengel.github.io/R-data-wrangling/tidyr.html](here.)
+Once we have our data in a way that we like it let's do some quick plots, first looking at state and county levels, then looking at rural-urban areas. 
 
 ## Travel distance
 ```{r}
 county_snap_dist <-
   rural_food_desert_snap %>% 
-  mutate(id = group_indices(., census_tract)) %>% 
-  select(state, county, desc, census_tract,contains('share')) %>% 
+  mutate(id = group_indices(., census_tract)) %>%
+  select(state, 
+         county, 
+         desc,
+         median_family_income,
+         census_tract,
+         contains('share')) %>% 
   pivot_longer(-c(state, 
                   county, 
                   desc, 
-                  census_tract),
+                  census_tract,
+                  median_family_income),
                names_to =  'snap_dist', 
                values_to = 'rate') %>% 
   mutate(snap_dist = 
@@ -244,15 +242,13 @@ county_snap_dist <-
            replace_na(snap_dist, .5)) 
 
 ```
-
-Let's quickly take a look at the top rate (percent) of people in census tracts for each distance from a grocery store. 
+Let's quickly take a look at the top rate (percent) of people in census tracts for each distance from a supermarket. 
 We'll look at only those people classified as living in rural counties. 
 
-The plot below is a boxplot that shows the spread of rate SNAP recievers accross distances to supermarkets. 
+The plot below is a boxplot that shows the spread of rate SNAP receivers across distances to supermarkets. 
 It shows that there is a great deal of variability in terms of distance as well as a high number of people who have to travel quite far. 
-The rate of SNAP recievers appears to be negatively correlated with distance, meaning that the rate of SNAP recievers decreases as distance increases. 
+The rate of SNAP receivers appears to be negatively correlated with distance, meaning that the rate of SNAP receivers decreases as distance increases. 
 ```{r}
-
 county_snap_dist %>%
   ggplot(aes(as.factor(snap_dist),rate))+
   geom_boxplot(aes(fill = as.factor(snap_dist)), 
@@ -280,99 +276,168 @@ county_snap_dist %>%
            arrow = arrow(type = 'closed', 
                          length = unit(1, 'mm')))
 ```
-
 # A closer look with Leaflet
 Our data is aggregated by census tract and is therefore geographical by nature. 
-Mapping in R has made huge developments in the past 5 to 10 years, and any work with rural/urban analysis can usually be benefited through some geo-spatial analysis. 
+Mapping in R has made considerable developments in the past 5 to 10 years, and any work with rural/urban analysis can usually be benefited through some geospatial analysis. 
 So learning to make maps is always helpful!
 
 ## Leaflet maps
-The `leaflet` package is a fantastic way to make interative maps with a relatively small amount of code. 
-It works really well will with the `sf` package for geocomputional analysis. 
-In addition, we can use the `tigris` package to get census tract information straight in R. 
+The `leaflet` package is a fantastic way to make interactive maps with a relatively small amount of code. 
+It works really well will with the `sf` package for geo-computational analysis. 
+Moreover, we can use the `tigris` package to get census tract information straight in R. 
 `tigris` can return `sf` objects, making for speedy workflow between the three packages. 
 
 Below, we'll take a look those census tracts that have a large proportion of the population that have to travel 20 or miles to a supermarket and that have a high percentage of SNAP recipients. 
 ```{r, include=F}
-
-## Get the top 25 of rate
-top_5_perc_20m <- 
+## Get all 20 miles or more that have at least some percent of SNAP users
+top_perc_20m <- 
   county_snap_dist %>% 
-  filter(snap_dist == 20) %>% 
-  top_n(25, rate) 
+  filter(snap_dist == 20, 
+         rate > 0) %>% 
+  mutate(desc = replace_na(desc, 'Unknown'))
 
-top_5_perc_20m_ls <- 
-  top_5_perc_20m %>% 
-  mutate(id = LETTERS[1:nrow(.)]) %>% 
+
+top_perc_20m_ls <- 
+  top_perc_20m %>% 
+  mutate(id = as.character(row_number())) %>% 
   split(.$id)
 
 
-# retrieve all census tract polygons per county
-top_5_20_sf_ls <- 
-  map(top_5_perc_20m_ls, 
-    possibly(function(x){
-    .y <-   tracts(state = x$state, 
-             county = x$county, 
-             cb = T) 
-    
-    .y$census_tract <- x$census_tract
-    .y$rate <- x$rate
-    .y$dist <- x$snap_dist
-    .y$desc <- x$desc
-    .y$id <-  x$id
-    .y$county <-  x$county
-    .y$state <-  x$state
+# retrieve all census tract polygons per county using a loop and the applying the tracts function from the tigris package.
 
-    return(.y)
-    
-    }, NULL)) 
-
+top_perc_20_sf_ls <- 
+  map(top_perc_20m_ls, 
+      possibly(function(x){
+        .y <-   tracts(state = x$state, 
+                       county = x$county, 
+                       cb = T) 
+        
+        single_track <- 
+          str_sub(x$census_tract,
+                start = 6, 
+                end = 9)
+        
+        .z <- .y %>% 
+          filter(NAME %in% single_track)
+        
+        .z$census_tract <- x$census_tract
+        .z$rate <- x$rate
+        .z$dist <- x$snap_dist
+        .z$desc <- x$desc
+        .z$id <-  x$id
+        .z$county <-  x$county
+        .z$state <-  x$state
+        .z$median_family_income <- x$median_family_income
+        
+        return(.z)
+        
+      }, NULL)) 
 
 # NOTE do.call to combine the sf objects
-top_5_20_sf <- 
-  do.call(rbind,top_5_20_sf_ls) 
+top_20_sf <- 
+  do.call(rbind,top_perc_20_sf_ls) 
 
 ```
-
 It only takes a few lines of code to produce a great map in `leaflet`. 
 Below you can see the polygons of the top 25 SNAP recipients in food deserts that are 20 miles or more to supermarkets. 
 And, while it is inciteful in its own right, it leaves us wanting something more. 
-With the help of `HTML` we can turn this map into something fantastic!
+With the help of `HTML`, we can turn this map into something fantastic!
 ```{r}
-leaflet(top_5_20_sf) %>% 
+leaflet(top_20_sf) %>% 
   addProviderTiles("CartoDB.Positron") %>% 
   addPolygons(color = "tomato") %>% 
   frameWidget()
   
 ```
-
 ### Leaflet to the next level 
-`HTML` is essential a coding approach to formatting web applications. 
+One way to dramatically improve our interactive `leaflet` maps is to use `HTML` code. `HTML` is essential a coding approach to formatting web applications. 
 Officially `HTML` is: 
 
 >Hypertext Markup Language (HTML) is the standard markup language for documents designed to be displayed in a web browser. It can be assisted by technologies such as Cascading Style Sheets (CSS) and scripting languages such as JavaScript.
 
-First, we'll use `HTML` to create some tooltips that provide users information when they hover over polygons in the map. 
+We can also use our data to correspond to map polygon colours. 
+The `leaflet.extras` package offers a lot of great extra options to add to `leaflet` maps. 
+The best part is that it is relatively straightforward to add these options. 
 
-```{r}
-timestamp()
-```
+Let's take the following steps to *trick* out our `leaflet` map!
 
+1. We'll use `HTML` to create some tooltips that provide users information when they hover over polygons in the map. 
+2. Create a custom function to map the fill/colour of the `leaflet` polygons to help guide the user's eye towards the worst off places in terms of SNAP and distance to supermarket. 
+NOTE: Our custom colour function is from [this question on StackOverflow.com](https://stackoverflow.com/questions/15006211/how-do-i-generate-a-mapping-from-numbers-to-colors-in-r/18749392).
+3. Use `leaflet.extras` to add some great functionality that makes the map more user-friendly.
 ```{r}
-tooltip <- top_5_20_sf %>% 
+remove_words <- 
+  glue_collapse(c('Nonmetro - ', 
+                  'Metro - '),'|')
+
+## tooltip with html
+tooltip <- top_20_sf %>% 
   as_tibble() %>% 
   mutate(county = str_to_title(county), 
          state = str_to_title(state), 
-         rate = percent(rate)) %>% 
-  transmute(tip = glue('County: {county} <br> State: {state} <br> Distance to supermarket <br> {dist} <br> SNAP percent: {rate} <br> Tract: {census_tract}'))
+         rate = round(rate, 2),
+         rate = percent(rate), 
+         desc = str_remove_all(desc,
+                               remove_words), 
+         median_family_income = 
+           dollar(median_family_income)) %>% 
+  transmute(tip = glue('<b>County:</b> {county} <br> <b>State:</b> {state} <br> <b>SNAP percent:</b> {rate} <br> <b>*Rural/Urban class:</b> {desc} <br> <b>Median family income:</b> {median_family_income} <br><b>Tract:</b> {census_tract}<br><br>- All areas are 20 or more miles from a supermarket.<br>* Rural/Urban classification determined at county-level.'))
 
+# change polygon colour to correspond to a numeric variable in the database
+map2color <- function(x, 
+                      pal, 
+                      limits = NULL) {
+  if (is.null(limits))
+    limits = range(x)
+  pal[findInterval(x, 
+               seq(limits[1], 
+               limits[2], 
+               length.out = length(pal) + 1), 
+                   all.inside = TRUE)]
+}
 
-l_ii <- leaflet(top_5_20_sf) %>% 
+col_pal <- rev(viridis_pal()(6))
+
+all_rate <- top_20_sf %>% 
+  as_tibble() %>% 
+  pull(rate) 
+
+all_rate_0 <- 
+  ifelse(all_rate < 0.005, 0, all_rate)
+
+all_rate_6 <- cut_interval(all_rate_0, 
+                           6, 
+                           labels = F) 
+
+percent_labs <- c('0.0% to 10.1%', 
+  '10.1% to 20.2%',
+  '20.2% to 30.2%',
+  '30.2% to 40.3%',
+  '40.3% to 50.4%',
+  '50.4% to 60.5%')
+
+top_20_sf_leaf_map <- 
+    leaflet(top_20_sf) %>% 
   addProviderTiles("OpenStreetMap") %>%
-  addPolygons(color = "black", 
-              popup = tooltip$tip) 
+  addPolygons(color = '#C4C4C4',
+              fillColor  = 
+                map2color(all_rate_6, 
+                          col_pal), 
+              fillOpacity = .85,
+              weight = .55,
+              popup = tooltip$tip, 
+          opacity = 1
+          )%>%
+  addDrawToolbar(
+    editOptions=editToolbarOptions(selectedPathOptions=selectedPathOptions())
+  ) %>%
+  addLegend(colors = col_pal, 
+            labels = percent_labs, 
+            opacity = 0.7,
+            title = 'Percent SNAP use<br>by census tract',
+    position = "bottomright")
 
-frameWidget(l_ii, width = "100%")
-
+top_20_sf_leaf_map %>% 
+  frameWidget(width = '100%')
 ```
 
