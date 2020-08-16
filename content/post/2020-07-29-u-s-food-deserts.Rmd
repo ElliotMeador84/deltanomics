@@ -29,6 +29,68 @@ A considerable issue today related to food and rural population research are foo
 Food deserts are a complicated issue, but the idea centres on a simple premise: areas, where it's hard to reach a grocery store or access food, can be thought of as food deserts. 
 If you're interested in knowing more about the discourse on food deserts, than I'd recommend looking into these papers: 
 
+- Blanchard, T. C., & Matthews, T. L. (2007). Retail concentration, food deserts, and food-disadvantaged communities in rural America. Remaking the North American food system: *Strategies for sustainability*, 201-215.
+- Gundersen, C., Kreider, B., & Pepper, J. V. (2017). Partial identification methods for evaluating food assistance programs: a case study of the causal impact of SNAP on food insecurity. *American Journal of Agricultural Economics*, 99(4), 875-893.
+- Andrews, M., Bhatta, R., & Ploeg, M. V. (2013). An alternative to developing stores in food deserts: can changes in SNAP benefits make a difference?. *Applied Economic Perspectives and Policy*, 35(1), 150-170.
+
+# The data
+Data for this post is on food deserts and comes from Kaggle. 
+Kaggle is an excellent resource for aspiring data scientists and experienced ones. 
+Specifically, the page called [Food Deserts in the US: Food access for sub-populations of the United States](https://www.kaggle.com/tcrammond/food-access-and-food-deserts?select=food_access_variable_lookup.csv).
+You can download the data directly from the link in the sentence above. 
+The code below reads in the data. 
+
+## Libraries and data
+```{r, message=F}
+# For data wrangling/tables
+library(tidyverse)
+library(janitor)
+library(knitr)
+library(kableExtra)
+library(glue)
+library(tidytext)
+library(scales)
+
+# For mapping and census data
+library(tigris)
+library(leaflet)
+library(leaflet.extras)
+library(maps)
+library(sf)
+library(widgetframe)
+map <- purrr::map
+
+# US county and state fips data is built-in R
+data("county.fips")
+county.fips <- 
+ county.fips %>% 
+  as_tibble()
+
+data("state.fips")
+state.fips <- 
+  state.fips %>% 
+  as_tibble()
+
+
+# File 1
+food_access_research_atlas <- 
+  read_csv('~/Downloads/665808_1173338_bundle_archive/food_access_research_atlas.csv') %>% 
+  clean_names()
+
+# File 2
+lookup <- 
+  read_csv('~/Downloads/665808_1173338_bundle_archive/food_access_variable_lookup.csv') %>% 
+  clean_names()
+
+# Pull in the USDA data from a directory I created in my cloud storage.
+rural_urban <-
+  read_csv('~/OneDrive - SRUC/Data/usda/ruralurbancodes2013.csv') %>%
+  select(state, 
+         county = county_name,
+         rucc_2013,
+         desc = description)
+```
+## Theme
 We'll use a custom theme for `ggplot2` plots made with this code. 
 Note the `...` notation, which allows us to make on-the-fly changes without calling another `theme` argument. 
 
@@ -37,6 +99,7 @@ options(warn = -1)
 ```
 
 ```{r}
+# a custom theme for ggplots
 post_theme <- function(...) {
   theme(
     text = 
@@ -75,62 +138,6 @@ post_theme <- function(...) {
 ```
 
 
-# The data
-Data for this post is on food deserts and comes from Kaggle. 
-Kaggle is an excellent resource for aspiring data scientists and experienced ones. 
-Specifically, the page called [Food Deserts in the US: Food access for sub-populations of the United States](https://www.kaggle.com/tcrammond/food-access-and-food-deserts?select=food_access_variable_lookup.csv).
-You can download the data directly from the link in the sentence above. 
-The code below reads in the data. 
-
-```{r, message=F}
-library(tidyverse)
-library(janitor)
-library(knitr)
-library(kableExtra)
-library(glue)
-library(tidytext)
-library(scales)
-
-# For mapping and census data
-library(tigris)
-library(leaflet)
-library(leaflet.extras)
-library(maps)
-library(sf)
-library(widgetframe)
-map <- purrr::map
-
-data("county.fips")
-county.fips <- 
- county.fips %>% 
-  as_tibble()
-
-data("state.fips")
-
-state.fips <- 
-  state.fips %>% 
-  as_tibble()
-
-
-# File 1
-food_access_research_atlas <- 
-  read_csv('~/Downloads/665808_1173338_bundle_archive/food_access_research_atlas.csv') %>% 
-  clean_names()
-
-# File 2
-lookup <- 
-  read_csv('~/Downloads/665808_1173338_bundle_archive/food_access_variable_lookup.csv') %>% 
-  clean_names()
-
-# Pull in the USDA data from a directory I created in my cloud storage.
-rural_urban <-
-  read_csv('~/OneDrive - SRUC/Data/usda/ruralurbancodes2013.csv') %>%
-  select(state, 
-         county = county_name,
-         rucc_2013,
-         desc = description)
-```
-
 ```{r hidden_scratch, echo=F}
 food_access_research_atlas_names <- names(food_access_research_atlas)
 ```
@@ -142,7 +149,8 @@ The lookup file is a database that explains what each variable is.
 There isn't a perfect indicator of rural/urban classification in the data, so, as usual, we'll need to add one. 
 I've used the USDA Rural-Urban Classifications before in the post on [Covid-19 and Rural Areas in the U.S.](https://www.thedeltanomics.com/post/covid-19-rural-deltanomics/). 
 
-```{r}
+```{r, message=FALSE}
+# clean names will be used to help get joining data in format that will merge well
 clean_names <- 
   function(x){
     x <- str_to_lower(x)
@@ -159,7 +167,8 @@ rural_urban <-
   rename(abb = state) %>% 
   left_join(
 tibble(abb = state.abb, 
-       state = clean_names(state.name))) %>% 
+       state = clean_names(state.name)),
+       by = "abb") %>% 
   mutate(state_county = 
            glue('{state} {county}')) %>% 
   select(state_county, rucc_2013, desc)
@@ -178,7 +187,7 @@ Lookup files are often called *data dictionaries*.
 Data dictionaries are a common component of many large datasets that are used extensively in the public sphere.
 As previously mentioned, quite often, a data dictionary or lookup is just another file that accompanies the primary data. 
 
-It isn't "data" in the traditional sense (i.e. we aren't going to be performing cross-tabulations on it anytime soon), but it is a useful approach to treat it just like any other data file.
+The data dictionary isn't "data" in the traditional sense (i.e. we aren't going to be performing cross-tabulations on it anytime soon), but it is a useful approach to treat it just like any other data file.
 For instance: 
 
 1. We can append data dictionaries/lookups to the central database as we did previously;
@@ -215,7 +224,7 @@ rural_food_desert_snap <-
 # Getting things tidy 
 Before going forward we'll need to tidy our data a bit. 
 Note the use of `pivot_longer` instead of `spread`; `pivot_longer` and `pivot_wider` are `dplyr`'s new verb names for changing between wide and long formats. 
-We won't discuss the major changes here, but it's good practice to read over big changes like this; you can do so [https://cengel.github.io/R-data-wrangling/tidyr.html](here.)
+We won't discuss the major changes here, but it's good practice to read over big changes like this; you can do so [here](https://cengel.github.io/R-data-wrangling/tidyr.html).
 Once we have our data in a way that we like it let's do some quick plots, first looking at state and county levels, then looking at rural-urban areas. 
 
 ## Travel distance
@@ -248,35 +257,38 @@ We'll look at only those people classified as living in rural counties.
 The plot below is a boxplot that shows the spread of rate SNAP receivers across distances to supermarkets. 
 It shows that there is a great deal of variability in terms of distance as well as a high number of people who have to travel quite far. 
 The rate of SNAP receivers appears to be negatively correlated with distance, meaning that the rate of SNAP receivers decreases as distance increases. 
-```{r}
-county_snap_dist %>%
-  ggplot(aes(as.factor(snap_dist),rate))+
-  geom_boxplot(aes(fill = as.factor(snap_dist)), 
-               show.legend = F)+
-  scale_fill_viridis_d(direction = -1)+
-  scale_y_continuous(labels = percent)+
-  post_theme(
-    axis.title.x = 
-      element_text(face = 'italic'),
-             axis.title.y = 
-               element_text(angle = 0, 
-                            hjust= 1, 
-                            face = 'italic'))+
-  labs(title = 'Relationship between percent of SNAP recievers and food deserts',
-       subtitle = 'Rural and Remote areas in the US according to USDA classification',
-       x = 'Miles to nearest supermarket',
-       y = 'Percent recieving\nSNAP')+
-  annotate('rect', xmin = 3.9, xmax = 4.1, ymin = .1, ymax = .35, color = '#C4C4C4', alpha = .25)+
-  annotate('text', x = 3.65, y = .425, label = str_wrap('Upwards of 35% of residents in these census tract travel 20 or miles to a grocery store and recive government food benefits.', 30), hjust= .5, size = 2.5)+
-  annotate('segment', 
-           x  = 3.85, 
-           xend = 4, 
-           y = .385, 
-           yend = .36, 
-           arrow = arrow(type = 'closed', 
-                         length = unit(1, 'mm')))
+```{r, fig.align='centre',fig.height=6, fig.width=10, message=FALSE}
+
+label_new <- 
+  function(x){
+    glue('{x} miles to\nnearest supermarket')
+  }
+
+county_snap_dist %>% 
+  mutate(snap_dist = as.factor(snap_dist),
+         snap_dist = fct_relabel(snap_dist, 
+                                 .fun = label_new)) %>% 
+  filter(rate > 0) %>% 
+  ggplot(aes(median_family_income, rate))+
+  stat_binhex()+
+  geom_smooth(color = '#C4C4C4', 
+              method = 'gam')+
+  scale_fill_viridis_c(labels = comma, 
+                       name = '# of\ncensus tracts')+
+  scale_x_continuous(labels = dollar)+
+  scale_y_continuous(labels = percent, 
+                     expand = c(0, 0))+
+  facet_grid(~snap_dist, )+
+  post_theme(axis.text.x = element_text(angle = 45, 
+                                        hjust = 1))+
+    labs(title = 'Association between SNAP rate and family income by travel distance to supermarket', 
+         x = 'Median family income\nper census tract', 
+         y = 'Percent SNAP\nrecipient', 
+        caption = 'Smoothed line fits a generalized additive model (GAM) to data: y ~ s(x, bs = "cs").')
+  
 ```
-# A closer look with Leaflet
+
+# Building interactive maps
 Our data is aggregated by census tract and is therefore geographical by nature. 
 Mapping in R has made considerable developments in the past 5 to 10 years, and any work with rural/urban analysis can usually be benefited through some geospatial analysis. 
 So learning to make maps is always helpful!
@@ -288,7 +300,7 @@ Moreover, we can use the `tigris` package to get census tract information straig
 `tigris` can return `sf` objects, making for speedy workflow between the three packages. 
 
 Below, we'll take a look those census tracts that have a large proportion of the population that have to travel 20 or miles to a supermarket and that have a high percentage of SNAP recipients. 
-```{r, include=F}
+```{r, eval=F, include=T}
 ## Get all 20 miles or more that have at least some percent of SNAP users
 top_perc_20m <- 
   county_snap_dist %>% 
@@ -327,7 +339,7 @@ top_perc_20_sf_ls <-
         .z$id <-  x$id
         .z$county <-  x$county
         .z$state <-  x$state
-        .z$median_family_income <- x$median_family_income
+       .z$median_family_income <-x$median_family_income
         
         return(.z)
         
@@ -337,7 +349,18 @@ top_perc_20_sf_ls <-
 top_20_sf <- 
   do.call(rbind,top_perc_20_sf_ls) 
 
+# This whole code-block may take quite a bit of time to run depending on your computer's specs. It's best to go ahead and save the output and then comment out the code above. This reduces the risk of accidently changing or re-running things, then having to wait to make adjustments. 
+
+write_sf(top_20_sf,'~/Documents/temp/top_20_sf.shp')
 ```
+
+```{r, echo=F}
+top_20_sf <- read_sf('~/Documents/temp/top_20_sf.shp')
+names(top_20_sf)[17] <- 'median_family_income'
+names(top_20_sf)[10] <- 'census_tract'
+```
+
+
 It only takes a few lines of code to produce a great map in `leaflet`. 
 Below you can see the polygons of the top 25 SNAP recipients in food deserts that are 20 miles or more to supermarkets. 
 And, while it is inciteful in its own right, it leaves us wanting something more. 
@@ -349,6 +372,7 @@ leaflet(top_20_sf) %>%
   frameWidget()
   
 ```
+
 ### Leaflet to the next level 
 One way to dramatically improve our interactive `leaflet` maps is to use `HTML` code. `HTML` is essential a coding approach to formatting web applications. 
 Officially `HTML` is: 

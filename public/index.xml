@@ -79,9 +79,75 @@
 &lt;p&gt;A considerable issue today related to food and rural population research are food deserts.
 Food deserts are a complicated issue, but the idea centres on a simple premise: areas, where it’s hard to reach a grocery store or access food, can be thought of as food deserts.
 If you’re interested in knowing more about the discourse on food deserts, than I’d recommend looking into these papers:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Blanchard, T. C., &amp;amp; Matthews, T. L. (2007). Retail concentration, food deserts, and food-disadvantaged communities in rural America. Remaking the North American food system: &lt;em&gt;Strategies for sustainability&lt;/em&gt;, 201-215.&lt;/li&gt;
+&lt;li&gt;Gundersen, C., Kreider, B., &amp;amp; Pepper, J. V. (2017). Partial identification methods for evaluating food assistance programs: a case study of the causal impact of SNAP on food insecurity. &lt;em&gt;American Journal of Agricultural Economics&lt;/em&gt;, 99(4), 875-893.&lt;/li&gt;
+&lt;li&gt;Andrews, M., Bhatta, R., &amp;amp; Ploeg, M. V. (2013). An alternative to developing stores in food deserts: can changes in SNAP benefits make a difference?. &lt;em&gt;Applied Economic Perspectives and Policy&lt;/em&gt;, 35(1), 150-170.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;div id=&#34;the-data&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;The data&lt;/h1&gt;
+&lt;p&gt;Data for this post is on food deserts and comes from Kaggle.
+Kaggle is an excellent resource for aspiring data scientists and experienced ones.
+Specifically, the page called &lt;a href=&#34;https://www.kaggle.com/tcrammond/food-access-and-food-deserts?select=food_access_variable_lookup.csv&#34;&gt;Food Deserts in the US: Food access for sub-populations of the United States&lt;/a&gt;.
+You can download the data directly from the link in the sentence above.
+The code below reads in the data.&lt;/p&gt;
+&lt;div id=&#34;libraries-and-data&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Libraries and data&lt;/h2&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# For data wrangling/tables
+library(tidyverse)
+library(janitor)
+library(knitr)
+library(kableExtra)
+library(glue)
+library(tidytext)
+library(scales)
+
+# For mapping and census data
+library(tigris)
+library(leaflet)
+library(leaflet.extras)
+library(maps)
+library(sf)
+library(widgetframe)
+map &amp;lt;- purrr::map
+
+# US county and state fips data is built-in R
+data(&amp;quot;county.fips&amp;quot;)
+county.fips &amp;lt;- 
+ county.fips %&amp;gt;% 
+  as_tibble()
+
+data(&amp;quot;state.fips&amp;quot;)
+state.fips &amp;lt;- 
+  state.fips %&amp;gt;% 
+  as_tibble()
+
+
+# File 1
+food_access_research_atlas &amp;lt;- 
+  read_csv(&amp;#39;~/Downloads/665808_1173338_bundle_archive/food_access_research_atlas.csv&amp;#39;) %&amp;gt;% 
+  clean_names()
+
+# File 2
+lookup &amp;lt;- 
+  read_csv(&amp;#39;~/Downloads/665808_1173338_bundle_archive/food_access_variable_lookup.csv&amp;#39;) %&amp;gt;% 
+  clean_names()
+
+# Pull in the USDA data from a directory I created in my cloud storage.
+rural_urban &amp;lt;-
+  read_csv(&amp;#39;~/OneDrive - SRUC/Data/usda/ruralurbancodes2013.csv&amp;#39;) %&amp;gt;%
+  select(state, 
+         county = county_name,
+         rucc_2013,
+         desc = description)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;theme&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Theme&lt;/h2&gt;
 &lt;p&gt;We’ll use a custom theme for &lt;code&gt;ggplot2&lt;/code&gt; plots made with this code.
 Note the &lt;code&gt;...&lt;/code&gt; notation, which allows us to make on-the-fly changes without calling another &lt;code&gt;theme&lt;/code&gt; argument.&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;post_theme &amp;lt;- function(...) {
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# a custom theme for ggplots
+post_theme &amp;lt;- function(...) {
   theme(
     text = 
       element_text(
@@ -116,68 +182,16 @@ Note the &lt;code&gt;...&lt;/code&gt; notation, which allows us to make on-the-f
   ) +
     theme(...) # this bit allows us to make changes using this same function instead of calling two theme functions.
 }&lt;/code&gt;&lt;/pre&gt;
-&lt;/div&gt;
-&lt;div id=&#34;the-data&#34; class=&#34;section level1&#34;&gt;
-&lt;h1&gt;The data&lt;/h1&gt;
-&lt;p&gt;Data for this post is on food deserts and comes from Kaggle.
-Kaggle is an excellent resource for aspiring data scientists and experienced ones.
-Specifically, the page called &lt;a href=&#34;https://www.kaggle.com/tcrammond/food-access-and-food-deserts?select=food_access_variable_lookup.csv&#34;&gt;Food Deserts in the US: Food access for sub-populations of the United States&lt;/a&gt;.
-You can download the data directly from the link in the sentence above.
-The code below reads in the data.&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(tidyverse)
-library(janitor)
-library(knitr)
-library(kableExtra)
-library(glue)
-library(tidytext)
-library(scales)
-
-# For mapping and census data
-library(tigris)
-library(leaflet)
-library(leaflet.extras)
-library(maps)
-library(sf)
-library(widgetframe)
-map &amp;lt;- purrr::map
-
-data(&amp;quot;county.fips&amp;quot;)
-county.fips &amp;lt;- 
- county.fips %&amp;gt;% 
-  as_tibble()
-
-data(&amp;quot;state.fips&amp;quot;)
-
-state.fips &amp;lt;- 
-  state.fips %&amp;gt;% 
-  as_tibble()
-
-
-# File 1
-food_access_research_atlas &amp;lt;- 
-  read_csv(&amp;#39;~/Downloads/665808_1173338_bundle_archive/food_access_research_atlas.csv&amp;#39;) %&amp;gt;% 
-  clean_names()
-
-# File 2
-lookup &amp;lt;- 
-  read_csv(&amp;#39;~/Downloads/665808_1173338_bundle_archive/food_access_variable_lookup.csv&amp;#39;) %&amp;gt;% 
-  clean_names()
-
-# Pull in the USDA data from a directory I created in my cloud storage.
-rural_urban &amp;lt;-
-  read_csv(&amp;#39;~/OneDrive - SRUC/Data/usda/ruralurbancodes2013.csv&amp;#39;) %&amp;gt;%
-  select(state, 
-         county = county_name,
-         rucc_2013,
-         desc = description)&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;An exciting caveat with the data is that it comes in two files.
 One file is the data, and the other file is what’s known as a data dictionary or data lookup.
 The lookup file is a database that explains what each variable is.&lt;/p&gt;
+&lt;/div&gt;
 &lt;div id=&#34;linking-with-rural-urban-classification-data&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Linking with rural-urban classification data&lt;/h2&gt;
 &lt;p&gt;There isn’t a perfect indicator of rural/urban classification in the data, so, as usual, we’ll need to add one.
 I’ve used the USDA Rural-Urban Classifications before in the post on &lt;a href=&#34;https://www.thedeltanomics.com/post/covid-19-rural-deltanomics/&#34;&gt;Covid-19 and Rural Areas in the U.S.&lt;/a&gt;.&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;clean_names &amp;lt;- 
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;# clean names will be used to help get joining data in format that will merge well
+clean_names &amp;lt;- 
   function(x){
     x &amp;lt;- str_to_lower(x)
     x &amp;lt;- str_remove_all(x, &amp;#39;county&amp;#39;)
@@ -193,12 +207,13 @@ rural_urban &amp;lt;-
   rename(abb = state) %&amp;gt;% 
   left_join(
 tibble(abb = state.abb, 
-       state = clean_names(state.name))) %&amp;gt;% 
+       state = clean_names(state.name)),
+       by = &amp;quot;abb&amp;quot;) %&amp;gt;% 
   mutate(state_county = 
            glue(&amp;#39;{state} {county}&amp;#39;)) %&amp;gt;% 
-  select(state_county, rucc_2013, desc)&lt;/code&gt;&lt;/pre&gt;
-&lt;pre&gt;&lt;code&gt;## Joining, by = &amp;quot;abb&amp;quot;&lt;/code&gt;&lt;/pre&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;rural_food_desert &amp;lt;- 
+  select(state_county, rucc_2013, desc)
+
+rural_food_desert &amp;lt;- 
   food_access_research_atlas %&amp;gt;% 
   mutate(state = clean_names(state),
             county = clean_names(county),
@@ -213,7 +228,7 @@ tibble(abb = state.abb,
 &lt;p&gt;Lookup files are often called &lt;em&gt;data dictionaries&lt;/em&gt;.
 Data dictionaries are a common component of many large datasets that are used extensively in the public sphere.
 As previously mentioned, quite often, a data dictionary or lookup is just another file that accompanies the primary data.&lt;/p&gt;
-&lt;p&gt;It isn’t “data” in the traditional sense (i.e. we aren’t going to be performing cross-tabulations on it anytime soon), but it is a useful approach to treat it just like any other data file.
+&lt;p&gt;The data dictionary isn’t “data” in the traditional sense (i.e. we aren’t going to be performing cross-tabulations on it anytime soon), but it is a useful approach to treat it just like any other data file.
 For instance:&lt;/p&gt;
 &lt;ol style=&#34;list-style-type: decimal&#34;&gt;
 &lt;li&gt;We can append data dictionaries/lookups to the central database as we did previously;&lt;/li&gt;
@@ -362,7 +377,7 @@ We’ll use the verb &lt;code&gt;contains&lt;/code&gt; within &lt;code&gt;dyplyr
 &lt;h1&gt;Getting things tidy&lt;/h1&gt;
 &lt;p&gt;Before going forward we’ll need to tidy our data a bit.
 Note the use of &lt;code&gt;pivot_longer&lt;/code&gt; instead of &lt;code&gt;spread&lt;/code&gt;; &lt;code&gt;pivot_longer&lt;/code&gt; and &lt;code&gt;pivot_wider&lt;/code&gt; are &lt;code&gt;dplyr&lt;/code&gt;’s new verb names for changing between wide and long formats.
-We won’t discuss the major changes here, but it’s good practice to read over big changes like this; you can do so &lt;a href=&#34;here.&#34;&gt;https://cengel.github.io/R-data-wrangling/tidyr.html&lt;/a&gt;
+We won’t discuss the major changes here, but it’s good practice to read over big changes like this; you can do so &lt;a href=&#34;https://cengel.github.io/R-data-wrangling/tidyr.html&#34;&gt;here&lt;/a&gt;.
 Once we have our data in a way that we like it let’s do some quick plots, first looking at state and county levels, then looking at rural-urban areas.&lt;/p&gt;
 &lt;div id=&#34;travel-distance&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Travel distance&lt;/h2&gt;
@@ -391,38 +406,40 @@ We’ll look at only those people classified as living in rural counties.&lt;/p&
 &lt;p&gt;The plot below is a boxplot that shows the spread of rate SNAP receivers across distances to supermarkets.
 It shows that there is a great deal of variability in terms of distance as well as a high number of people who have to travel quite far.
 The rate of SNAP receivers appears to be negatively correlated with distance, meaning that the rate of SNAP receivers decreases as distance increases.&lt;/p&gt;
-&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;county_snap_dist %&amp;gt;%
-  ggplot(aes(as.factor(snap_dist),rate))+
-  geom_boxplot(aes(fill = as.factor(snap_dist)), 
-               show.legend = F)+
-  scale_fill_viridis_d(direction = -1)+
-  scale_y_continuous(labels = percent)+
-  post_theme(
-    axis.title.x = 
-      element_text(face = &amp;#39;italic&amp;#39;),
-             axis.title.y = 
-               element_text(angle = 0, 
-                            hjust= 1, 
-                            face = &amp;#39;italic&amp;#39;))+
-  labs(title = &amp;#39;Relationship between percent of SNAP recievers and food deserts&amp;#39;,
-       subtitle = &amp;#39;Rural and Remote areas in the US according to USDA classification&amp;#39;,
-       x = &amp;#39;Miles to nearest supermarket&amp;#39;,
-       y = &amp;#39;Percent recieving\nSNAP&amp;#39;)+
-  annotate(&amp;#39;rect&amp;#39;, xmin = 3.9, xmax = 4.1, ymin = .1, ymax = .35, color = &amp;#39;#C4C4C4&amp;#39;, alpha = .25)+
-  annotate(&amp;#39;text&amp;#39;, x = 3.65, y = .425, label = str_wrap(&amp;#39;Upwards of 35% of residents in these census tract travel 20 or miles to a grocery store and recive government food benefits.&amp;#39;, 30), hjust= .5, size = 2.5)+
-  annotate(&amp;#39;segment&amp;#39;, 
-           x  = 3.85, 
-           xend = 4, 
-           y = .385, 
-           yend = .36, 
-           arrow = arrow(type = &amp;#39;closed&amp;#39;, 
-                         length = unit(1, &amp;#39;mm&amp;#39;)))&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;/post/2020-07-29-u-s-food-deserts_files/figure-html/unnamed-chunk-8-1.png&#34; width=&#34;672&#34; /&gt;
-# A closer look with Leaflet
-Our data is aggregated by census tract and is therefore geographical by nature.
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;label_new &amp;lt;- 
+  function(x){
+    glue(&amp;#39;{x} miles to\nnearest supermarket&amp;#39;)
+  }
+
+county_snap_dist %&amp;gt;% 
+  mutate(snap_dist = as.factor(snap_dist),
+         snap_dist = fct_relabel(snap_dist, 
+                                 .fun = label_new)) %&amp;gt;% 
+  filter(rate &amp;gt; 0) %&amp;gt;% 
+  ggplot(aes(median_family_income, rate))+
+  stat_binhex()+
+  geom_smooth(color = &amp;#39;#C4C4C4&amp;#39;, 
+              method = &amp;#39;gam&amp;#39;)+
+  scale_fill_viridis_c(labels = comma, 
+                       name = &amp;#39;# of\ncensus tracts&amp;#39;)+
+  scale_x_continuous(labels = dollar)+
+  scale_y_continuous(labels = percent, 
+                     expand = c(0, 0))+
+  facet_grid(~snap_dist, )+
+  post_theme(axis.text.x = element_text(angle = 45, 
+                                        hjust = 1))+
+    labs(title = &amp;#39;Association between SNAP rate and family income by travel distance to supermarket&amp;#39;, 
+         x = &amp;#39;Median family income\nper census tract&amp;#39;, 
+         y = &amp;#39;Percent SNAP\nrecipient&amp;#39;, 
+        caption = &amp;#39;Smoothed line fits a generalized additive model (GAM) to data: y ~ s(x, bs = &amp;quot;cs&amp;quot;).&amp;#39;)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2020-07-29-u-s-food-deserts_files/figure-html/unnamed-chunk-8-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;building-interactive-maps&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Building interactive maps&lt;/h1&gt;
+&lt;p&gt;Our data is aggregated by census tract and is therefore geographical by nature.
 Mapping in R has made considerable developments in the past 5 to 10 years, and any work with rural/urban analysis can usually be benefited through some geospatial analysis.
 So learning to make maps is always helpful!&lt;/p&gt;
-&lt;/div&gt;
 &lt;div id=&#34;leaflet-maps&#34; class=&#34;section level2&#34;&gt;
 &lt;h2&gt;Leaflet maps&lt;/h2&gt;
 &lt;p&gt;The &lt;code&gt;leaflet&lt;/code&gt; package is a fantastic way to make interactive maps with a relatively small amount of code.
@@ -430,6 +447,57 @@ It works really well will with the &lt;code&gt;sf&lt;/code&gt; package for geo-c
 Moreover, we can use the &lt;code&gt;tigris&lt;/code&gt; package to get census tract information straight in R.
 &lt;code&gt;tigris&lt;/code&gt; can return &lt;code&gt;sf&lt;/code&gt; objects, making for speedy workflow between the three packages.&lt;/p&gt;
 &lt;p&gt;Below, we’ll take a look those census tracts that have a large proportion of the population that have to travel 20 or miles to a supermarket and that have a high percentage of SNAP recipients.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;## Get all 20 miles or more that have at least some percent of SNAP users
+top_perc_20m &amp;lt;- 
+  county_snap_dist %&amp;gt;% 
+  filter(snap_dist == 20, 
+         rate &amp;gt; 0) %&amp;gt;% 
+  mutate(desc = replace_na(desc, &amp;#39;Unknown&amp;#39;))
+
+
+top_perc_20m_ls &amp;lt;- 
+  top_perc_20m %&amp;gt;% 
+  mutate(id = as.character(row_number())) %&amp;gt;% 
+  split(.$id)
+
+
+# retrieve all census tract polygons per county using a loop and the applying the tracts function from the tigris package.
+
+top_perc_20_sf_ls &amp;lt;- 
+  map(top_perc_20m_ls, 
+      possibly(function(x){
+        .y &amp;lt;-   tracts(state = x$state, 
+                       county = x$county, 
+                       cb = T) 
+        
+        single_track &amp;lt;- 
+          str_sub(x$census_tract,
+                start = 6, 
+                end = 9)
+        
+        .z &amp;lt;- .y %&amp;gt;% 
+          filter(NAME %in% single_track)
+        
+        .z$census_tract &amp;lt;- x$census_tract
+        .z$rate &amp;lt;- x$rate
+        .z$dist &amp;lt;- x$snap_dist
+        .z$desc &amp;lt;- x$desc
+        .z$id &amp;lt;-  x$id
+        .z$county &amp;lt;-  x$county
+        .z$state &amp;lt;-  x$state
+       .z$median_family_income &amp;lt;-x$median_family_income
+        
+        return(.z)
+        
+      }, NULL)) 
+
+# NOTE do.call to combine the sf objects
+top_20_sf &amp;lt;- 
+  do.call(rbind,top_perc_20_sf_ls) 
+
+# This whole code-block may take quite a bit of time to run depending on your computer&amp;#39;s specs. It&amp;#39;s best to go ahead and save the output and then comment out the code above. This reduces the risk of accidently changing or re-running things, then having to wait to make adjustments. 
+
+write_sf(top_20_sf,&amp;#39;~/Documents/temp/top_20_sf.shp&amp;#39;)&lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;It only takes a few lines of code to produce a great map in &lt;code&gt;leaflet&lt;/code&gt;.
 Below you can see the polygons of the top 25 SNAP recipients in food deserts that are 20 miles or more to supermarkets.
 And, while it is inciteful in its own right, it leaves us wanting something more.
@@ -438,10 +506,11 @@ With the help of &lt;code&gt;HTML&lt;/code&gt;, we can turn this map into someth
   addProviderTiles(&amp;quot;CartoDB.Positron&amp;quot;) %&amp;gt;% 
   addPolygons(color = &amp;quot;tomato&amp;quot;) %&amp;gt;% 
   frameWidget()&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;div id=&#34;htmlwidget-1&#34; style=&#34;width:100%;height:480px;&#34; class=&#34;widgetframe html-widget&#34;&gt;&lt;/div&gt;
-&lt;script type=&#34;application/json&#34; data-for=&#34;htmlwidget-1&#34;&gt;{&#34;x&#34;:{&#34;url&#34;:&#34;/post/2020-07-29-u-s-food-deserts_files/figure-html//widgets/widget_unnamed-chunk-10.html&#34;,&#34;options&#34;:{&#34;xdomain&#34;:&#34;*&#34;,&#34;allowfullscreen&#34;:false,&#34;lazyload&#34;:false}},&#34;evals&#34;:[],&#34;jsHooks&#34;:[]}&lt;/script&gt;
-### Leaflet to the next level
-One way to dramatically improve our interactive &lt;code&gt;leaflet&lt;/code&gt; maps is to use &lt;code&gt;HTML&lt;/code&gt; code. &lt;code&gt;HTML&lt;/code&gt; is essential a coding approach to formatting web applications.
+&lt;div id=&#34;htmlwidget-1&#34; style=&#34;width:100%;height:480px;&#34; class=&#34;widgetframe html-widget&#34;&gt;&lt;/div&gt;
+&lt;script type=&#34;application/json&#34; data-for=&#34;htmlwidget-1&#34;&gt;{&#34;x&#34;:{&#34;url&#34;:&#34;/post/2020-07-29-u-s-food-deserts_files/figure-html//widgets/widget_unnamed-chunk-11.html&#34;,&#34;options&#34;:{&#34;xdomain&#34;:&#34;*&#34;,&#34;allowfullscreen&#34;:false,&#34;lazyload&#34;:false}},&#34;evals&#34;:[],&#34;jsHooks&#34;:[]}&lt;/script&gt;
+&lt;div id=&#34;leaflet-to-the-next-level&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Leaflet to the next level&lt;/h3&gt;
+&lt;p&gt;One way to dramatically improve our interactive &lt;code&gt;leaflet&lt;/code&gt; maps is to use &lt;code&gt;HTML&lt;/code&gt; code. &lt;code&gt;HTML&lt;/code&gt; is essential a coding approach to formatting web applications.
 Officially &lt;code&gt;HTML&lt;/code&gt; is:&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;Hypertext Markup Language (HTML) is the standard markup language for documents designed to be displayed in a web browser. It can be assisted by technologies such as Cascading Style Sheets (CSS) and scripting languages such as JavaScript.&lt;/p&gt;
@@ -530,7 +599,8 @@ top_20_sf_leaf_map &amp;lt;-
 top_20_sf_leaf_map %&amp;gt;% 
   frameWidget(width = &amp;#39;100%&amp;#39;)&lt;/code&gt;&lt;/pre&gt;
 &lt;div id=&#34;htmlwidget-2&#34; style=&#34;width:100%;height:480px;&#34; class=&#34;widgetframe html-widget&#34;&gt;&lt;/div&gt;
-&lt;script type=&#34;application/json&#34; data-for=&#34;htmlwidget-2&#34;&gt;{&#34;x&#34;:{&#34;url&#34;:&#34;/post/2020-07-29-u-s-food-deserts_files/figure-html//widgets/widget_unnamed-chunk-11.html&#34;,&#34;options&#34;:{&#34;xdomain&#34;:&#34;*&#34;,&#34;allowfullscreen&#34;:false,&#34;lazyload&#34;:false}},&#34;evals&#34;:[],&#34;jsHooks&#34;:[]}&lt;/script&gt;
+&lt;script type=&#34;application/json&#34; data-for=&#34;htmlwidget-2&#34;&gt;{&#34;x&#34;:{&#34;url&#34;:&#34;/post/2020-07-29-u-s-food-deserts_files/figure-html//widgets/widget_unnamed-chunk-12.html&#34;,&#34;options&#34;:{&#34;xdomain&#34;:&#34;*&#34;,&#34;allowfullscreen&#34;:false,&#34;lazyload&#34;:false}},&#34;evals&#34;:[],&#34;jsHooks&#34;:[]}&lt;/script&gt;
+&lt;/div&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 </description>
