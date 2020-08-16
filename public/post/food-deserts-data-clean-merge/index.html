@@ -28,7 +28,7 @@
   
     
   
-  <meta name="description" content="Introduction A considerable issue today related to food and rural population research are food deserts. Food deserts are a complicated issue, but the idea centres on a simple premise: areas, where it’s hard to reach a grocery store or access food, can be thought of as food deserts. If you’re interested in knowing more about the discourse on food deserts, than I’d recommend looking into these papers:">
+  <meta name="description" content="Introduction A considerable issue today related to food and rural population research are food deserts. Food deserts are a complicated issue, but the idea centres on a simple premise: areas, where it’s hard to reach a grocery store or access food, can be thought of as food deserts. If you’re interested in knowing more about the discourse on food deserts, I’d recommend looking into these papers:">
 
   
   <link rel="alternate" hreflang="en-us" href="/post/food-deserts-data-clean-merge/">
@@ -270,7 +270,7 @@
   <meta property="og:site_name" content="Deltanomics">
   <meta property="og:url" content="/post/food-deserts-data-clean-merge/">
   <meta property="og:title" content="U.S. Food Deserts | Deltanomics">
-  <meta property="og:description" content="Introduction A considerable issue today related to food and rural population research are food deserts. Food deserts are a complicated issue, but the idea centres on a simple premise: areas, where it’s hard to reach a grocery store or access food, can be thought of as food deserts. If you’re interested in knowing more about the discourse on food deserts, than I’d recommend looking into these papers:"><meta property="og:image" content="/images/icon_hu92a9dc9639b79cadf266306904fb01f6_516996_512x512_fill_lanczos_center_2.png">
+  <meta property="og:description" content="Introduction A considerable issue today related to food and rural population research are food deserts. Food deserts are a complicated issue, but the idea centres on a simple premise: areas, where it’s hard to reach a grocery store or access food, can be thought of as food deserts. If you’re interested in knowing more about the discourse on food deserts, I’d recommend looking into these papers:"><meta property="og:image" content="/images/icon_hu92a9dc9639b79cadf266306904fb01f6_516996_512x512_fill_lanczos_center_2.png">
   <meta property="twitter:image" content="/images/icon_hu92a9dc9639b79cadf266306904fb01f6_516996_512x512_fill_lanczos_center_2.png"><meta property="og:locale" content="en-us">
   
     
@@ -322,7 +322,7 @@
       "url": "img//"
     }
   },
-  "description": "Introduction A considerable issue today related to food and rural population research are food deserts. Food deserts are a complicated issue, but the idea centres on a simple premise: areas, where it’s hard to reach a grocery store or access food, can be thought of as food deserts. If you’re interested in knowing more about the discourse on food deserts, than I’d recommend looking into these papers:"
+  "description": "Introduction A considerable issue today related to food and rural population research are food deserts. Food deserts are a complicated issue, but the idea centres on a simple premise: areas, where it’s hard to reach a grocery store or access food, can be thought of as food deserts. If you’re interested in knowing more about the discourse on food deserts, I’d recommend looking into these papers:"
 }
 </script>
 
@@ -656,7 +656,7 @@
   
   <span class="middot-divider"></span>
   <span class="article-reading-time">
-    11 min read
+    13 min read
   </span>
   
 
@@ -707,7 +707,7 @@
 <h1>Introduction</h1>
 <p>A considerable issue today related to food and rural population research are food deserts.
 Food deserts are a complicated issue, but the idea centres on a simple premise: areas, where it’s hard to reach a grocery store or access food, can be thought of as food deserts.
-If you’re interested in knowing more about the discourse on food deserts, than I’d recommend looking into these papers:</p>
+If you’re interested in knowing more about the discourse on food deserts, I’d recommend looking into these papers:</p>
 <ul>
 <li>Blanchard, T. C., &amp; Matthews, T. L. (2007). Retail concentration, food deserts, and food-disadvantaged communities in rural America. Remaking the North American food system: <em>Strategies for sustainability</em>, 201-215.</li>
 <li>Gundersen, C., Kreider, B., &amp; Pepper, J. V. (2017). Partial identification methods for evaluating food assistance programs: a case study of the causal impact of SNAP on food insecurity. <em>American Journal of Agricultural Economics</em>, 99(4), 875-893.</li>
@@ -739,6 +739,8 @@ library(leaflet.extras)
 library(maps)
 library(sf)
 library(widgetframe)
+library(htmlwidgets)
+library(htmltools)
 map &lt;- purrr::map
 
 # US county and state fips data is built-in R
@@ -1031,10 +1033,10 @@ Once we have our data in a way that we like it let’s do some quick plots, firs
          snap_dist = 
            replace_na(snap_dist, .5)) </code></pre>
 <p>Let’s quickly take a look at the top rate (percent) of people in census tracts for each distance from a supermarket.
-We’ll look at only those people classified as living in rural counties.</p>
-<p>The plot below is a boxplot that shows the spread of rate SNAP receivers across distances to supermarkets.
-It shows that there is a great deal of variability in terms of distance as well as a high number of people who have to travel quite far.
-The rate of SNAP receivers appears to be negatively correlated with distance, meaning that the rate of SNAP receivers decreases as distance increases.</p>
+In addition, we’ll consider the association between rate of SNAP recipients to income.</p>
+<p>The plot below uses the <code>stat_binhex</code> in ggplot.
+This approach is similar to a standard scatter plot, but it shows which areas of the plot have the highest frequency. This is important as the plot will have 124,326 points - far too many for a person to visual see the difference (due to overlapping with the points).
+The <code>stat_binhex</code> function uses colour to differentiate the frequencies for each bin.</p>
 <pre class="r"><code>label_new &lt;- 
   function(x){
     glue(&#39;{x} miles to\nnearest supermarket&#39;)
@@ -1047,7 +1049,7 @@ county_snap_dist %&gt;%
   filter(rate &gt; 0) %&gt;% 
   ggplot(aes(median_family_income, rate))+
   stat_binhex()+
-  geom_smooth(color = &#39;#C4C4C4&#39;, 
+  geom_smooth(color = &#39;#CCCCCC&#39;, 
               method = &#39;gam&#39;)+
   scale_fill_viridis_c(labels = comma, 
                        name = &#39;# of\ncensus tracts&#39;)+
@@ -1061,7 +1063,13 @@ county_snap_dist %&gt;%
          x = &#39;Median family income\nper census tract&#39;, 
          y = &#39;Percent SNAP\nrecipient&#39;, 
         caption = &#39;Smoothed line fits a generalized additive model (GAM) to data: y ~ s(x, bs = &quot;cs&quot;).&#39;)</code></pre>
-<p><img src="/post/2020-07-29-u-s-food-deserts_files/figure-html/unnamed-chunk-8-1.png" width="960" /></p>
+<p><img src="/post/2020-07-29-u-s-food-deserts_files/figure-html/unnamed-chunk-8-1.png" width="960" />
+According to plot above, we can see that there is a relationship between median family income and percentage of SNAP usage.
+Interestingly, but ultimately out of scope for this project, is the high percentage of SNAP recievers in places with high median family income values ($100k or more).
+We see this because both SNAP and median family income are measurements of central tendency within a geography.
+They are not 1-to-1 comparisons.
+That is, we aren’t looking at survey data completed by individual people.
+This finding alone tells us that it is necessary to look deeper into SNAP, as families who recieve the benefit may live quite unique lives, each with their own struggles to overcome.</p>
 </div>
 </div>
 <div id="building-interactive-maps" class="section level1">
@@ -1144,6 +1152,10 @@ Officially <code>HTML</code> is:</p>
 <blockquote>
 <p>Hypertext Markup Language (HTML) is the standard markup language for documents designed to be displayed in a web browser. It can be assisted by technologies such as Cascading Style Sheets (CSS) and scripting languages such as JavaScript.</p>
 </blockquote>
+<p>We’ll also use <code>CSS</code>, which is similar to <code>HTML</code> in that it’s used to format websites. Officially, <code>CSS</code> is:</p>
+<blockquote>
+<p>CSS stands for Cascading Style Sheets. CSS describes how HTML elements are to be displayed on screen, paper, or in other media. CSS saves a lot of work. It can control the layout of multiple web pages all at once. External stylesheets are stored in CSS files.</p>
+</blockquote>
 <p>We can also use our data to correspond to map polygon colours.
 The <code>leaflet.extras</code> package offers a lot of great extra options to add to <code>leaflet</code> maps.
 The best part is that it is relatively straightforward to add these options.</p>
@@ -1153,6 +1165,7 @@ The best part is that it is relatively straightforward to add these options.</p>
 <li>Create a custom function to map the fill/colour of the <code>leaflet</code> polygons to help guide the user’s eye towards the worst off places in terms of SNAP and distance to supermarket.
 NOTE: Our custom colour function is from <a href="https://stackoverflow.com/questions/15006211/how-do-i-generate-a-mapping-from-numbers-to-colors-in-r/18749392">this question on StackOverflow.com</a>.</li>
 <li>Use <code>leaflet.extras</code> to add some great functionality that makes the map more user-friendly.</li>
+<li>Create and format a title using CSS.</li>
 </ol>
 <pre class="r"><code>remove_words &lt;- 
   glue_collapse(c(&#39;Nonmetro - &#39;, 
@@ -1169,7 +1182,7 @@ tooltip &lt;- top_20_sf %&gt;%
                                remove_words), 
          median_family_income = 
            dollar(median_family_income)) %&gt;% 
-  transmute(tip = glue(&#39;&lt;b&gt;County:&lt;/b&gt; {county} &lt;br&gt; &lt;b&gt;State:&lt;/b&gt; {state} &lt;br&gt; &lt;b&gt;SNAP percent:&lt;/b&gt; {rate} &lt;br&gt; &lt;b&gt;*Rural/Urban class:&lt;/b&gt; {desc} &lt;br&gt; &lt;b&gt;Median family income:&lt;/b&gt; {median_family_income} &lt;br&gt;&lt;b&gt;Tract:&lt;/b&gt; {census_tract}&lt;br&gt;&lt;br&gt;- All areas are 20 or more miles from a supermarket.&lt;br&gt;* Rural/Urban classification determined at county-level.&#39;))
+  transmute(tip = glue(&#39;&lt;b&gt;County:&lt;/b&gt; {county} &lt;br&gt; &lt;b&gt;State:&lt;/b&gt; {state} &lt;br&gt; &lt;b&gt;*SNAP percent:&lt;/b&gt; {rate} &lt;br&gt; &lt;b&gt;**Rural/Urban class:&lt;/b&gt; {desc} &lt;br&gt; &lt;b&gt;Median family income:&lt;/b&gt; {median_family_income} &lt;br&gt;&lt;b&gt;Tract:&lt;/b&gt; {census_tract}&lt;br&gt;&lt;br&gt;* All areas have this percentage SNAP recipients who 20 or more miles from a supermarket.&lt;br&gt;** Rural/Urban classification determined at county-level.&#39;))
 
 # change polygon colour to correspond to a numeric variable in the database
 map2color &lt;- function(x, 
@@ -1204,6 +1217,28 @@ percent_labs &lt;- c(&#39;0.0% to 10.1%&#39;,
   &#39;40.3% to 50.4%&#39;,
   &#39;50.4% to 60.5%&#39;)
 
+## Add a our title to the map using css
+
+tag.map.title &lt;- tags$style(HTML(&quot;
+  .leaflet-control.map-title { 
+    transform: translate(-50%,20%);
+    position: fixed !important;
+    left: 50%;
+    text-align: center;
+    padding-left: 10px; 
+    padding-right: 10px; 
+    background: rgba(255,255,255,0.5);
+    font-weight: bold;
+    font-size: 28px;
+  }
+&quot;))
+
+title &lt;- tags$div(
+  tag.map.title, HTML(&quot;US Food Deserts&quot;)
+)  
+
+
+
 top_20_sf_leaf_map &lt;- 
     leaflet(top_20_sf) %&gt;% 
   addProviderTiles(&quot;OpenStreetMap&quot;) %&gt;%
@@ -1223,14 +1258,26 @@ top_20_sf_leaf_map &lt;-
             labels = percent_labs, 
             opacity = 0.7,
             title = &#39;Percent SNAP use&lt;br&gt;by census tract&#39;,
-    position = &quot;bottomright&quot;)
+    position = &quot;bottomright&quot;) %&gt;%
+  addControl(title, 
+             position = &quot;topleft&quot;,
+             className=&quot;map-title&quot;)
 
 top_20_sf_leaf_map %&gt;% 
   frameWidget(width = &#39;100%&#39;)</code></pre>
-<div id="htmlwidget-2" style="width:100%;height:480px;" class="widgetframe html-widget"></div>
+<p><div id="htmlwidget-2" style="width:100%;height:480px;" class="widgetframe html-widget"></div>
 <script type="application/json" data-for="htmlwidget-2">{"x":{"url":"/post/2020-07-29-u-s-food-deserts_files/figure-html//widgets/widget_unnamed-chunk-12.html","options":{"xdomain":"*","allowfullscreen":false,"lazyload":false}},"evals":[],"jsHooks":[]}</script>
+Our <code>leaflet</code> map now has plenty of bells and whistles, and hopefully, it will be useful for people interested in knowing more about food deserts and SNAP in the US.</p>
 </div>
 </div>
+</div>
+<div id="conclusion" class="section level1">
+<h1>Conclusion</h1>
+<p>Food deserts and SNAP are complicated subjects in their own right.
+Very often, the two compound one another, making things even more complicated.
+Using data science approaches to thinking about these two issues can help policymakers and rural stakeholders better plan for those people impacted by them.</p>
+<p>As always, the <em>Deltanomics</em> blog is for instructional use in R.
+Any potential findings need more research to verify them before any conclusions can be made.</p>
 </div>
 
     </div>

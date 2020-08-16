@@ -27,7 +27,7 @@ editor_options:
 # Introduction
 A considerable issue today related to food and rural population research are food deserts. 
 Food deserts are a complicated issue, but the idea centres on a simple premise: areas, where it's hard to reach a grocery store or access food, can be thought of as food deserts. 
-If you're interested in knowing more about the discourse on food deserts, than I'd recommend looking into these papers: 
+If you're interested in knowing more about the discourse on food deserts, I'd recommend looking into these papers: 
 
 - Blanchard, T. C., & Matthews, T. L. (2007). Retail concentration, food deserts, and food-disadvantaged communities in rural America. Remaking the North American food system: *Strategies for sustainability*, 201-215.
 - Gundersen, C., Kreider, B., & Pepper, J. V. (2017). Partial identification methods for evaluating food assistance programs: a case study of the causal impact of SNAP on food insecurity. *American Journal of Agricultural Economics*, 99(4), 875-893.
@@ -58,6 +58,8 @@ library(leaflet.extras)
 library(maps)
 library(sf)
 library(widgetframe)
+library(htmlwidgets)
+library(htmltools)
 map <- purrr::map
 
 # US county and state fips data is built-in R
@@ -252,11 +254,11 @@ county_snap_dist <-
 
 ```
 Let's quickly take a look at the top rate (percent) of people in census tracts for each distance from a supermarket. 
-We'll look at only those people classified as living in rural counties. 
+In addition, we'll consider the association between rate of SNAP recipients to income.  
 
-The plot below is a boxplot that shows the spread of rate SNAP receivers across distances to supermarkets. 
-It shows that there is a great deal of variability in terms of distance as well as a high number of people who have to travel quite far. 
-The rate of SNAP receivers appears to be negatively correlated with distance, meaning that the rate of SNAP receivers decreases as distance increases. 
+The plot below uses the `stat_binhex` in ggplot. 
+This approach is similar to a standard scatter plot, but it shows which areas of the plot have the highest frequency. This is important as the plot will have 124,326 points - far too many for a person to visual see the difference (due to overlapping with the points). 
+The `stat_binhex` function uses colour to differentiate the frequencies for each bin.
 ```{r, fig.align='centre',fig.height=6, fig.width=10, message=FALSE}
 
 label_new <- 
@@ -271,7 +273,7 @@ county_snap_dist %>%
   filter(rate > 0) %>% 
   ggplot(aes(median_family_income, rate))+
   stat_binhex()+
-  geom_smooth(color = '#C4C4C4', 
+  geom_smooth(color = '#CCCCCC', 
               method = 'gam')+
   scale_fill_viridis_c(labels = comma, 
                        name = '# of\ncensus tracts')+
@@ -287,6 +289,12 @@ county_snap_dist %>%
         caption = 'Smoothed line fits a generalized additive model (GAM) to data: y ~ s(x, bs = "cs").')
   
 ```
+According to plot above, we can see that there is a relationship between median family income and percentage of SNAP usage. 
+Interestingly, but ultimately out of scope for this project, is the high percentage of SNAP recievers in places with high median family income values ($100k or more). 
+We see this because both SNAP and median family income are measurements of central tendency within a geography. 
+They are not 1-to-1 comparisons. 
+That is, we aren't looking at survey data completed by individual people.
+This finding alone tells us that it is necessary to look deeper into SNAP, as families who recieve the benefit may live quite unique lives, each with their own struggles to overcome.
 
 # Building interactive maps
 Our data is aggregated by census tract and is therefore geographical by nature. 
@@ -379,6 +387,10 @@ Officially `HTML` is:
 
 >Hypertext Markup Language (HTML) is the standard markup language for documents designed to be displayed in a web browser. It can be assisted by technologies such as Cascading Style Sheets (CSS) and scripting languages such as JavaScript.
 
+We'll also use `CSS`, which is similar to `HTML` in that it's used to format websites. Officially, `CSS` is: 
+
+>CSS stands for Cascading Style Sheets. CSS describes how HTML elements are to be displayed on screen, paper, or in other media. CSS saves a lot of work. It can control the layout of multiple web pages all at once. External stylesheets are stored in CSS files.
+
 We can also use our data to correspond to map polygon colours. 
 The `leaflet.extras` package offers a lot of great extra options to add to `leaflet` maps. 
 The best part is that it is relatively straightforward to add these options. 
@@ -389,6 +401,7 @@ Let's take the following steps to *trick* out our `leaflet` map!
 2. Create a custom function to map the fill/colour of the `leaflet` polygons to help guide the user's eye towards the worst off places in terms of SNAP and distance to supermarket. 
 NOTE: Our custom colour function is from [this question on StackOverflow.com](https://stackoverflow.com/questions/15006211/how-do-i-generate-a-mapping-from-numbers-to-colors-in-r/18749392).
 3. Use `leaflet.extras` to add some great functionality that makes the map more user-friendly.
+4. Create and format a title using CSS.
 ```{r}
 remove_words <- 
   glue_collapse(c('Nonmetro - ', 
@@ -405,7 +418,7 @@ tooltip <- top_20_sf %>%
                                remove_words), 
          median_family_income = 
            dollar(median_family_income)) %>% 
-  transmute(tip = glue('<b>County:</b> {county} <br> <b>State:</b> {state} <br> <b>SNAP percent:</b> {rate} <br> <b>*Rural/Urban class:</b> {desc} <br> <b>Median family income:</b> {median_family_income} <br><b>Tract:</b> {census_tract}<br><br>- All areas are 20 or more miles from a supermarket.<br>* Rural/Urban classification determined at county-level.'))
+  transmute(tip = glue('<b>County:</b> {county} <br> <b>State:</b> {state} <br> <b>*SNAP percent:</b> {rate} <br> <b>**Rural/Urban class:</b> {desc} <br> <b>Median family income:</b> {median_family_income} <br><b>Tract:</b> {census_tract}<br><br>* All areas have this percentage SNAP recipients who 20 or more miles from a supermarket.<br>** Rural/Urban classification determined at county-level.'))
 
 # change polygon colour to correspond to a numeric variable in the database
 map2color <- function(x, 
@@ -440,6 +453,28 @@ percent_labs <- c('0.0% to 10.1%',
   '40.3% to 50.4%',
   '50.4% to 60.5%')
 
+## Add a our title to the map using css
+
+tag.map.title <- tags$style(HTML("
+  .leaflet-control.map-title { 
+    transform: translate(-50%,20%);
+    position: fixed !important;
+    left: 50%;
+    text-align: center;
+    padding-left: 10px; 
+    padding-right: 10px; 
+    background: rgba(255,255,255,0.5);
+    font-weight: bold;
+    font-size: 28px;
+  }
+"))
+
+title <- tags$div(
+  tag.map.title, HTML("US Food Deserts")
+)  
+
+
+
 top_20_sf_leaf_map <- 
     leaflet(top_20_sf) %>% 
   addProviderTiles("OpenStreetMap") %>%
@@ -459,9 +494,31 @@ top_20_sf_leaf_map <-
             labels = percent_labs, 
             opacity = 0.7,
             title = 'Percent SNAP use<br>by census tract',
-    position = "bottomright")
+    position = "bottomright") %>%
+  addControl(title, 
+             position = "topleft",
+             className="map-title")
 
 top_20_sf_leaf_map %>% 
   frameWidget(width = '100%')
 ```
+Our `leaflet` map now has plenty of bells and whistles, and hopefully, it will be useful for people interested in knowing more about food deserts and SNAP in the US.
+
+# Conclusion
+Food deserts and SNAP are complicated subjects in their own right. 
+Very often, the two compound one another, making things even more complicated. 
+Using data science approaches to thinking about these two issues can help policymakers and rural stakeholders better plan for those people impacted by them. 
+
+As always, the *Deltanomics* blog is for instructional use in R. 
+Any potential findings need more research to verify them before any conclusions can be made. 
+
+
+
+
+
+
+
+
+
+
 

@@ -28,7 +28,7 @@
 &lt;h1&gt;Introduction&lt;/h1&gt;
 &lt;p&gt;A considerable issue today related to food and rural population research are food deserts.
 Food deserts are a complicated issue, but the idea centres on a simple premise: areas, where it’s hard to reach a grocery store or access food, can be thought of as food deserts.
-If you’re interested in knowing more about the discourse on food deserts, than I’d recommend looking into these papers:&lt;/p&gt;
+If you’re interested in knowing more about the discourse on food deserts, I’d recommend looking into these papers:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;Blanchard, T. C., &amp;amp; Matthews, T. L. (2007). Retail concentration, food deserts, and food-disadvantaged communities in rural America. Remaking the North American food system: &lt;em&gt;Strategies for sustainability&lt;/em&gt;, 201-215.&lt;/li&gt;
 &lt;li&gt;Gundersen, C., Kreider, B., &amp;amp; Pepper, J. V. (2017). Partial identification methods for evaluating food assistance programs: a case study of the causal impact of SNAP on food insecurity. &lt;em&gt;American Journal of Agricultural Economics&lt;/em&gt;, 99(4), 875-893.&lt;/li&gt;
@@ -60,6 +60,8 @@ library(leaflet.extras)
 library(maps)
 library(sf)
 library(widgetframe)
+library(htmlwidgets)
+library(htmltools)
 map &amp;lt;- purrr::map
 
 # US county and state fips data is built-in R
@@ -352,10 +354,10 @@ Once we have our data in a way that we like it let’s do some quick plots, firs
          snap_dist = 
            replace_na(snap_dist, .5)) &lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;Let’s quickly take a look at the top rate (percent) of people in census tracts for each distance from a supermarket.
-We’ll look at only those people classified as living in rural counties.&lt;/p&gt;
-&lt;p&gt;The plot below is a boxplot that shows the spread of rate SNAP receivers across distances to supermarkets.
-It shows that there is a great deal of variability in terms of distance as well as a high number of people who have to travel quite far.
-The rate of SNAP receivers appears to be negatively correlated with distance, meaning that the rate of SNAP receivers decreases as distance increases.&lt;/p&gt;
+In addition, we’ll consider the association between rate of SNAP recipients to income.&lt;/p&gt;
+&lt;p&gt;The plot below uses the &lt;code&gt;stat_binhex&lt;/code&gt; in ggplot.
+This approach is similar to a standard scatter plot, but it shows which areas of the plot have the highest frequency. This is important as the plot will have 124,326 points - far too many for a person to visual see the difference (due to overlapping with the points).
+The &lt;code&gt;stat_binhex&lt;/code&gt; function uses colour to differentiate the frequencies for each bin.&lt;/p&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;label_new &amp;lt;- 
   function(x){
     glue(&amp;#39;{x} miles to\nnearest supermarket&amp;#39;)
@@ -368,7 +370,7 @@ county_snap_dist %&amp;gt;%
   filter(rate &amp;gt; 0) %&amp;gt;% 
   ggplot(aes(median_family_income, rate))+
   stat_binhex()+
-  geom_smooth(color = &amp;#39;#C4C4C4&amp;#39;, 
+  geom_smooth(color = &amp;#39;#CCCCCC&amp;#39;, 
               method = &amp;#39;gam&amp;#39;)+
   scale_fill_viridis_c(labels = comma, 
                        name = &amp;#39;# of\ncensus tracts&amp;#39;)+
@@ -382,7 +384,13 @@ county_snap_dist %&amp;gt;%
          x = &amp;#39;Median family income\nper census tract&amp;#39;, 
          y = &amp;#39;Percent SNAP\nrecipient&amp;#39;, 
         caption = &amp;#39;Smoothed line fits a generalized additive model (GAM) to data: y ~ s(x, bs = &amp;quot;cs&amp;quot;).&amp;#39;)&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;&lt;img src=&#34;/post/2020-07-29-u-s-food-deserts_files/figure-html/unnamed-chunk-8-1.png&#34; width=&#34;960&#34; /&gt;&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2020-07-29-u-s-food-deserts_files/figure-html/unnamed-chunk-8-1.png&#34; width=&#34;960&#34; /&gt;
+According to plot above, we can see that there is a relationship between median family income and percentage of SNAP usage.
+Interestingly, but ultimately out of scope for this project, is the high percentage of SNAP recievers in places with high median family income values ($100k or more).
+We see this because both SNAP and median family income are measurements of central tendency within a geography.
+They are not 1-to-1 comparisons.
+That is, we aren’t looking at survey data completed by individual people.
+This finding alone tells us that it is necessary to look deeper into SNAP, as families who recieve the benefit may live quite unique lives, each with their own struggles to overcome.&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
 &lt;div id=&#34;building-interactive-maps&#34; class=&#34;section level1&#34;&gt;
@@ -465,6 +473,10 @@ Officially &lt;code&gt;HTML&lt;/code&gt; is:&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;Hypertext Markup Language (HTML) is the standard markup language for documents designed to be displayed in a web browser. It can be assisted by technologies such as Cascading Style Sheets (CSS) and scripting languages such as JavaScript.&lt;/p&gt;
 &lt;/blockquote&gt;
+&lt;p&gt;We’ll also use &lt;code&gt;CSS&lt;/code&gt;, which is similar to &lt;code&gt;HTML&lt;/code&gt; in that it’s used to format websites. Officially, &lt;code&gt;CSS&lt;/code&gt; is:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;CSS stands for Cascading Style Sheets. CSS describes how HTML elements are to be displayed on screen, paper, or in other media. CSS saves a lot of work. It can control the layout of multiple web pages all at once. External stylesheets are stored in CSS files.&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;p&gt;We can also use our data to correspond to map polygon colours.
 The &lt;code&gt;leaflet.extras&lt;/code&gt; package offers a lot of great extra options to add to &lt;code&gt;leaflet&lt;/code&gt; maps.
 The best part is that it is relatively straightforward to add these options.&lt;/p&gt;
@@ -474,6 +486,7 @@ The best part is that it is relatively straightforward to add these options.&lt;
 &lt;li&gt;Create a custom function to map the fill/colour of the &lt;code&gt;leaflet&lt;/code&gt; polygons to help guide the user’s eye towards the worst off places in terms of SNAP and distance to supermarket.
 NOTE: Our custom colour function is from &lt;a href=&#34;https://stackoverflow.com/questions/15006211/how-do-i-generate-a-mapping-from-numbers-to-colors-in-r/18749392&#34;&gt;this question on StackOverflow.com&lt;/a&gt;.&lt;/li&gt;
 &lt;li&gt;Use &lt;code&gt;leaflet.extras&lt;/code&gt; to add some great functionality that makes the map more user-friendly.&lt;/li&gt;
+&lt;li&gt;Create and format a title using CSS.&lt;/li&gt;
 &lt;/ol&gt;
 &lt;pre class=&#34;r&#34;&gt;&lt;code&gt;remove_words &amp;lt;- 
   glue_collapse(c(&amp;#39;Nonmetro - &amp;#39;, 
@@ -490,7 +503,7 @@ tooltip &amp;lt;- top_20_sf %&amp;gt;%
                                remove_words), 
          median_family_income = 
            dollar(median_family_income)) %&amp;gt;% 
-  transmute(tip = glue(&amp;#39;&amp;lt;b&amp;gt;County:&amp;lt;/b&amp;gt; {county} &amp;lt;br&amp;gt; &amp;lt;b&amp;gt;State:&amp;lt;/b&amp;gt; {state} &amp;lt;br&amp;gt; &amp;lt;b&amp;gt;SNAP percent:&amp;lt;/b&amp;gt; {rate} &amp;lt;br&amp;gt; &amp;lt;b&amp;gt;*Rural/Urban class:&amp;lt;/b&amp;gt; {desc} &amp;lt;br&amp;gt; &amp;lt;b&amp;gt;Median family income:&amp;lt;/b&amp;gt; {median_family_income} &amp;lt;br&amp;gt;&amp;lt;b&amp;gt;Tract:&amp;lt;/b&amp;gt; {census_tract}&amp;lt;br&amp;gt;&amp;lt;br&amp;gt;- All areas are 20 or more miles from a supermarket.&amp;lt;br&amp;gt;* Rural/Urban classification determined at county-level.&amp;#39;))
+  transmute(tip = glue(&amp;#39;&amp;lt;b&amp;gt;County:&amp;lt;/b&amp;gt; {county} &amp;lt;br&amp;gt; &amp;lt;b&amp;gt;State:&amp;lt;/b&amp;gt; {state} &amp;lt;br&amp;gt; &amp;lt;b&amp;gt;*SNAP percent:&amp;lt;/b&amp;gt; {rate} &amp;lt;br&amp;gt; &amp;lt;b&amp;gt;**Rural/Urban class:&amp;lt;/b&amp;gt; {desc} &amp;lt;br&amp;gt; &amp;lt;b&amp;gt;Median family income:&amp;lt;/b&amp;gt; {median_family_income} &amp;lt;br&amp;gt;&amp;lt;b&amp;gt;Tract:&amp;lt;/b&amp;gt; {census_tract}&amp;lt;br&amp;gt;&amp;lt;br&amp;gt;* All areas have this percentage SNAP recipients who 20 or more miles from a supermarket.&amp;lt;br&amp;gt;** Rural/Urban classification determined at county-level.&amp;#39;))
 
 # change polygon colour to correspond to a numeric variable in the database
 map2color &amp;lt;- function(x, 
@@ -525,6 +538,28 @@ percent_labs &amp;lt;- c(&amp;#39;0.0% to 10.1%&amp;#39;,
   &amp;#39;40.3% to 50.4%&amp;#39;,
   &amp;#39;50.4% to 60.5%&amp;#39;)
 
+## Add a our title to the map using css
+
+tag.map.title &amp;lt;- tags$style(HTML(&amp;quot;
+  .leaflet-control.map-title { 
+    transform: translate(-50%,20%);
+    position: fixed !important;
+    left: 50%;
+    text-align: center;
+    padding-left: 10px; 
+    padding-right: 10px; 
+    background: rgba(255,255,255,0.5);
+    font-weight: bold;
+    font-size: 28px;
+  }
+&amp;quot;))
+
+title &amp;lt;- tags$div(
+  tag.map.title, HTML(&amp;quot;US Food Deserts&amp;quot;)
+)  
+
+
+
 top_20_sf_leaf_map &amp;lt;- 
     leaflet(top_20_sf) %&amp;gt;% 
   addProviderTiles(&amp;quot;OpenStreetMap&amp;quot;) %&amp;gt;%
@@ -544,14 +579,26 @@ top_20_sf_leaf_map &amp;lt;-
             labels = percent_labs, 
             opacity = 0.7,
             title = &amp;#39;Percent SNAP use&amp;lt;br&amp;gt;by census tract&amp;#39;,
-    position = &amp;quot;bottomright&amp;quot;)
+    position = &amp;quot;bottomright&amp;quot;) %&amp;gt;%
+  addControl(title, 
+             position = &amp;quot;topleft&amp;quot;,
+             className=&amp;quot;map-title&amp;quot;)
 
 top_20_sf_leaf_map %&amp;gt;% 
   frameWidget(width = &amp;#39;100%&amp;#39;)&lt;/code&gt;&lt;/pre&gt;
-&lt;div id=&#34;htmlwidget-2&#34; style=&#34;width:100%;height:480px;&#34; class=&#34;widgetframe html-widget&#34;&gt;&lt;/div&gt;
+&lt;p&gt;&lt;div id=&#34;htmlwidget-2&#34; style=&#34;width:100%;height:480px;&#34; class=&#34;widgetframe html-widget&#34;&gt;&lt;/div&gt;
 &lt;script type=&#34;application/json&#34; data-for=&#34;htmlwidget-2&#34;&gt;{&#34;x&#34;:{&#34;url&#34;:&#34;/post/2020-07-29-u-s-food-deserts_files/figure-html//widgets/widget_unnamed-chunk-12.html&#34;,&#34;options&#34;:{&#34;xdomain&#34;:&#34;*&#34;,&#34;allowfullscreen&#34;:false,&#34;lazyload&#34;:false}},&#34;evals&#34;:[],&#34;jsHooks&#34;:[]}&lt;/script&gt;
+Our &lt;code&gt;leaflet&lt;/code&gt; map now has plenty of bells and whistles, and hopefully, it will be useful for people interested in knowing more about food deserts and SNAP in the US.&lt;/p&gt;
 &lt;/div&gt;
 &lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;conclusion&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Conclusion&lt;/h1&gt;
+&lt;p&gt;Food deserts and SNAP are complicated subjects in their own right.
+Very often, the two compound one another, making things even more complicated.
+Using data science approaches to thinking about these two issues can help policymakers and rural stakeholders better plan for those people impacted by them.&lt;/p&gt;
+&lt;p&gt;As always, the &lt;em&gt;Deltanomics&lt;/em&gt; blog is for instructional use in R.
+Any potential findings need more research to verify them before any conclusions can be made.&lt;/p&gt;
 &lt;/div&gt;
 </description>
     </item>
