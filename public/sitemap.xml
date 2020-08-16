@@ -3,21 +3,6 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>/courses/example/example1/</loc>
-    <lastmod>2019-05-05T00:00:00+01:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/courses/example/</loc>
-    <lastmod>2018-09-09T00:00:00+00:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/courses/example/example2/</loc>
-    <lastmod>2019-05-05T00:00:00+01:00</lastmod>
-  </url>
-  
-  <url>
     <loc>/authors/admin/</loc>
     <lastmod>2020-08-08T00:00:00+00:00</lastmod>
   </url>
@@ -188,6 +173,26 @@
   </url>
   
   <url>
+    <loc>/courses/alasdair_sykes/</loc>
+    <lastmod>2018-09-09T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/courses/andrew_duncan/</loc>
+    <lastmod>2018-09-09T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/courses/r_bloggers/</loc>
+    <lastmod>2018-09-09T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/courses/scottish_snow/</loc>
+    <lastmod>2018-09-09T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/privacy/</loc>
     <lastmod>2018-06-28T00:00:00+01:00</lastmod>
   </url>
@@ -213,12 +218,8 @@
   </url>
   
   <url>
-    <loc>/links/</loc>
+    <loc>/links/r-bloggers/</loc>
     <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/links/</loc>
   </url>
   
   <url>
@@ -227,15 +228,15 @@
   </url>
   
   <url>
-    <loc>/courses/</loc>
-  </url>
-  
-  <url>
     <loc>/post/covid-19-rural-deltanomics/</loc>
   </url>
   
   <url>
     <loc>/links/</loc>
+  </url>
+  
+  <url>
+    <loc>/courses/</loc>
   </url>
   
 </urlset>
