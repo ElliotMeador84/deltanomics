@@ -1,7 +1,7 @@
 ---
 title: U.S. Food Deserts
 author: ''
-date: '2020-07-29'
+date: '2020-08-16'
 slug: food-deserts-data-clean-merge
 categories:
   - R

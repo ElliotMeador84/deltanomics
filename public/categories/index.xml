@@ -5,7 +5,7 @@
     <link>/categories/</link>
       <atom:link href="/categories/index.xml" rel="self" type="application/rss+xml" />
     <description>Categories</description>
-    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>©2020</copyright><lastBuildDate>Wed, 29 Jul 2020 00:00:00 +0000</lastBuildDate>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>©2020</copyright><lastBuildDate>Sun, 16 Aug 2020 00:00:00 +0000</lastBuildDate>
     <image>
       <url>/images/icon_hu92a9dc9639b79cadf266306904fb01f6_516996_512x512_fill_lanczos_center_2.png</url>
       <title>Categories</title>
@@ -15,7 +15,7 @@
     <item>
       <title>R</title>
       <link>/categories/r/</link>
-      <pubDate>Wed, 29 Jul 2020 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 16 Aug 2020 00:00:00 +0000</pubDate>
       <guid>/categories/r/</guid>
       <description></description>
     </item>
@@ -23,7 +23,7 @@
     <item>
       <title>Rural</title>
       <link>/categories/rural/</link>
-      <pubDate>Wed, 29 Jul 2020 00:00:00 +0000</pubDate>
+      <pubDate>Sun, 16 Aug 2020 00:00:00 +0000</pubDate>
       <guid>/categories/rural/</guid>
       <description></description>
     </item>
