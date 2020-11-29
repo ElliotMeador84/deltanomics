@@ -26,13 +26,12 @@ editor_options:
 ---
 
 # Introduction
-The US Presidential election is now over (for the most part!). 
-Trump is fighting the results in court and appears to be losing for the most part. 
-A clear theme that's coming out of the results this time around is the contrast of rural and urban voters. 
-The theory seems to go: Trump voters for the most part come from rural areas, who are out of touch with the rest of the country. 
+The US Presidential vote count has nearly finished. 
+Trump is fighting the results in court though appears to have lost, but a clear theme that's coming out is the contrast of rural and urban voters. 
+The theory seems to go: Trump voters for the most part come from rural areas, and the election is based on a rural vs urban debate. 
 We can test this theory using some data science approaches - mainly, cleaning and merging data from several places into a useful format. 
 For this post, we'll be addressing the research question: 
-> Did the rural population vote for Trump and could it swing the election in his or future candidates favour?
+> Did Trump's backing come from only rural areas and could it swing the election in his or future candidates favour?
 
 Let's first load our libraries and get started!
 ```{r, message=FALSE, warning=FALSE}
@@ -361,7 +360,7 @@ We use the `element_markdown` and the `element_textbox_simple` to turn on the HT
 ```
 We can revisit our initial research questions and see that within rural areas there really isn't enough people there to swing a national election. 
 Also, Trump won over 40% of the big metro areas in the US, and even higher in some urban areas.
-More research is needed, but I personally don't by the argument that Trumps' supporters are contained in rural areas only whilst Biden's are found in the urban centres. 
+More research is needed, but I personally don't buy the argument that Trumps' supporters are contained in rural areas only whilst Biden's are found in the urban centres. 
 On the contrary, it a much more mixed bag for both parties. 
 
 
