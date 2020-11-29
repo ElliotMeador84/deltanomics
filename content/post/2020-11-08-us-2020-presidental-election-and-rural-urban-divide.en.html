@@ -1,0 +1,337 @@
+---
+title: US 2020 Presidental Election and Rural - Urban Divide
+author: Elliot Meador
+date: '2020-11-08'
+slug: us-2020-presidental-election-and-rural-urban-divide
+categories:
+  - R
+  - Rural
+  - Election
+tags:
+  - Data
+  - ggplot
+  - dplyr
+subtitle: ''
+summary: ''
+authors: []
+lastmod: '2020-11-08T11:34:44Z'
+featured: no
+image:
+  caption: ''
+  focal_point: ''
+  preview_only: no
+projects: []
+editor_options: 
+  chunk_output_type: console
+---
+
+<script src="/rmarkdown-libs/header-attrs/header-attrs.js"></script>
+<link href="/rmarkdown-libs/anchor-sections/anchor-sections.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/anchor-sections/anchor-sections.js"></script>
+
+
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>The US Presidential election is now over (for the most part!).
+Trump is fighting the results in court and appears to be losing for the most part.
+A clear theme that’s coming out of the results this time around is the contrast of rural and urban voters.
+The theory seems to go: Trump voters for the most part come from rural areas, who are out of touch with the rest of the country.
+We can test this theory using some data science approaches - mainly, cleaning and merging data from several places into a useful format.
+For this post, we’ll be addressing the research question:
+&gt; Did the rural population vote for Trump and could it swing the election in his or future candidates favour?</p>
+<p>Let’s first load our libraries and get started!</p>
+<pre class="r"><code># For data wrangling/tables
+library(tidyverse)
+library(lubridate)
+library(ggtext)
+library(glue)
+library(scales)
+library(RColorBrewer)
+
+# For mapping and census data
+library(tigris)
+library(leaflet)
+library(leaflet.extras)
+library(maps)
+library(sf)
+library(widgetframe)
+library(htmlwidgets)
+library(htmltools)
+map &lt;- purrr::map</code></pre>
+<p>As always I like to use a custom <code>ggplot</code> function specified below.</p>
+<pre class="r"><code># a custom theme for ggplots
+post_theme &lt;- function(...) {
+  theme(
+    text = 
+      element_text(
+        color = &#39;black&#39;,
+         family = &#39;serif&#39;),
+    axis.text = 
+      element_text(
+        color = &#39;black&#39;, 
+        size = 14),
+    panel.background = 
+      element_blank(),
+    axis.line.x = 
+      element_line(
+        color = &#39;black&#39;),
+    axis.ticks = element_blank(),
+    plot.margin = margin(.75, .75, .75, .75, &#39;cm&#39;),
+    plot.caption = 
+      element_text(hjust = 0,
+                   size = 15,
+                                face = &quot;italic&quot;),
+    plot.title = 
+      element_text(
+        face = &#39;bold&#39;),
+    plot.subtitle = 
+      element_text(face = &#39;bold&#39;),
+    plot.title.position = &quot;plot&quot;,
+    plot.caption.position =  &quot;plot&quot;, 
+    strip.background = 
+      element_blank(), 
+    strip.text = 
+      element_text(
+        face = &#39;bold&#39;)
+  ) +
+    theme(...) # this bit allows us to make changes using this same function instead of calling two theme functions.
+}</code></pre>
+</div>
+<div id="the-data" class="section level1">
+<h1>The data</h1>
+<p>Our process for analysis is a two-step process: first, we download and tidy data for the US 2020 presidential election results; then, we’ll join this data to the USDA Rural-Urban classifications. The resulting database will be used to investigate voting patterns between these classifications.</p>
+<div id="election-data" class="section level2">
+<h2>Election data</h2>
+<p>Election data comes from Fabio Votta’s Github page, under the repository for <em>favstats/USElection2020-NYT-Results</em> (visit <a href="https://github.com/favstats/USElection2020-NYT-Results" class="uri">https://github.com/favstats/USElection2020-NYT-Results</a>). Fabio is a fantastic political data scientist. I’d recommend following him on Twitter (<span class="citation">@favstats</span>) as he shares a lot of great information on his work there. Fabio wrote a function that communicates with the New York Times data API to pull the data in a tidy format.</p>
+<p>I’ve already cloned into the <em>favstats/USElection2020-NYT-Results</em> repository and have the database of voting trends on my laptop. This repo has dated files with the election results as they come in. We’ll need a bit of code to help us identify the most recent version as it’s being updated. Below, is the code I used to input the data.</p>
+<pre class="r"><code>data_folders &lt;- list.files(&#39;~/Documents/R/USElection2020-NYT-Results/data/&#39;)
+
+max_date_folder &lt;- data_folders %&gt;% 
+  str_subset(&#39;^2020&#39;) %&gt;% 
+  max() 
+
+results_2020 &lt;- glue(&#39;~/Documents/R/USElection2020-NYT-Results/data/{max_date_folder}&#39;) %&gt;% 
+  list.files(full.names = T) %&gt;% 
+  str_subset(&#39;presidential$&#39;) %&gt;% 
+  list.files(full.names = T) %&gt;% 
+  str_subset(&#39;.csv$&#39;) %&gt;% 
+  read_csv()</code></pre>
+</div>
+<div id="usda-rural-urban-classifications" class="section level2">
+<h2>USDA Rural-Urban Classifications</h2>
+<p>The USDA’s Rural-Urban Classification’s classify each US county along a rural-urban continuum. We’ve used these codes quite a lot when dealing with US county-level data. You can find this data here for download, <a href="https://www.ers.usda.gov/data-products/rural-urban-continuum-codes.aspx" class="uri">https://www.ers.usda.gov/data-products/rural-urban-continuum-codes.aspx</a>.</p>
+<p>In addition, we’re going to use a few of R’s internal databases to help us out in the wrangling process, specifically we’ll use some data from the <code>tigris</code> package.</p>
+<blockquote>
+<p>In the process of writing this blog post I’ve discovered that Alaska uses electoral districts for counting votes - not counties. Therefore, for now, we’re going to leave Alaska out of the analysis because assigning a rural-urban code to electoral districts requires quite a bit of GIS work that’s outwith the scope of this post.</p>
+</blockquote>
+<pre class="r"><code># US county fips from tigris package
+fips_codes &lt;-
+  fips_codes %&gt;% 
+  as_tibble()
+
+
+# Pull in the USDA data from a directory I created in my cloud storage.
+rural_urban &lt;-
+  read_csv(
+    &#39;~/OneDrive - SRUC/Data/usda/ruralurbancodes2013.csv&#39;
+    ) %&gt;%
+  as_tibble() %&gt;% 
+  select(state, 
+         county = county_name,
+         rucc_2013,
+         desc = description)</code></pre>
+</div>
+<div id="data-join" class="section level2">
+<h2>Data join</h2>
+<p>We need to join the election data, which has the county fips codes to identify each county, with the built-in <code>county.fips</code> database. Then, we have to join the election data with the new <code>rural_urban_tidy</code> data.</p>
+<pre class="r"><code># clean names will be used to help get joining data in format that will merge well
+clean_names &lt;- 
+  function(x){
+    x &lt;- str_to_lower(x)
+    x &lt;- str_remove_all(x, &#39;county&#39;)
+    x &lt;- str_remove_all(x, &#39;[[:digit:]]&#39;)
+    x &lt;- str_squish(x)
+    x &lt;- str_trim(x)
+    x
+  }
+
+
+fips_codes_tidy &lt;- fips_codes %&gt;% 
+  mutate(county = clean_names(county)) %&gt;% 
+  mutate(fips = glue(&#39;{state_code}{county_code}&#39;))
+
+
+rural_urban_tidy &lt;- rural_urban %&gt;% 
+  mutate(county = clean_names(county)) %&gt;% 
+  left_join(fips_codes_tidy, 
+            by = c(&#39;state&#39;, 
+                   &#39;county&#39;)) %&gt;% 
+  select(fips, 
+         county, 
+         state = state_name, 
+         ru_ur_n = rucc_2013,
+         ru_ur_label = desc)
+  
+  
+
+results_2020_rural_urban &lt;- 
+  results_2020 %&gt;%
+  inner_join(rural_urban_tidy %&gt;% 
+               select(-state), 
+             by = &#39;fips&#39;) </code></pre>
+</div>
+</div>
+<div id="tidy-and-combine" class="section level1">
+<h1>Tidy and combine</h1>
+<p>We now have two datasets to work with:</p>
+<ol style="list-style-type: decimal">
+<li>Our dataset containing the voting outcome</li>
+<li>Our dataset with the rural-urban codes</li>
+</ol>
+<p>We’re going to transform our voting data to tidy format so we can join it with the rural-urban data.
+During this process we’ll also make some adjustments to what will become our axis labels. Adding two asterisks (**) will signal the <code>ggtext</code> package to bold certian words in the <code>ggplot</code>.</p>
+<pre class="r"><code>ru_ur_partison_vote &lt;- 
+  results_2020_rural_urban %&gt;% 
+  select(ru_ur_label,
+         ru_ur_n,
+         results_bidenj, 
+         results_trumpd) %&gt;% 
+  gather(key, partison_vote, 
+         -ru_ur_label, -ru_ur_n) %&gt;% 
+  group_by(ru_ur_label) %&gt;% 
+  mutate(total_ru_ur_vote = sum(partison_vote), 
+         key = str_remove_all(key, &#39;results_&#39;)
+         ) %&gt;% 
+  ungroup() 
+
+
+ru_ur_new_v &lt;- c(&quot;**Urban** population of 2,500 to 19,999, not adjacent to a metro area&quot;, &quot;**Urban** population of 2,500 to 19,999, adjacent to a metro area&quot;, &quot;**Urban** population of 20,000 or more, not adjacent to a metro area&quot;, &quot;Counties in **metro** areas of 250,000 to 1 million population&quot;, &quot;Counties in **metro** areas of fewer than 250,000 population&quot;, &quot;Counties in **metro** areas of 1 million population or more&quot;, &quot;Completely **rural** or less than 2,500 urban population, adjacent to a metro area&quot;, &quot;Completely **rural** or less than 2,500 urban population, not adjacent to a metro area&quot;, &quot;**Urban** population of 20,000 or more, adjacent to a metro area&quot;) %&gt;% 
+  str_replace_all(&#39;, not&#39;, &#39;&lt;br&gt; not&#39;) %&gt;% 
+   str_replace_all(&#39;, adjacent&#39;, &#39;&lt;br&gt; adjacent&#39;)
+
+ru_ur_partison_vote &lt;- ru_ur_partison_vote %&gt;% 
+  distinct(ru_ur_label) %&gt;% 
+  mutate(ru_ur_label_new = ru_ur_new_v) %&gt;% 
+  right_join(ru_ur_partison_vote) %&gt;% 
+  select(ru_ur_label = ru_ur_label_new, 
+         ru_ur_n, 
+         key, 
+         partison_vote, 
+         total_ru_ur_vote)</code></pre>
+<div id="sub-setting-for-annotations" class="section level2">
+<h2>Sub-setting for annotations</h2>
+<p>Adding annotations to a plot can really help drive home the main take-aways by drawing the reader’s eye to specific areas.</p>
+<blockquote>
+<p>A key finding with our analysis, related to rural voting patterns, is that many people in urban areas voted Donald Trump.
+And because the urban areas have such a higher percentage of people living there it is much more impactful on the election outcome than rural areas.</p>
+</blockquote>
+<p>We’re going to highlight those urban vote percentages and add them to <code>geom_text</code> in the <code>ggplot</code> function.
+We can specify a new data set in that geom (separate from the primary data that’s being plotted in the main call).</p>
+<pre class="r"><code>bar_labels_df &lt;- ru_ur_partison_vote %&gt;% 
+  group_by(ru_ur_label, key) %&gt;% 
+  summarise(tot_ru_ur_party = 
+           sum(partison_vote)) %&gt;% 
+  mutate(percent_ru_ur_party =  percent(tot_ru_ur_party/sum(tot_ru_ur_party))
+         ) %&gt;% 
+  ungroup() %&gt;% 
+  mutate(position_y = tot_ru_ur_party/2, 
+         position_done = ifelse(
+           key == &#39;bidenj&#39;, position_y + lead(tot_ru_ur_party), position_y
+         ))  %&gt;% 
+  group_by(ru_ur_label) %&gt;% 
+  mutate(tot = sum(tot_ru_ur_party)) %&gt;% 
+  ungroup()</code></pre>
+<p>Our bar colours will split out by the proportion of a every level won by one of the two main candidates.</p>
+<p>I searched the web and found the Republican party red and Democratic party blue. You can see these colours below.</p>
+<pre class="r"><code>show_col(c( &#39;#0015BC&#39;, &#39;#DE0100&#39;))</code></pre>
+<p><img src="/post/2020-11-08-us-2020-presidental-election-and-rural-urban-divide.en_files/figure-html/unnamed-chunk-8-1.png" width="672" />
+We can use these unique colours in the <code>scale_fill_manual</code> function.
+Also, the <code>label_number_si</code> function from the <code>scales</code> package provides the clean looking axes labels.</p>
+<pre class="r"><code># the scale_fill_manual requires a named vector, with the names corresponding to the levels to be filled
+party_cols &lt;- c( &#39;#0015BC&#39;, &#39;#DE0100&#39;)
+
+names(party_cols) &lt;- unique(ru_ur_partison_vote$key)
+# for clean labels
+gg_labs &lt;- label_number_si(accuracy = 0.01)
+
+gg_wrap &lt;- function(width = 25){
+  str_wrap(x, width)
+}</code></pre>
+</div>
+</div>
+<div id="building-the-plot-by-layers" class="section level1">
+<h1>Building the plot by layers</h1>
+<p><code>ggplot2</code> works by layering geoms on top of one another. This works to our advantage, as we can step through each additional plot layer at a time.</p>
+<p>First, let’s create the base plot with data.
+Note the use of <code>mutate</code> and <code>fct_reorder</code> to ensure our plot level order corresponds to the highest to lowest.
+We’ll start with a simple bar plot.</p>
+<pre class="r"><code>(ru_ur_partison_vote_gg &lt;- 
+    ru_ur_partison_vote %&gt;% 
+  mutate(ru_ur_label = 
+           fct_reorder(
+             ru_ur_label,                 
+             total_ru_ur_vote), 
+         prefix = word(ru_ur_label, 1, 1)
+         ) %&gt;% 
+  ggplot(aes(ru_ur_label, 
+             partison_vote, 
+             fill = key))+
+  geom_col(show.legend = F))</code></pre>
+<p><img src="/post/2020-11-08-us-2020-presidental-election-and-rural-urban-divide.en_files/figure-html/unnamed-chunk-10-1.png" width="768" /></p>
+<p>The plot above shows we’re on the right track, but for the most part it’s unreadable at the moment.
+Before flipping the coordinates, we’re going to add the annotations to the plot.
+These are contained in the <code>bar_labels_df</code> data.</p>
+<pre class="r"><code>(ru_ur_partison_vote_gg &lt;- 
+  ru_ur_partison_vote_gg +
+  geom_text(data = bar_labels_df %&gt;%
+              filter(str_detect(ru_ur_label, 
+                                &#39;^Counties&#39;)) ,
+            aes(x = ru_ur_label,
+                y = position_done,
+                label = percent_ru_ur_party),
+            color = &#39;white&#39;)+
+    geom_text(data  = bar_labels_df,
+              aes(x = ru_ur_label, 
+                  y = tot+1.5e5,
+                  label = comma(tot)), 
+                  hjust = 0,
+              color = &#39;black&#39;,
+              size = 3
+              ))</code></pre>
+<p><img src="/post/2020-11-08-us-2020-presidental-election-and-rural-urban-divide.en_files/figure-html/unnamed-chunk-11-1.png" width="768" /></p>
+<p>Now we add the <em>wow</em> factor: the colours and label functions.
+Also, the <code>coord_flip</code> call flips the chart on its side - were we can more easily see everything.</p>
+<pre class="r"><code>(ru_ur_partison_vote_gg &lt;- 
+  ru_ur_partison_vote_gg  +
+  scale_x_discrete(labels = function(x){str_wrap(x, 25)})+
+  scale_y_continuous(labels = gg_labs)+
+  scale_fill_manual(values = party_cols)+
+  coord_flip(clip = &#39;off&#39;))</code></pre>
+<p><img src="/post/2020-11-08-us-2020-presidental-election-and-rural-urban-divide.en_files/figure-html/unnamed-chunk-12-1.png" width="1056" /></p>
+<p>And finally, we add the a custom theme and some labels.
+The <code>ggtext</code> package controls are specified in the plot <code>theme</code>.
+We use the <code>element_markdown</code> and the <code>element_textbox_simple</code> to turn on the HTML and Markdown elements in the label text.</p>
+<pre class="r"><code>(ru_ur_partison_vote_gg &lt;- 
+  ru_ur_partison_vote_gg   +
+    labs(
+        title = &quot;&lt;b&gt;**US 2020 Elections by Rural-Urban Classification**&lt;/b&gt;&lt;br&gt;
+ Comparing &lt;span style = &#39;color:#DE0100;font-size:24pt&#39;&gt;**Donald J. Trump**&lt;/span&gt; &amp; &lt;span style = &#39;color:#0015BC;font-size:24pt&#39;&gt;**Joe R. Biden**&lt;/span&gt;&quot;, 
+  x = &#39;USDA Rural-Urban\nContinuum 2013&#39;, 
+  y = &#39;Total Votes&#39;, 
+ caption = &#39;Original data are from New York Times API.\nParsed by Fabio Votta (@favstats), and downloaded from https://github.com/favstats/USElection2020-NYT-Results.\nCreated by Elliot Meador (@Elliot_Meador).&#39;) +
+      post_theme(
+        axis.text.y = element_markdown(),
+        plot.title.position = &quot;plot&quot;,
+        plot.title = element_textbox_simple(
+            size = 18,
+            lineheight = 1,
+            padding = margin(5.5, 5.5, 5.5, 5.5),
+            margin = margin(0, 0, 5.5, 0), 
+    ),
+    plot.margin = margin(2,2,2,2, &#39;cm&#39;)))</code></pre>
+<p><img src="/post/2020-11-08-us-2020-presidental-election-and-rural-urban-divide.en_files/figure-html/unnamed-chunk-13-1.png" width="1344" />
+We can revisit our initial research questions and see that the true classification of rural means that there really isn’t enough people there to swing a national election.
+Also, Trump won over 40% of the big metro areas in the US, and even higher in some urban areas.
+More research is needed, but I personally don’t by the argument that Trumps’ supporters are contained in rural areas only whilst Biden’s are found in the urban centres.
+On the contrary, it a much more mixed bag for both parties.</p>
+</div>
