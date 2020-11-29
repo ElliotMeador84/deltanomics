@@ -31,6 +31,7 @@ Trump is fighting the results in court though appears to have lost, but a clear 
 The theory seems to go: Trump voters for the most part come from rural areas, and the election is based on a rural vs urban debate. 
 We can test this theory using some data science approaches - mainly, cleaning and merging data from several places into a useful format. 
 For this post, we'll be addressing the research question: 
+
 > Did Trump's backing come from only rural areas and could it swing the election in his or future candidates favour?
 
 Let's first load our libraries and get started!
