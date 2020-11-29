@@ -338,7 +338,7 @@ Also, the `coord_flip` call flips the chart on its side - were we can more easil
 And finally, we add the a custom theme and some labels. 
 The `ggtext` package controls are specified in the plot `theme`. 
 We use the `element_markdown` and the `element_textbox_simple` to turn on the HTML and Markdown elements in the label text. 
-```{r, message=FALSE, warning=FALSE, fig.width = 14, fig.height=10}
+```{r, message=FALSE, warning=FALSE, fig.width = 10, fig.height=8}
 (ru_ur_partison_vote_gg <- 
   ru_ur_partison_vote_gg   +
     labs(
