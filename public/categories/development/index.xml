@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Development | Deltanomics</title>
+    <link>/categories/development/</link>
+      <atom:link href="/categories/development/index.xml" rel="self" type="application/rss+xml" />
+    <description>Development</description>
+    <generator>Source Themes Academic (https://sourcethemes.com/academic/)</generator><language>en-us</language><copyright>©2020</copyright><lastBuildDate>Sun, 07 Feb 2021 00:00:00 +0000</lastBuildDate>
+    <image>
+      <url>/images/icon_hu92a9dc9639b79cadf266306904fb01f6_516996_512x512_fill_lanczos_center_2.png</url>
+      <title>Development</title>
+      <link>/categories/development/</link>
+    </image>
+    
+    <item>
+      <title>Open Street Map: Leveraging open source data for development work</title>
+      <link>/post/open-street-map-leveraging-open-source-data-for-development-work/</link>
+      <pubDate>Sun, 07 Feb 2021 00:00:00 +0000</pubDate>
+      <guid>/post/open-street-map-leveraging-open-source-data-for-development-work/</guid>
+      <description>
+&lt;script src=&#34;/rmarkdown-libs/header-attrs/header-attrs.js&#34;&gt;&lt;/script&gt;
+
+
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;knitr::opts_chunk$set(echo = TRUE, message = FALSE, warning = FALSE)&lt;/code&gt;&lt;/pre&gt;
+&lt;div id=&#34;introduction&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Introduction&lt;/h1&gt;
+&lt;p&gt;Open source tools for development work allows for the power of big data, machine learning and AI to come together to benefit people who may need it most.&lt;/p&gt;
+&lt;p&gt;Open source tools are those with publicly available source code that can be downloaded or changed, completely free of charge.&lt;/p&gt;
+&lt;p&gt;There is a wide range of open source tools available these days: for instance, this blog is entirely written in the R programming language, which is free and open source. Other tools include Python, a very popular data science tool. Open source tools extend beyond programming languages. There are platforms that provide access to big, open data sets that can be freely used. A fantastic example of an open data tool that can be useful in development work is the OpenStreetMap (OSM).&lt;/p&gt;
+&lt;p&gt;According to the OpenStreetMap website, “OpenStreetMap is a map of the world, created by people like you and free to use under an open license.”&lt;/p&gt;
+&lt;p&gt;Basically, the OSM is an open map, in that regular people help identify infrastructure and other map objects for use in the map’s database. The OSM and its data can be accessed through an API, meaning that data can be pulled directly into R or other applications. The amount of really useful data one can pull from the OSM is an amazing asset to data science in a development context.&lt;/p&gt;
+&lt;p&gt;Take a look at these resources for some more information:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;&lt;a href=&#34;https://wiki.openstreetmap.org/wiki/Main_Page&#34;&gt;OpenStreetMap Wiki page&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;a href=&#34;https://wiki.openstreetmap.org/wiki/Books&#34;&gt;A list of books on OpenStreetMap&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;&lt;a href=&#34;https://www.hotosm.org/&#34;&gt;A very cool humanitarian project using OpenStreetMap&lt;/a&gt;&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div id=&#34;getting-data&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Getting data&lt;/h2&gt;
+&lt;p&gt;It’s straight forward to pull in data from the OSM for use in R with the &lt;code&gt;osmdata&lt;/code&gt; by Mark Padgham, Bob Rudis, Robin Lovelace and Maëlle Salmon. The &lt;code&gt;osmar&lt;/code&gt; package by Thomas Schlesinger and Manuel J. A. Eugster provides some extra R tools to work with the data.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;approach&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Approach&lt;/h2&gt;
+&lt;p&gt;In general, places that have high levels of civic engagement do better in successfully completing community development projects. Knowing this, let’s take a look at concentrations of community development centres across Scotland.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;analysis&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Analysis&lt;/h2&gt;
+&lt;p&gt;Our analysis will centre on getting the features we are interested in, plotting them within context an perhaps adding more, relevant, features to help bring out any emerging data narratives. First we’ll need to load our libraries.&lt;/p&gt;
+&lt;div id=&#34;libraries&#34; class=&#34;section level3&#34;&gt;
+&lt;h3&gt;Libraries&lt;/h3&gt;
+&lt;p&gt;First we need to we need to load our packages. We’re going to be working with spatial data, so we’ll load the sf package for that along with standard tidyverse packages for analysis.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;library(tidyverse)
+library(scales)
+library(osmdata)
+library(sf)
+library(janitor)&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;features&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Features&lt;/h2&gt;
+&lt;p&gt;We are interested in community development centres within the Scotland, specifically within the rural areas of the country. We can see all the available features using the &lt;code&gt;available_features&lt;/code&gt; function. Each feature comes with a subset of tags, which are more specific places.&lt;/p&gt;
+&lt;/div&gt;
+&lt;div id=&#34;expanding-to-the-islands&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Expanding to the islands&lt;/h2&gt;
+&lt;p&gt;We’ll use a looping approach to replicated the analysis for four islands and one area with a large island population (Argylle and Bute).
+Here is a list of the key places we are going to look at:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Argyll and Bute&lt;/li&gt;
+&lt;li&gt;Shetland Islands&lt;/li&gt;
+&lt;li&gt;Outer Hebrides&lt;/li&gt;
+&lt;li&gt;Orkney&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;an-efficient-workflow&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;An efficient workflow&lt;/h1&gt;
+&lt;p&gt;Getting an efficient workflow is critical to many data science projects.
+Workflows that aren’t efficient can cause unneeded delays in projects and are often the cause of underlying stress on the job.
+Knowing this, a good workflow for this type of project (mapping community development amenities) is to:&lt;/p&gt;
+&lt;ol style=&#34;list-style-type: decimal&#34;&gt;
+&lt;li&gt;&lt;p&gt;Identify the key geographic place boundaries that you want to work within and store them in a vector.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Loop over the place vector to and pull in the amenity data, then store this in a list.&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Loop of the place vector and pull in the boundary data, then also store this in a list.&lt;/p&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Our workflow keeps everything stored lists of the same geographic order.
+This will make sense as we work our way through the project as we will do most of our operations using loops.
+In R, looping is typically done with the &lt;code&gt;apply&lt;/code&gt; family of functions.
+However, I opt to use &lt;code&gt;purrr&lt;/code&gt;s version of the &lt;code&gt;apply&lt;/code&gt; functions called &lt;code&gt;map&lt;/code&gt;.
+I’d highly recommend using functional programming and the &lt;code&gt;apply&lt;/code&gt;/&lt;code&gt;purrr&lt;/code&gt; workflow as it allows you to utilise the full power of iterative programming!&lt;/p&gt;
+&lt;div id=&#34;community-centres&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Community centres&lt;/h2&gt;
+&lt;p&gt;Data can be pulled directly from OpenStreetMap in R using only a few lines of code.
+The code below does the following:&lt;/p&gt;
+&lt;ol style=&#34;list-style-type: decimal&#34;&gt;
+&lt;li&gt;&lt;code&gt;getbb(.x)&lt;/code&gt; - gets a bounding box around a region identified in a string&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;opq()&lt;/code&gt; - builds the query to the Overpass API&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;add_osm_feature()&lt;/code&gt; - adds a feature to your Overpass API&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;osmdata_sf()&lt;/code&gt; - turns the query into a simple features (sf) object.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;The &lt;code&gt;add_osm_feature&lt;/code&gt; is where we specify the amenity that we want.
+There are many, many different amenities that you can access with R and &lt;code&gt;osmdata&lt;/code&gt;. I’d recommend that you have a look at the &lt;code&gt;tags&lt;/code&gt;/&lt;code&gt;features&lt;/code&gt; documentation to better understand how you can structure queries to access different information – it’s extremely powerful.
+We are interested in &lt;em&gt;community centres&lt;/em&gt;; so we specifiy the key as &lt;em&gt;amenity&lt;/em&gt; and the value as &lt;em&gt;community_centre&lt;/em&gt;.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;## get a geographical box that contains
+## Scottish islands
+scottish_places &amp;lt;- 
+  c(
+  &amp;quot;argyll and bute&amp;quot;, 
+  &amp;quot;shetland&amp;quot;,
+  &amp;quot;outer hebrides&amp;quot;, 
+  &amp;quot;orkney&amp;quot;
+  )
+
+
+scottish_places_ls &amp;lt;- 
+  scottish_places %&amp;gt;% 
+  map(~{
+    getbb(.x) %&amp;gt;% 
+    opq() %&amp;gt;%
+    add_osm_feature(
+          key = &amp;quot;amenity&amp;quot;,
+          value = &amp;quot;community_centre&amp;quot;) %&amp;gt;% 
+       osmdata_sf()
+  }) %&amp;gt;% 
+  set_names(
+    make_clean_names(
+        scottish_places
+        )
+  )
+
+scottish_places_ls &amp;lt;- map(1:4, ~{
+scottish_places_ls[[.x]][[6]] %&amp;gt;% 
+  group_by(osm_id) %&amp;gt;% 
+  st_centroid() %&amp;gt;% 
+    ungroup() 
+}) %&amp;gt;% 
+  set_names(
+    make_clean_names(
+      scottish_places
+    )
+  )&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;place-boundaries&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Place boundaries&lt;/h2&gt;
+&lt;p&gt;Now we need to grab the boundary data for these places.
+Boundary data can be difficult to identify because places can sometimes go by many different name with differences in spelling.
+This seems to be a common occurrence when using geographic data and is likely the thinking behind things like FIPS codes in the US and other identification indeces.
+OpenStreetMap has unique id numbers that we can take advantage of as well.
+Take a look at the search function for &lt;a href=&#34;https://www.openstreetmap.org/relation/58446&#34;&gt;OpenStreetMap search function&lt;/a&gt; for more information.&lt;/p&gt;
+&lt;p&gt;Once you’ve identified your geographical boundary of interest and spotted its ID number, the &lt;code&gt;opq_osm_id&lt;/code&gt; function can be used to access the data from the Overpass API.
+We’re interested in the multipolygon data for the boundaries so we’ll using a loop and some base indexing to pull that information out specifically – we get a lot back from the original API request.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;place_id &amp;lt;- c (
+  1775685, 
+  376677, 
+  1959008, 
+  3067412
+  )
+
+place_name &amp;lt;- c(
+  &amp;quot;argyll_and_bute&amp;quot;, 
+  &amp;quot;shetland&amp;quot;,
+  &amp;quot;outer_hebrides&amp;quot;, 
+  &amp;quot;orkney&amp;quot;
+  )
+
+
+names(place_id) &amp;lt;- place_name
+
+place_boundaries_ls &amp;lt;- 
+map(place_id, ~{
+opq_osm_id(
+  type = &amp;quot;relation&amp;quot;, 
+  id = .x
+  ) %&amp;gt;%
+    opq_string() %&amp;gt;%
+    osmdata_sf()
+})
+
+
+place_boundaries_ls &amp;lt;- map(1:4, ~{
+ place_boundaries_ls[[.x]][[8]]  
+}) %&amp;gt;% 
+  set_names(
+    names(
+      place_boundaries_ls
+    )
+  )&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;div id=&#34;feature-cleaning---interesecting-points&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Feature cleaning - interesecting points&lt;/h2&gt;
+&lt;p&gt;The last thing we need to do is clean up those points that fall outside of the boundary line.
+This happens because we pull the community centre data through using a bounding box.
+Bounding boxes are, of course, square in shape.
+So we usually get data points that fall outside the area of interested – which is usually not a square!
+The &lt;code&gt;st_join&lt;/code&gt; with an intersecting join (&lt;code&gt;st_join&lt;/code&gt;) can help us shave off those extra points.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;## make the two geographies the same
+## coordinate projection
+scottish_places_ls &amp;lt;- 
+map2(scottish_places_ls, 
+     place_boundaries_ls, 
+~{
+  st_transform(.x, crs = st_crs(.y))
+})
+
+# find the points that intersect
+# with out boundaries data
+scottish_places_ls &amp;lt;- 
+map2(scottish_places_ls, 
+     place_boundaries_ls, 
+~{
+  st_join(.x, .y, join = st_intersects)
+})&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;div id=&#34;results&#34; class=&#34;section level1&#34;&gt;
+&lt;h1&gt;Results&lt;/h1&gt;
+&lt;p&gt;We’ve got more plans to do with the &lt;code&gt;osmdata&lt;/code&gt; package in R – mainly using it to do some network analysis using the road network.
+So, we aren’t going to go into too much detail create visuals as we’ll do that in a later blog post.
+For now let’s create a decent looking (but not really publication quality) map of our results to help us spot check and problems. Then, later, we’ll pick it up and push forward with linking our data to the Scottish road network and creating some fantastic network diagrams of places in Scotland.&lt;/p&gt;
+&lt;div id=&#34;visualising-the-results&#34; class=&#34;section level2&#34;&gt;
+&lt;h2&gt;Visualising the results&lt;/h2&gt;
+&lt;p&gt;For our visual we’ll create a simple ggplot map, which is pretty straightforward since we’re using &lt;code&gt;sf&lt;/code&gt; objects.
+We’ll just look at Argyll and Bute community centres.
+Remember to look out for Part 2 of this series in the future where we will use &lt;code&gt;osmdata&lt;/code&gt; and the Scottish road network to do some network mapping.&lt;/p&gt;
+&lt;pre class=&#34;r&#34;&gt;&lt;code&gt;ggplot() +
+  geom_sf(
+    data = place_boundaries_ls$orkney, 
+    fill = &amp;quot;#73b896&amp;quot;
+    ) +
+  geom_sf(
+    data = scottish_places_ls$orkney
+    ) +
+  geom_sf_text(
+    data = scottish_places_ls$orkney, 
+    aes(label = str_wrap(name.x, 35)), 
+    size = 3.5, 
+    nudge_x = .0125, 
+    nudge_y = .0125, 
+  ) + 
+  theme_minimal() +
+  theme(panel.background = 
+          element_rect(fill = &amp;quot;#b2bee0&amp;quot;)) +
+  coord_sf() +
+  labs(title = &amp;quot;Argyll and Bute Council&amp;quot;, 
+       subtitle = &amp;quot;Community Development Centres&amp;quot;, 
+       caption = &amp;quot;Made with OpenStreetMap&amp;quot;,
+       x = NULL, 
+       y = NULL)&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&#34;/post/2021-04-03-op.en_files/figure-html/unnamed-chunk-6-1.png&#34; width=&#34;672&#34; /&gt;&lt;/p&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+</description>
+    </item>
+    
+  </channel>
+</rss>

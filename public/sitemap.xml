@@ -4,47 +4,72 @@
   
   <url>
     <loc>/categories/</loc>
-    <lastmod>2020-08-16T23:11:33+01:00</lastmod>
-  </url>
-  
-  <url>
-    <loc>/tags/data/</loc>
-    <lastmod>2020-08-16T23:11:33+01:00</lastmod>
+    <lastmod>2021-02-07T11:12:50+00:00</lastmod>
   </url>
   
   <url>
     <loc>/</loc>
-    <lastmod>2020-08-16T23:11:33+01:00</lastmod>
+    <lastmod>2021-02-07T11:12:50+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/categories/development/</loc>
+    <lastmod>2021-02-07T11:12:50+00:00</lastmod>
   </url>
   
   <url>
     <loc>/tags/dplyr/</loc>
-    <lastmod>2020-08-16T23:11:33+01:00</lastmod>
+    <lastmod>2021-02-07T11:12:50+00:00</lastmod>
   </url>
   
   <url>
     <loc>/tags/ggplot/</loc>
-    <lastmod>2020-08-16T23:11:33+01:00</lastmod>
+    <lastmod>2021-02-07T11:12:50+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/post/open-street-map-leveraging-open-source-data-for-development-work/</loc>
+    <lastmod>2021-02-07T11:12:50+00:00</lastmod>
   </url>
   
   <url>
     <loc>/post/</loc>
-    <lastmod>2020-08-16T23:11:33+01:00</lastmod>
+    <lastmod>2021-02-07T11:12:50+00:00</lastmod>
   </url>
   
   <url>
     <loc>/categories/r/</loc>
-    <lastmod>2020-08-16T23:11:33+01:00</lastmod>
+    <lastmod>2021-02-07T11:12:50+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/categories/rural/</loc>
-    <lastmod>2020-08-16T23:11:33+01:00</lastmod>
+    <loc>/tags/sf/</loc>
+    <lastmod>2021-02-07T11:12:50+00:00</lastmod>
   </url>
   
   <url>
     <loc>/tags/</loc>
-    <lastmod>2020-08-16T23:11:33+01:00</lastmod>
+    <lastmod>2021-02-07T11:12:50+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/tags/data/</loc>
+    <lastmod>2020-11-08T11:34:44+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/categories/election/</loc>
+    <lastmod>2020-11-08T11:34:44+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/categories/rural/</loc>
+    <lastmod>2020-11-08T11:34:44+00:00</lastmod>
+  </url>
+  
+  <url>
+    <loc>/post/us-2020-presidental-election-and-rural-urban-divide/</loc>
+    <lastmod>2020-11-08T11:34:44+00:00</lastmod>
   </url>
   
   <url>
