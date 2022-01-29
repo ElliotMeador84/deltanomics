@@ -46,7 +46,7 @@ user_groups:
 - Visitors
 ---
 
-Elliot Meador is a computational social scientist and data scientist working as a research fellow within the Rural Policy Centre at SRUC in Edinburgh, UK. His work focuses on mapping rural resilience in Scotland and understanding how policy impacts community resilience. Elliot's research also looks at how information on sustainable agriculture practices is shared between farmers and how this influences behaviour change related to sustainable development. Elliot's research spans North America, Europe and Africa. 
+Elliot Meador is a computational social scientist and data scientist. He now works as a Rural Development Specialist at Delta Health Alliance in the Mississippi Delta, where he grew up. Previously, he worked as a Research Fellow at SRUC in Edinburgh, Scotland. His academic work focuses on mapping rural resilience in the United States, United Kingdom, Africa, and parts of the Middle East. Specifically, it focuses on understanding how policy impacts regional stability, rural people's wellbeing, the rural economy, access to healthy foods, and landscape. In addition, Elliot's research methodological expertise investigates how quantifying one's social networks can be leveraged to make positive changes related to stability, health, and overall wellbeing through sustainable economic development. Elliot's research spans North America, Europe, and Africa. 
 
 
 
